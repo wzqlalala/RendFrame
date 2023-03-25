@@ -1,0 +1,63 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.1831
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MxRendTest", "MxRendTest\MxRendTest.vcxproj", "{808236AE-C58B-4DE9-A733-AD2D7ED24E01}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C8A19B06-F1CE-447F-B46E-C15C15641178} = {C8A19B06-F1CE-447F-B46E-C15C15641178}
+		{BE28CE11-F4C2-4867-BDB8-C711DF17F8DE} = {BE28CE11-F4C2-4867-BDB8-C711DF17F8DE}
+		{225ADEA2-4AD8-443A-9E1D-76A1921E10F3} = {225ADEA2-4AD8-443A-9E1D-76A1921E10F3}
+		{15D857DA-ED91-4A76-98AC-8DBBEA4A6207} = {15D857DA-ED91-4A76-98AC-8DBBEA4A6207}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RendData", "RendData\RendData.vcxproj", "{15D857DA-ED91-4A76-98AC-8DBBEA4A6207}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BE28CE11-F4C2-4867-BDB8-C711DF17F8DE} = {BE28CE11-F4C2-4867-BDB8-C711DF17F8DE}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RendBasic", "RendBasic\RendBasic.vcxproj", "{BE28CE11-F4C2-4867-BDB8-C711DF17F8DE}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RendView", "RendView\RendView.vcxproj", "{C8A19B06-F1CE-447F-B46E-C15C15641178}"
+	ProjectSection(ProjectDependencies) = postProject
+		{BE28CE11-F4C2-4867-BDB8-C711DF17F8DE} = {BE28CE11-F4C2-4867-BDB8-C711DF17F8DE}
+		{225ADEA2-4AD8-443A-9E1D-76A1921E10F3} = {225ADEA2-4AD8-443A-9E1D-76A1921E10F3}
+		{15D857DA-ED91-4A76-98AC-8DBBEA4A6207} = {15D857DA-ED91-4A76-98AC-8DBBEA4A6207}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "RendBase", "RendBase\RendBase.vcxproj", "{225ADEA2-4AD8-443A-9E1D-76A1921E10F3}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{808236AE-C58B-4DE9-A733-AD2D7ED24E01}.Debug|x64.ActiveCfg = Debug|x64
+		{808236AE-C58B-4DE9-A733-AD2D7ED24E01}.Debug|x64.Build.0 = Debug|x64
+		{808236AE-C58B-4DE9-A733-AD2D7ED24E01}.Release|x64.ActiveCfg = Release|x64
+		{808236AE-C58B-4DE9-A733-AD2D7ED24E01}.Release|x64.Build.0 = Release|x64
+		{15D857DA-ED91-4A76-98AC-8DBBEA4A6207}.Debug|x64.ActiveCfg = Debug|x64
+		{15D857DA-ED91-4A76-98AC-8DBBEA4A6207}.Debug|x64.Build.0 = Debug|x64
+		{15D857DA-ED91-4A76-98AC-8DBBEA4A6207}.Release|x64.ActiveCfg = Release|x64
+		{15D857DA-ED91-4A76-98AC-8DBBEA4A6207}.Release|x64.Build.0 = Release|x64
+		{BE28CE11-F4C2-4867-BDB8-C711DF17F8DE}.Debug|x64.ActiveCfg = Debug|x64
+		{BE28CE11-F4C2-4867-BDB8-C711DF17F8DE}.Debug|x64.Build.0 = Debug|x64
+		{BE28CE11-F4C2-4867-BDB8-C711DF17F8DE}.Release|x64.ActiveCfg = Release|x64
+		{BE28CE11-F4C2-4867-BDB8-C711DF17F8DE}.Release|x64.Build.0 = Release|x64
+		{C8A19B06-F1CE-447F-B46E-C15C15641178}.Debug|x64.ActiveCfg = Debug|x64
+		{C8A19B06-F1CE-447F-B46E-C15C15641178}.Debug|x64.Build.0 = Debug|x64
+		{C8A19B06-F1CE-447F-B46E-C15C15641178}.Release|x64.ActiveCfg = Release|x64
+		{C8A19B06-F1CE-447F-B46E-C15C15641178}.Release|x64.Build.0 = Release|x64
+		{225ADEA2-4AD8-443A-9E1D-76A1921E10F3}.Debug|x64.ActiveCfg = Debug|x64
+		{225ADEA2-4AD8-443A-9E1D-76A1921E10F3}.Debug|x64.Build.0 = Debug|x64
+		{225ADEA2-4AD8-443A-9E1D-76A1921E10F3}.Release|x64.ActiveCfg = Release|x64
+		{225ADEA2-4AD8-443A-9E1D-76A1921E10F3}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {783A77BB-6BD2-4B49-B414-E7BB62D4FFA5}
+	EndGlobalSection
+EndGlobal
