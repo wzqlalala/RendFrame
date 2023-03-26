@@ -694,7 +694,7 @@ namespace mxr
 
 		//重新设置vao
 		_vaoattributes[index].isSetVAOFormat = false;
-		_vaoattributes[index].vao = MakeAsset<VAO>();
+		//_vaoattributes[index].vao = MakeAsset<VAO>();
 
 		//重新设置该格式中其余drawable的数据
 		for (auto item = drawableattributes[index].begin(); item != drawableattributes[index].end(); item++)

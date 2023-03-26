@@ -43,6 +43,7 @@ namespace MBaseRend
 	{
 		//_app->setContext(context());
 		//_context->makeCurrent(_context->surface());
+		QOpenGLContext *context = QOpenGLContext::currentContext();
 
 		this->initializeOpenGLFunctions();
 
@@ -67,11 +68,22 @@ namespace MBaseRend
 
 	void mBaseRend::paintGL()
 	{
+		QOpenGLContext *context = QOpenGLContext::currentContext();
 		for (auto baseRender : _renderArray)
 		{
 			baseRender->updateUniform(_modelView, _commonView);
 		}
+		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
+		if (error != 0)
+		{
+			qDebug() << error;
+		}
 		_viewer->run();
+		error = QOpenGLContext::currentContext()->functions()->glGetError();
+		if (error != 0)
+		{
+			qDebug() << error;
+		}
 	}
 
 	void mBaseRend::resizeGL(int w, int h)
@@ -336,9 +348,10 @@ namespace MBaseRend
 			}
 			//else if (mMeshStaticData::_pickSoloOrMutiply == SoloPick)
 			{
-				float depth;
-				makeCurrent();
-				glReadPixels(event->pos().x(), SCR_HEIGHT - event->pos().y(), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+				//QOpenGLContext *context = QOpenGLContext::currentContext();
+				//float depth;
+				//makeCurrent();
+				//glReadPixels(event->pos().x(), SCR_HEIGHT - event->pos().y(), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 				//if (mMeshStaticData::_pickObject == Mesh)
 				{
 					//_meshRend->SoloPickOnModel(event->pos(), depth);

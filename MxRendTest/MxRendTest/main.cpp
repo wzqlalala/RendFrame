@@ -17,7 +17,7 @@ int main(int argc, char *argv[])
 
 	//QOpenGLContext *context1 = new QOpenGLContext;
 	//context1->setFormat(format);
-    //MxRendTest w(0);
+    //MxRendTest w(1);
     //w.show();
 
 	//QOpenGLContext *context2 = new QOpenGLContext;
