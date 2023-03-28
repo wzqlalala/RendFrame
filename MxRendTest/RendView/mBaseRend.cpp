@@ -538,6 +538,8 @@ namespace MBaseRend
 		{
 			return;
 		}
+		mBaseRender *t = baseRender.get();
+		QObject::connect(t, SIGNAL(update()), this, SLOT(update()));
 		_renderArray.append(baseRender);
 	}
 	void mBaseRend::removeRender(shared_ptr<mBaseRender> baseRender)

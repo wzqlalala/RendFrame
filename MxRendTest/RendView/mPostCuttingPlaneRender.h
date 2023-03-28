@@ -372,6 +372,5 @@ namespace MPostRend
 		std::shared_ptr<mxr::StateSet> _transparentPlaneStateSet;
 
 		bool _isShowCuttingPlane;
-		bool _isShowPlane;
 	};
 }

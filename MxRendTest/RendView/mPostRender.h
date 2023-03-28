@@ -7,6 +7,7 @@
 //#define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 #include <QObject>
+#include <QTimer>
 
 //MViewBasic
 #include "mMeshViewEnum.h"
@@ -49,6 +50,7 @@ namespace MPostRend
 	class mPostAnimationRender;
 	class RENDVIEW_EXPORT mPostRender :public mBaseRender
 	{
+		Q_OBJECT
 	public:
 
 		mPostRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> parent);
@@ -67,6 +69,9 @@ namespace MPostRend
 	
 		//设置动画的渲染数据	
 		void setRendAnimationFrame(mPostAnimationRendData *allFrameRendData);
+
+		//生成线性动画
+		void createLinearAnimation();
 		
 		//设置当前的显示模式	
 		void setShowFuntion(ShowFuntion shoFuntion);
@@ -125,16 +130,31 @@ namespace MPostRend
 		//设置是否实时显示平面
 		void setIsShowPlane(bool isShow);
 
+		/**********************************动画*********************************************/
+		
+		//控制计时器开关		
+		void setTimerOn(bool ison);
+
+
 		~mPostRender();
 
 		void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView) override;
+
+		//
+	private slots:
+
+		//计时器更新	
+		void slot_aniTimer();
 
 	private:
 		shared_ptr<mDataPost1> _dataPost;
 
 		shared_ptr<mPostRendStatus> _rendStatus;
 
-		shared_ptr<mPostAnimationRender> _animationRender;//动画帧
+		//shared_ptr<mPostAnimationRender> _animationRender;//动画帧
+
+		//动画帧的渲染
+		QHash<int, shared_ptr<mPostOneFrameRender>> _animationRender;//动画帧
 
 		shared_ptr<mPostOneFrameRender> _oneFrameRender;//单帧
 
@@ -153,7 +173,11 @@ namespace MPostRend
 		std::shared_ptr<mxr::StateSet> _cuttingPlaneStateSet;//渲染面的状态
 		std::shared_ptr<mxr::StateSet> _transparentPlaneStateSet;//渲染透明面的状态
 
+		//计时器
+		QTimer* _aniTimer;
 
+		//动画渲染帧的当前id;
+		int _animationId;
 		
 	};
 }

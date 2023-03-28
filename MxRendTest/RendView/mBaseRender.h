@@ -29,6 +29,14 @@ namespace MBaseRend
 
 		virtual void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView) {};
 
+	signals:
+
+		void update();
+
+	private:
+
+
+
 	protected:
 		std::shared_ptr<mxr::Application> _app;
 

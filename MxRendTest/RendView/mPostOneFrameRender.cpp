@@ -41,6 +41,16 @@ namespace MPostRend
 		_modelRender.reset();
 	}
 
+	void mPostOneFrameRender::showThisFrame()
+	{
+		_geode->setNodeMask(0);
+	}
+
+	void mPostOneFrameRender::hideThisFrame()
+	{
+		_geode->setNodeMask(1);
+	}
+
 	void mPostOneFrameRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
 	{
 		if (_modelRender)
@@ -187,7 +197,8 @@ namespace MPostRend
 
 	void mPostOneFrameRender::setOnlyShowCuttingPlane(bool isOnlyShowCuttingPlane)
 	{
-		
+		_rendStatus->_isOnlyShowCuttingPlane = isOnlyShowCuttingPlane;
+		//_modelRender
 	}
 
 
@@ -249,6 +260,11 @@ namespace MPostRend
 
 	void mPostOneFrameRender::setIsShowPlane(bool isShow)
 	{
+		_rendStatus->_isShowTransparentPlane = isShow;
+		for (auto cuttingPlane : _cuttingPlaneRenders)
+		{
+			cuttingPlane->setIsShowCuttingPlane(isShow);
+		}
 		//_isShowPlane = isShow;
 	}
 	void mPostOneFrameRender::updateCuttingPlaneUniform()

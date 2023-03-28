@@ -80,6 +80,13 @@ namespace MPostRend
 
 		//切平面的参数
 		QVector<QVector4D> _cuttingPlanes;
+
+		//是否实时显示平面
+		bool _isShowTransparentPlane = true;
+
+		//是否只显示被切的面，不显示模型
+		bool _isOnlyShowCuttingPlane = false;
+
 	};
 }
 

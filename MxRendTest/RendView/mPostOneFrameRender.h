@@ -48,6 +48,12 @@ namespace MPostRend
 
 		~mPostOneFrameRender();
 
+		void showThisFrame();
+
+		void hideThisFrame();
+
+		mPostOneFrameRendData *getOneFrameRendData() { return _oneFrameRendData; };
+
 		std::shared_ptr<mPostModelRender> getModelRender() {return _modelRender;};
 
 		void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView);

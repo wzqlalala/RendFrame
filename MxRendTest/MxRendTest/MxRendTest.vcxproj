@@ -60,7 +60,7 @@
       <AdditionalIncludeDirectories>..\RendBase;..\RendBase\spdlog\include;.\;..\RendData;..\RendView;..\RendBasic;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>RendBase.lib;RendData.lib;RendView.lib;RendBasic.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>RendBase.lib;RendData.lib;RendView.lib;RendBasic.lib;$(Qt_LIBS_);%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
