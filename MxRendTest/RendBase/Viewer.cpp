@@ -13,7 +13,7 @@ namespace mxr
 	void Viewer::compile()
 	{
 		//qDebug() << __LINE__ << time->elapsed();
-		//time->start();
+		time->start();
 		qDebug() << __LINE__ << time->elapsed();
 		_sceneData->accept(_visitor);//20帧的动画花费100ms，云图花费97ms
 		qDebug() << __LINE__ << time->elapsed();

@@ -35,6 +35,7 @@ namespace mxr
 		virtual const Geode* asGeode() const { return 0; }
 		virtual Frode* asFrode() { return 0; }
 		virtual const Frode* asFrode() const { return 0; }
+		
 		virtual bool isNeedAccept() { return true; };
 		virtual void accept(asset_ref<NodeVisitor> nv) {};
 

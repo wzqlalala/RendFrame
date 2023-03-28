@@ -27,7 +27,7 @@ namespace mxr
 		{
 			return false;
 		}
-		_needAccept = true;
+		this->setNeedAccept(true);
 		child->addParent(this);
 		_children.push_back(child);
 		return true;
@@ -36,7 +36,7 @@ namespace mxr
 	bool Group::insertChild(unsigned int index, asset_ref<Node> child)
 	{
 		child->addParent(this);
-		_needAccept = true;
+		this->setNeedAccept(true);
 		_children.insert(_children.begin() + index, child);
 		return true;
 	}
@@ -48,7 +48,7 @@ namespace mxr
 		{
 			return false;
 		}
-		_needAccept = true;
+		this->setNeedAccept(true);
 		child->removeParent(this);
 		_children.erase(result);
 		return true;
@@ -60,7 +60,7 @@ namespace mxr
 		{
 			child->removeParent(this);
 		}
-		_needAccept = true;
+		this->setNeedAccept(true);
 	}
 
 

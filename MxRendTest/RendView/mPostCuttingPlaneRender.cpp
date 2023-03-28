@@ -2070,7 +2070,6 @@ namespace MPostRend
 		if (_transparentPlaneDrawable)
 		{
 			_parent->removeChild(_transparentPlaneDrawable);
-			_transparentPlaneDrawable.reset();
 		}
 	}
 

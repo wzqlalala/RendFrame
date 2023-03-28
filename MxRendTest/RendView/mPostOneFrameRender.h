@@ -20,6 +20,7 @@ namespace mxr
 	class Group;
 	class Geode;
 	class Texture;
+	class Viewer;
 }
 namespace MViewBasic
 {
@@ -44,13 +45,11 @@ namespace MPostRend
 	{
 	public:
 
-		mPostOneFrameRender(std::shared_ptr<mxr::Group> parent, shared_ptr<mPostRendStatus> rendStatus, mOneFrameData1 *oneFrameData, mPostOneFrameRendData *oneFrameRendData);
+		mPostOneFrameRender(shared_ptr<mPostRendStatus> rendStatus, mOneFrameData1 *oneFrameData, mPostOneFrameRendData *oneFrameRendData);
 
 		~mPostOneFrameRender();
 
-		void showThisFrame();
-
-		void hideThisFrame();
+		void bufferThisFrame();
 
 		mPostOneFrameRendData *getOneFrameRendData() { return _oneFrameRendData; };
 
@@ -109,10 +108,10 @@ namespace MPostRend
 
 	private:
 
+		void initial();
+
 		void updateCuttingPlaneUniform();
 	private:
-		std::shared_ptr<mxr::Group> _parent;
-
 		std::shared_ptr<mxr::Geode> _geode;//当前总节点
 
 		std::shared_ptr<mPostRendStatus> _rendStatus;
@@ -139,7 +138,8 @@ namespace MPostRend
 		std::shared_ptr<mxr::StateSet> _cuttingPlaneStateSet;//渲染面的状态
 		std::shared_ptr<mxr::StateSet> _transparentPlaneStateSet;//渲染透明面的状态
 
-
+		/*************************************当前帧渲染********************************************************/
+		std::shared_ptr<mxr::Viewer> _viewer;
 	};
 	
 }

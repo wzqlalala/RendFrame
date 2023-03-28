@@ -647,6 +647,10 @@ namespace mxr
 					{				
 						RemoveVaoAttribute(node, i);
 						drawableattributes[i].erase(item);
+						if (drawableattributes[i].size() == 0)
+						{
+							drawableattributes.erase(drawableattributes.begin() + i);
+						}
 						return;
 					}
 				}			

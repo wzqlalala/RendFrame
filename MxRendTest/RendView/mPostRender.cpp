@@ -315,7 +315,7 @@ namespace MPostRend
 		{
 			_oneFrameRender.reset();
 		}
-		_oneFrameRender = make_shared<mPostOneFrameRender>(_parent, _rendStatus, oneFrameData, postOneFrameRendData);
+		_oneFrameRender = make_shared<mPostOneFrameRender>(_rendStatus, oneFrameData, postOneFrameRendData);
 		if (!_texture)
 		{
 			mPostColorTableData *table = postOneFrameRendData->getRendColorTable();
@@ -362,7 +362,7 @@ namespace MPostRend
 		{
 			float scale = i / float(ids - 1);
 			mPostOneFrameRendData *newFrameRendData = new mPostOneFrameRendData(*postOneFrameRendData);
-			std::shared_ptr<mPostOneFrameRender> oneFrameRender = make_shared<mPostOneFrameRender>(_parent, _rendStatus, oneFrameData, newFrameRendData);
+			std::shared_ptr<mPostOneFrameRender> oneFrameRender = make_shared<mPostOneFrameRender>(_rendStatus, oneFrameData, newFrameRendData);
 			oneFrameRender->setFaceStateSet(_faceStateSet);
 			oneFrameRender->setFaceTransparentNoDeformationStateSet(_faceTransparentNodeformationStateSet);
 			oneFrameRender->setFaceTransparentStateSet(_faceTransparentStateSet);
@@ -373,12 +373,9 @@ namespace MPostRend
 			oneFrameRender->setTextureCoordScale(scale);
 			oneFrameRender->setDeformationScale(deformationScale*scale);
 			oneFrameRender->updateAllModelOperate(ImportOperate);
-			//oneFrameRender->updateAllModelOperate(HideAllPartOperate);
-			oneFrameRender->hideThisFrame();
 			_animationRender.insert(i + 1, oneFrameRender);
 		}
-		_animationRender.value(1)->updateAllModelOperate(ShowAllPartOperate);
-		_oneFrameRender->updateAllModelOperate(HideAllPartOperate);
+		_animationId = 0;
 	}
 
 	void mPostRender::setShowFuntion(ShowFuntion showFuntion)
@@ -547,12 +544,12 @@ namespace MPostRend
 		{
 			return;
 		}
-		if (_animationId != 0)
-		{
-			auto lastrender = _animationRender.value(_animationId);
-			//lastrender->hideThisFrame();
-			lastrender->updateAllModelOperate(HideAllPartOperate);
-		}
+		//if (_animationId != 0)
+		//{
+		//	auto lastrender = _animationRender.value(_animationId);
+		//	//lastrender->hideThisFrame();
+		//	lastrender->updateAllModelOperate(HideAllPartOperate);
+		//}
 		if (_animationId < 10 && _animationId >= 1)
 		{
 			_animationId++;
@@ -561,9 +558,9 @@ namespace MPostRend
 		{
 			_animationId = 1;
 		}
-		auto thisrender = _animationRender.value(_animationId);
-		//thisrender->showThisFrame();
-		thisrender->updateAllModelOperate(ShowAllPartOperate);
+		//auto thisrender = _animationRender.value(_animationId);
+		////thisrender->showThisFrame();
+		//thisrender->updateAllModelOperate(ShowAllPartOperate);
 		emit update();
 		qDebug() << __LINE__ << mxr::time->elapsed();
 	}
@@ -646,11 +643,15 @@ namespace MPostRend
 
 		if (!_animationRender.empty())
 		{
-			if (_animationId != 0)
+			if (_animationId == 0)
 			{
-				_animationRender.value(_animationId)->updateUniform(modelView, commonView);
+				for (auto rend : _animationRender)
+				{
+					rend->bufferThisFrame();
+				}
+				_animationId = 1;
 			}
-
+			_animationRender.value(_animationId)->updateUniform(modelView, commonView);
 		}
 		else if (_oneFrameRender)
 		{
