@@ -291,6 +291,28 @@ namespace MPostRend
 		_aniTimer->setInterval(0);
 		connect(_aniTimer, SIGNAL(timeout()), this, SLOT(slot_aniTimer()));
 	}
+	void mPostRender::updateOneModelOperate(QPair<MBasicFunction::PostModelOperateEnum, std::set<QString>> postModelOperates)
+	{
+		if (_oneFrameRender)
+		{
+			_oneFrameRender->updateOneModelOperate(postModelOperates);
+		}
+		for (auto rend : _animationRender)
+		{
+			rend->updateOneModelOperate(postModelOperates);
+		}
+	}
+	void mPostRender::updateAllModelOperate(MBasicFunction::PostModelOperateEnum postModelOperate)
+	{
+		if (_oneFrameRender)
+		{
+			_oneFrameRender->updateAllModelOperate(postModelOperate);
+		}
+		for (auto rend : _animationRender)
+		{
+			rend->updateAllModelOperate(postModelOperate);
+		}
+	}
 	void mPostRender::clearRender()
 	{
 		if (_oneFrameRender)
@@ -385,6 +407,10 @@ namespace MPostRend
 		{
 			_oneFrameRender->getModelRender()->setShowFuntion(showFuntion);
 		}
+		for (auto rend : _animationRender)
+		{
+			rend->getModelRender()->setShowFuntion(showFuntion);
+		}
 	}
 
 	void mPostRender::setDispersed(bool isdispersed)
@@ -406,6 +432,10 @@ namespace MPostRend
 		{
 			_oneFrameRender->setDeformationScale(deformationScale);
 		}
+		for (auto rend : _animationRender)
+		{
+			rend->setDeformationScale(deformationScale);
+		}
 	}
 
 	void mPostRender::setIsShowInitialShape(bool isShowInitialShape)
@@ -415,6 +445,10 @@ namespace MPostRend
 		{
 			_oneFrameRender->getModelRender()->setIsShowInitialShape(isShowInitialShape);
 		}
+		for (auto rend : _animationRender)
+		{
+			rend->getModelRender()->setIsShowInitialShape(isShowInitialShape);
+		}
 	}
 
 	void mPostRender::setTextureCoordScale(float textureCoordScale)
@@ -422,6 +456,10 @@ namespace MPostRend
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setTextureCoordScale(textureCoordScale);
+		}
+		for (auto rend : _animationRender)
+		{
+			rend->setTextureCoordScale(textureCoordScale);
 		}
 	}
 
@@ -527,7 +565,7 @@ namespace MPostRend
 		mxr::time->start();
 		if (ison)
 		{
-			int interval = 1000 / 20;
+			int interval = 1000 / 30;
 			_aniTimer->start(interval);
 		}
 		else

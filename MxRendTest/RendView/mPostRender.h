@@ -59,6 +59,11 @@ namespace MPostRend
 
 		shared_ptr<mPostOneFrameRender> getOneFrameRender() { return  _oneFrameRender; };
 
+		//更新单个部件操作
+		void updateOneModelOperate(QPair<MBasicFunction::PostModelOperateEnum, std::set<QString>> postModelOperates);
+		//更新全部部件操作
+		void updateAllModelOperate(MBasicFunction::PostModelOperateEnum postModelOperate);
+
 		/*
 		* 清除全部的渲染
 		*/

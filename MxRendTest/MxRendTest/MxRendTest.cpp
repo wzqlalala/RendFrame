@@ -139,7 +139,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
-		_postRender->getOneFrameRender()->updateAllModelOperate(_modelOperate);
+		_postRender->updateAllModelOperate(_modelOperate);
 		int id = int(_modelOperate);
 		if (_modelOperate == TextureAllPartOperate)
 		{
@@ -157,7 +157,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
-		_postRender->getOneFrameRender()->updateAllModelOperate(_modelOperate1);
+		_postRender->updateAllModelOperate(_modelOperate1);
 		if (_modelOperate1 == HideAllPartOperate)
 		{
 			_modelOperate1 = ShowAllPartOperate;
