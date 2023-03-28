@@ -58,6 +58,8 @@ namespace MDataPost
 		_id = oneframe._id;
 		_deformationScale = oneframe._deformationScale;
 		_value = oneframe._value;
+		_currentMinData = oneframe._currentMinData;
+		_currentMaxData = oneframe._currentMaxData;
 		_constMinData = oneframe._constMinData;
 		_constMaxData = oneframe._constMaxData;
 		_minData = oneframe._minData;

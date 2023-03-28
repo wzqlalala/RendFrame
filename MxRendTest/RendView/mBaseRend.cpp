@@ -69,10 +69,6 @@ namespace MBaseRend
 	void mBaseRend::paintGL()
 	{
 		QOpenGLContext *context = QOpenGLContext::currentContext();
-		for (auto baseRender : _renderArray)
-		{
-			baseRender->updateUniform(_modelView, _commonView);
-		}
 		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
 		if (error != 0)
 		{
@@ -83,6 +79,10 @@ namespace MBaseRend
 		if (error != 0)
 		{
 			qDebug() << error;
+		}
+		for (auto baseRender : _renderArray)
+		{
+			baseRender->updateUniform(_modelView, _commonView);
 		}
 	}
 
@@ -538,6 +538,8 @@ namespace MBaseRend
 		{
 			return;
 		}
+		mBaseRender *t = baseRender.get();
+		QObject::connect(t, SIGNAL(update()), this, SLOT(update()));
 		_renderArray.append(baseRender);
 	}
 	void mBaseRend::removeRender(shared_ptr<mBaseRender> baseRender)

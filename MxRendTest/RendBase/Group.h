@@ -11,6 +11,16 @@ namespace mxr
 		virtual ~Group();
 		virtual Group* asGroup() { return this; }
 		virtual const Group* asGroup() const { return this; }
+		virtual bool isNeedAccept() { return _needAccept; };
+
+		inline void setNeedAccept(bool isAccept)
+		{
+			_needAccept = isAccept;
+			for (auto parent : _parents)
+			{
+				parent->setNeedAccept(true);
+			}
+		};
 		virtual void accept(asset_ref<NodeVisitor> nv);
 		virtual bool addChild(asset_ref<Node> child);
 		virtual bool insertChild(unsigned int index, asset_ref<Node> child);
@@ -39,6 +49,6 @@ namespace mxr
 	protected:
 		NodeList _children;
 
-
+		bool _needAccept = true;
 	};
 }

@@ -36,7 +36,8 @@ namespace MPostRend
 		_dataPost = nullptr;
 		_texture = nullptr;
 		_oneFrameRender = nullptr;
-		_animationRender = nullptr;
+		_animationId = 0;
+		//_animationRender = nullptr;
 
 		_rendStatus = make_shared<mPostRendStatus>();
 
@@ -278,11 +279,39 @@ namespace MPostRend
 		shared_ptr<Shader> transparentplaneshader = mShaderManage::GetInstance()->GetShader("PostTransparentPlaneWithOutDeformation");
 		_transparentPlaneStateSet->setShader(transparentplaneshader);
 		_transparentPlaneStateSet->setAttributeAndModes(MakeAsset<Depth>(), 1);
+		_transparentPlaneStateSet->setAttributeAndModes(MakeAsset<PolygonOffsetFill>(0, 0), 0);
 		_transparentPlaneStateSet->setAttributeAndModes(MakeAsset<PolygonMode>(mxr::PolygonMode::FRONT_AND_BACK, mxr::PolygonMode::FILL), 1);
 		_transparentPlaneStateSet->setAttributeAndModes(MakeAsset<BlendFunc>(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA), 1);
 		_transparentPlaneStateSet->setUniform(MakeAsset<Uniform>("projection", QMatrix4x4()));
 		_transparentPlaneStateSet->setUniform(MakeAsset<Uniform>("view", QMatrix4x4()));
 		_transparentPlaneStateSet->setUniform(MakeAsset<Uniform>("model", QMatrix4x4()));
+
+		//初始化计时器
+		_aniTimer = new QTimer;
+		_aniTimer->setInterval(0);
+		connect(_aniTimer, SIGNAL(timeout()), this, SLOT(slot_aniTimer()));
+	}
+	void mPostRender::updateOneModelOperate(QPair<MBasicFunction::PostModelOperateEnum, std::set<QString>> postModelOperates)
+	{
+		if (_oneFrameRender)
+		{
+			_oneFrameRender->updateOneModelOperate(postModelOperates);
+		}
+		for (auto rend : _animationRender)
+		{
+			rend->updateOneModelOperate(postModelOperates);
+		}
+	}
+	void mPostRender::updateAllModelOperate(MBasicFunction::PostModelOperateEnum postModelOperate)
+	{
+		if (_oneFrameRender)
+		{
+			_oneFrameRender->updateAllModelOperate(postModelOperate);
+		}
+		for (auto rend : _animationRender)
+		{
+			rend->updateAllModelOperate(postModelOperate);
+		}
 	}
 	void mPostRender::clearRender()
 	{
@@ -290,10 +319,10 @@ namespace MPostRend
 		{
 			_oneFrameRender.reset();
 		}
-		if (_animationRender)
-		{
-			_animationRender.reset();
-		}
+		//if (_animationRender)
+		//{
+		//	_animationRender.reset();
+		//}
 
 	}
 	void mPostRender::setRendCurrentFrameData(mPostOneFrameRendData* postOneFrameRendData)
@@ -308,7 +337,7 @@ namespace MPostRend
 		{
 			_oneFrameRender.reset();
 		}
-		_oneFrameRender = make_shared<mPostOneFrameRender>(_parent, _rendStatus, oneFrameData, postOneFrameRendData);
+		_oneFrameRender = make_shared<mPostOneFrameRender>(_rendStatus, oneFrameData, postOneFrameRendData);
 		if (!_texture)
 		{
 			mPostColorTableData *table = postOneFrameRendData->getRendColorTable();
@@ -337,6 +366,38 @@ namespace MPostRend
 			return;
 		}
 
+
+	}
+
+	void mPostRender::createLinearAnimation()
+	{
+		if (!_dataPost || nullptr == _oneFrameRender)
+		{
+			return;
+		}
+		mPostOneFrameRendData* postOneFrameRendData = _oneFrameRender->getOneFrameRendData();
+		int id = postOneFrameRendData->getRendID();
+		QVector3D deformationScale = postOneFrameRendData->getDeformationScale();
+		mOneFrameData1 *oneFrameData = _dataPost->getOneFrameData(id);
+		int ids = 10;
+		for (int i = 0; i < ids; i++)
+		{
+			float scale = i / float(ids - 1);
+			mPostOneFrameRendData *newFrameRendData = new mPostOneFrameRendData(*postOneFrameRendData);
+			std::shared_ptr<mPostOneFrameRender> oneFrameRender = make_shared<mPostOneFrameRender>(_rendStatus, oneFrameData, newFrameRendData);
+			oneFrameRender->setFaceStateSet(_faceStateSet);
+			oneFrameRender->setFaceTransparentNoDeformationStateSet(_faceTransparentNodeformationStateSet);
+			oneFrameRender->setFaceTransparentStateSet(_faceTransparentStateSet);
+			oneFrameRender->setEdgeLineStateSet(_edgelineStateSet);
+			oneFrameRender->setFaceLineStateSet(_facelineStateSet);
+			oneFrameRender->setLineStateSet(_lineStateSet);
+			oneFrameRender->setPointStateSet(_pointStateSet);
+			oneFrameRender->setTextureCoordScale(scale);
+			oneFrameRender->setDeformationScale(deformationScale*scale);
+			oneFrameRender->updateAllModelOperate(ImportOperate);
+			_animationRender.insert(i + 1, oneFrameRender);
+		}
+		_animationId = 0;
 	}
 
 	void mPostRender::setShowFuntion(ShowFuntion showFuntion)
@@ -345,6 +406,10 @@ namespace MPostRend
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->getModelRender()->setShowFuntion(showFuntion);
+		}
+		for (auto rend : _animationRender)
+		{
+			rend->getModelRender()->setShowFuntion(showFuntion);
 		}
 	}
 
@@ -367,6 +432,10 @@ namespace MPostRend
 		{
 			_oneFrameRender->setDeformationScale(deformationScale);
 		}
+		for (auto rend : _animationRender)
+		{
+			rend->setDeformationScale(deformationScale);
+		}
 	}
 
 	void mPostRender::setIsShowInitialShape(bool isShowInitialShape)
@@ -376,6 +445,10 @@ namespace MPostRend
 		{
 			_oneFrameRender->getModelRender()->setIsShowInitialShape(isShowInitialShape);
 		}
+		for (auto rend : _animationRender)
+		{
+			rend->getModelRender()->setIsShowInitialShape(isShowInitialShape);
+		}
 	}
 
 	void mPostRender::setTextureCoordScale(float textureCoordScale)
@@ -383,6 +456,10 @@ namespace MPostRend
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setTextureCoordScale(textureCoordScale);
+		}
+		for (auto rend : _animationRender)
+		{
+			rend->setTextureCoordScale(textureCoordScale);
 		}
 	}
 
@@ -483,10 +560,53 @@ namespace MPostRend
 		}
 	}
 
+	void mPostRender::setTimerOn(bool ison)
+	{
+		mxr::time->start();
+		if (ison)
+		{
+			int interval = 1000 / 30;
+			_aniTimer->start(interval);
+		}
+		else
+		{
+			_aniTimer->stop();
+		}
+	}
+	
+	void mPostRender::slot_aniTimer()
+	{
+		qDebug() << __LINE__ << mxr::time->elapsed();
+		mxr::time->start();
+		if (_animationRender.empty())
+		{
+			return;
+		}
+		//if (_animationId != 0)
+		//{
+		//	auto lastrender = _animationRender.value(_animationId);
+		//	//lastrender->hideThisFrame();
+		//	lastrender->updateAllModelOperate(HideAllPartOperate);
+		//}
+		if (_animationId < 10 && _animationId >= 1)
+		{
+			_animationId++;
+		}
+		else
+		{
+			_animationId = 1;
+		}
+		//auto thisrender = _animationRender.value(_animationId);
+		////thisrender->showThisFrame();
+		//thisrender->updateAllModelOperate(ShowAllPartOperate);
+		emit update();
+		qDebug() << __LINE__ << mxr::time->elapsed();
+	}
+
 	mPostRender::~mPostRender()
 	{
 		_oneFrameRender.reset();
-		_animationRender.reset();
+		//_animationRender.reset();
 		
 	}
 
@@ -559,10 +679,22 @@ namespace MPostRend
 			_edgelineStateSet->getUniform("rightToLeft")->SetData(float(modelView->_Right - modelView->_Left));
 		}
 
-
-		if (_oneFrameRender)
+		if (!_animationRender.empty())
+		{
+			if (_animationId == 0)
+			{
+				for (auto rend : _animationRender)
+				{
+					rend->bufferThisFrame();
+				}
+				_animationId = 1;
+			}
+			_animationRender.value(_animationId)->updateUniform(modelView, commonView);
+		}
+		else if (_oneFrameRender)
 		{
 			_oneFrameRender->updateUniform(modelView, commonView);
 		}
+		
 	}
 }

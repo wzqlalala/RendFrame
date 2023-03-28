@@ -61,7 +61,7 @@
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>..\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>RendBase.lib;RendData.lib;RendBasic.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>RendBase.lib;RendData.lib;RendBasic.lib;$(Qt_LIBS_);%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
@@ -121,7 +121,7 @@
     <ClInclude Include="mPostOneFrameRender.h" />
     <ClInclude Include="mPostPartRender.h" />
     <QtMoc Include="mPostRend.h" />
-    <ClInclude Include="mPostRender.h" />
+    <QtMoc Include="mPostRender.h" />
     <QtMoc Include="mPreRend.h" />
     <ClInclude Include="mTestRender.h" />
     <ClInclude Include="rendview_global.h" />

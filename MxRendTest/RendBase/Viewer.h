@@ -3,13 +3,18 @@
 #include "NodeVisitor.h"
 #include "StateAttribute.h"
 
+#include <QTime>
+
 namespace mxr
 {
+	extern MXR_EXPORT QTime *time;
 	class MXR_EXPORT Viewer
 	{
 	public:
 		Viewer();
 		void setSceneData(asset_ref<Node> _node) { _sceneData = _node; }
+		void compile();
+		void noClearRun();
 		void run();
 
 	protected:

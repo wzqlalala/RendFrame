@@ -89,7 +89,7 @@ namespace MPostRend
 			{
 				hidePartNames.insert(partName);
 			}
-			asset_ref<mPostPartRender> part = MakeAsset<mPostPartRender>(_parent, _oneFrameData, partData);
+			asset_ref<mPostPartRender> part = MakeAsset<mPostPartRender>(_geode, _oneFrameData, partData);
 			part->setFaceStateSet(_faceStateSet);
 			part->setFaceTransparentNodeformationStateSet(_faceTransparentNodeformationStateSet);
 			part->setEdgeLineStateSet(_edgelineStateSet);
@@ -119,11 +119,13 @@ namespace MPostRend
 		{
 			for (QString partName : partNames)
 			{
-				_partRenders[partName]->getGeode()->setNodeMask(0);
+				//_partRenders[partName]->getGeode()->setNodeMask(0);
+				_partRenders[partName]->setShowFuntion(_rendStatus->_showFunction);
+				_partRenders[partName]->setIsShowInitialShape(_rendStatus->_isShowInitialShape);
 				//parts[partName]->getFaceDrawable()->setNodeMask(0);
 			}
-			setShowFuntion(_rendStatus->_showFunction);
-			setIsShowInitialShape(_rendStatus->_isShowInitialShape);
+			//setShowFuntion(_rendStatus->_showFunction);
+			//setIsShowInitialShape(_rendStatus->_isShowInitialShape);
 		}
 		else if (postModelOperate == ColorOnePartOperate)
 		{

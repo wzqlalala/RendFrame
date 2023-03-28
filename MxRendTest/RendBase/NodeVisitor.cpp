@@ -64,7 +64,7 @@ namespace mxr
 
 	//具有相同格式的一组
 	void VaoDrawArrayAttribute::compile(std::vector<DrawableAttribute> &_drawableattribute)
-	{	
+	{
 		std::vector<DrawArraysIndirectCommand> arraycommands;
 		std::vector<DrawElementsIndirectCommand> elementcommands;
 		_drawbuffers.clear();
@@ -78,7 +78,7 @@ namespace mxr
 		{
 			std::map<int, DrawableData> _drawabledata = _drawableattribute[i].census();
 			if (!_drawableattribute[i].isCompile)
-			{			
+			{
 				isSetVAOFormat = false;
 				if (HaveIBO)
 				{
@@ -162,7 +162,7 @@ namespace mxr
 
 			}
 
-			
+
 		}*/
 
 		int allSize = 0;
@@ -173,7 +173,7 @@ namespace mxr
 		}
 		std::map<int, std::map<int, DrawableData>> _drawabledatas;
 		for (int i = 0; i < _drawableattribute.size(); i++)
-		{			
+		{
 			if (!_drawableattribute[i].isCompile)
 			{
 				std::map<int, DrawableData> _drawabledata = _drawableattribute[i].census(); _drawabledatas[i] = _drawabledata;
@@ -257,7 +257,7 @@ namespace mxr
 
 		}
 
-		bool vbobool{false};//是否需要重新生成VBO
+		bool vbobool{ false };//是否需要重新生成VBO
 		for (auto vsize : vbosize)
 		{
 			if (vbos[vsize.first])//存在原始vbo
@@ -277,12 +277,11 @@ namespace mxr
 			}
 
 		}
-
-		for (int i = 0; i < _drawableattribute.size(); i++)
+		if (vbobool)
 		{
-			std::map<int, DrawableData> _drawabledata = _drawableattribute[i].census();
-			if (vbobool)
+			for (int i = 0; i < _drawableattribute.size(); i++)
 			{
+				//std::map<int, DrawableData> _drawabledata = _drawableattribute[i].census();
 				std::map<int, DrawableData> _drawabledata = _drawableattribute[i].census();
 				if (!_drawableattribute[i].isCompile)//没有编译过的
 				{
@@ -648,6 +647,10 @@ namespace mxr
 					{				
 						RemoveVaoAttribute(node, i);
 						drawableattributes[i].erase(item);
+						if (drawableattributes[i].size() == 0)
+						{
+							drawableattributes.erase(drawableattributes.begin() + i);
+						}
 						return;
 					}
 				}			

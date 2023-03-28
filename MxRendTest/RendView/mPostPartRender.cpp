@@ -37,7 +37,7 @@ namespace MPostRend
 		_parent = parent;
 		_spaceTree = nullptr;
 
-		_geode = MakeAsset<Geode>();	
+		_geode = MakeAsset<Geode>();
 		_parent->addChild(_geode);
 
 		_facerend = MakeAsset<mPostPartFaceRender>(_geode);
@@ -182,6 +182,7 @@ namespace MPostRend
 
 	void mPostPartRender::setShowFuntion(ShowFuntion showFuntion)
 	{
+		_linerend->getDrawable()->setNodeMask(0);
 		if (showFuntion == ElementFace)
 		{
 			_facerend->getDrawable()->setNodeMask(0);
@@ -1184,7 +1185,7 @@ namespace MPostRend
 		//_drawable->setVertexAttribArray(8, _vertex8);
 
 		_parent = parent;
-		//_parent->addChild(_drawable);
+		_parent->addChild(_drawable);
 	}
 
 	mPostPartFaceTransparentNodeformationRender::~mPostPartFaceTransparentNodeformationRender()
@@ -1211,7 +1212,7 @@ namespace MPostRend
 		//_drawable->setVertexAttribArray(3, _vertex3);
 
 		_parent = parent;
-		//_parent->addChild(_drawable);
+		_parent->addChild(_drawable);
 	}
 
 	mPostPartFaceLineRender::~mPostPartFaceLineRender()
@@ -1242,7 +1243,7 @@ namespace MPostRend
 		_drawable->setVertexAttribArray(5, _vertex5);
 
 		_parent = parent;
-		//_parent->addChild(_drawable);
+		_parent->addChild(_drawable);
 	}
 
 	mPostPartLineRender::~mPostPartLineRender()
@@ -1273,7 +1274,7 @@ namespace MPostRend
 		_drawable->setVertexAttribArray(5, _vertex5);
 
 		_parent = parent;
-		//_parent->addChild(_drawable);
+		_parent->addChild(_drawable);
 	}
 
 	mPostPartPointRender::~mPostPartPointRender()
@@ -1298,7 +1299,7 @@ namespace MPostRend
 		_drawable->setVertexAttribArray(2, _vertex2);
 
 		_parent = parent;
-		//_parent->addChild(_drawable);
+		_parent->addChild(_drawable);
 	}
 
 	mPostPartEdgeLineRender::~mPostPartEdgeLineRender()

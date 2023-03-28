@@ -9,6 +9,7 @@ namespace mxr
 	class Group;
 	class Switch;
 	class Geode;
+	class Frode;
 	class NodeVisitor;
 	class Callback;
 	class StateSet;
@@ -32,7 +33,10 @@ namespace mxr
 		virtual const Switch* asSwitch() const { return 0; }
 		virtual Geode* asGeode() { return 0; }
 		virtual const Geode* asGeode() const { return 0; }
-
+		virtual Frode* asFrode() { return 0; }
+		virtual const Frode* asFrode() const { return 0; }
+		
+		virtual bool isNeedAccept() { return true; };
 		virtual void accept(asset_ref<NodeVisitor> nv) {};
 
 

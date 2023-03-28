@@ -106,7 +106,8 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		_postRender = make_shared<MPostRend::mPostRender>(_postRend->getApplication(), _postRend->getRoot());
 		
 		shared_ptr<mDataPost1> dp = make_shared<mDataPost1>();
-		mPostOneFrameRendData *oneFrameRendData = new mPostOneFrameRendData();
+		mPostOneFrameRendData *oneFrameRendData = new mPostOneFrameRendData(); 
+		//oneFrameRendData->setDeformationScale(QVector3D(10.0f, 10.0f, 10.0f));
 		if (!getData(dp, oneFrameRendData))
 		{
 			delete oneFrameRendData;
@@ -138,7 +139,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
-		_postRender->getOneFrameRender()->updateAllModelOperate(_modelOperate);
+		_postRender->updateAllModelOperate(_modelOperate);
 		int id = int(_modelOperate);
 		if (_modelOperate == TextureAllPartOperate)
 		{
@@ -156,7 +157,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
-		_postRender->getOneFrameRender()->updateAllModelOperate(_modelOperate1);
+		_postRender->updateAllModelOperate(_modelOperate1);
 		if (_modelOperate1 == HideAllPartOperate)
 		{
 			_modelOperate1 = ShowAllPartOperate;
@@ -172,7 +173,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
-		_postRender->setDeformationScale(QVector3D(2.0,2.0,2.0));
+		_postRender->setDeformationScale(QVector3D(1.0,1.0,1.0));
 	}
 	else if (event->key() == Qt::Key_5)
 	{
@@ -201,8 +202,9 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		Space::AABB aabb = _postRender->getOneFrameRender()->getModelRender()->getModelAABB();
 		float radius = (aabb.maxEdge - aabb.minEdge).length() / 2.0;
 		QVector3D center = (aabb.maxEdge + aabb.minEdge) / 2.0;
-		_postRender->createCuttingPlane(0, QVector3D(0,0,1), center);
-		_postRender->setPlaneData(0, QVector3D(0, 0, 1), center, radius);
+		_postRender->createCuttingPlane(_cuttingPlaneNum, planeNormals.at(_cuttingPlaneNum), center);
+		_postRender->setPlaneData(_cuttingPlaneNum, planeNormals.at(_cuttingPlaneNum), center, radius);
+		_cuttingPlaneNum++;
 	}
 	else if (event->key() == Qt::Key_W)
 	{
@@ -210,11 +212,12 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
-		Space::AABB aabb = _postRender->getOneFrameRender()->getModelRender()->getModelAABB();
-		float radius = (aabb.maxEdge - aabb.minEdge).length() / 2.0;
-		QVector3D center = (aabb.maxEdge + aabb.minEdge) / 2.0;
-		_postRender->createCuttingPlane(1, QVector3D(0, 1, 0), center);
-		_postRender->setPlaneData(1, QVector3D(0, 1, 0), center, radius);
+		if (_cuttingPlaneNum > 0)
+		{
+			_postRender->deleteCuttingPlane(0);
+			_cuttingPlaneNum--;
+		}
+
 	}
 	else if (event->key() == Qt::Key_E)
 	{
@@ -222,7 +225,36 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
-		_postRender->deleteCuttingPlane(0);		
+		if (_cuttingPlaneNum > 0)
+		{
+			_postRender->deleteCuttingPlane(_cuttingPlaneNum - 1);
+			_cuttingPlaneNum--;
+		}
+	}
+	else if (event->key() == Qt::Key_R)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		_isShowPlane = !_isShowPlane;
+		_postRender->setIsShowPlane(_isShowPlane);
+	}
+	else if (event->key() == Qt::Key_A)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		_postRender->createLinearAnimation();
+	}
+	else if (event->key() == Qt::Key_S)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		_postRender->setTimerOn(true);
 	}
 	else if (event->key() == Qt::Key_Asterisk)
 	{

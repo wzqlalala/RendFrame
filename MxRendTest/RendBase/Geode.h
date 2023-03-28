@@ -21,9 +21,7 @@ namespace mxr
 				Node->setNodeMask(nm);
 			}
 			_nodeMask = nm;
-		}
-		virtual void accept(asset_ref<NodeVisitor> nv);
-		
+		}		
 	};
 
 }

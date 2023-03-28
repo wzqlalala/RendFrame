@@ -38,9 +38,6 @@
     <ClInclude Include="mPostPartRender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mPostRender.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="mTestRender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -115,6 +112,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="mPreRend.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="mPostRender.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

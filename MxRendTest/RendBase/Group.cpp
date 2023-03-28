@@ -10,9 +10,13 @@ namespace mxr
 
 	void Group::accept(asset_ref<NodeVisitor> nv)
 	{
-		for (int i = 0; i < _children.size(); i++)
+		if (isNeedAccept())
 		{
-			_children[i]->accept(nv);
+			for (int i = 0; i < _children.size(); i++)
+			{
+				_children[i]->accept(nv);
+			}
+			_needAccept = false;
 		}
 
 	}
@@ -23,6 +27,7 @@ namespace mxr
 		{
 			return false;
 		}
+		this->setNeedAccept(true);
 		child->addParent(this);
 		_children.push_back(child);
 		return true;
@@ -31,6 +36,7 @@ namespace mxr
 	bool Group::insertChild(unsigned int index, asset_ref<Node> child)
 	{
 		child->addParent(this);
+		this->setNeedAccept(true);
 		_children.insert(_children.begin() + index, child);
 		return true;
 	}
@@ -42,6 +48,7 @@ namespace mxr
 		{
 			return false;
 		}
+		this->setNeedAccept(true);
 		child->removeParent(this);
 		_children.erase(result);
 		return true;
@@ -53,6 +60,7 @@ namespace mxr
 		{
 			child->removeParent(this);
 		}
+		this->setNeedAccept(true);
 	}
 
 

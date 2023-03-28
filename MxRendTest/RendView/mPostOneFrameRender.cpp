@@ -25,24 +25,29 @@ using namespace mxr;
 using namespace std;
 namespace MPostRend
 {
-	mPostOneFrameRender::mPostOneFrameRender(std::shared_ptr<mxr::Group> parent, shared_ptr<mPostRendStatus> rendStatus, mOneFrameData1 *oneFrameData, mPostOneFrameRendData *oneFrameRendData) :
-		_parent(parent), _rendStatus(rendStatus), _oneFrameData(oneFrameData), _oneFrameRendData(oneFrameRendData)
+	mPostOneFrameRender::mPostOneFrameRender(shared_ptr<mPostRendStatus> rendStatus, mOneFrameData1 *oneFrameData, mPostOneFrameRendData *oneFrameRendData) : _rendStatus(rendStatus), _oneFrameData(oneFrameData), _oneFrameRendData(oneFrameRendData)
 	{
 		_cuttingPlaneStateSet = nullptr;
 
 		_geode = MakeAsset<Geode>();
-		_parent->addChild(_geode);
+		_viewer = nullptr;
 
 		_modelRender = make_shared<mPostModelRender>(_geode, _rendStatus, oneFrameData, oneFrameRendData);
 	}
 	mPostOneFrameRender::~mPostOneFrameRender()
 	{
-		_parent->removeChild(_geode);
 		_modelRender.reset();
+	}
+
+	void mPostOneFrameRender::bufferThisFrame()
+	{
+		this->initial();
+		_viewer->compile();
 	}
 
 	void mPostOneFrameRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
 	{
+		this->initial();
 		if (_modelRender)
 		{
 			//std::vector<QVector4D> cutplanes;
@@ -64,6 +69,7 @@ namespace MPostRend
 			//_modelRender->setTexture(_texture);
 			//_modelRender->setDistancePlane(cutplanes);
 		}
+		_viewer->noClearRun();
 	}
 
 	void mPostOneFrameRender::updateOneModelOperate(QPair<MBasicFunction::PostModelOperateEnum, std::set<QString>> postModelOperates)
@@ -187,7 +193,8 @@ namespace MPostRend
 
 	void mPostOneFrameRender::setOnlyShowCuttingPlane(bool isOnlyShowCuttingPlane)
 	{
-		
+		_rendStatus->_isOnlyShowCuttingPlane = isOnlyShowCuttingPlane;
+		//_modelRender
 	}
 
 
@@ -208,7 +215,7 @@ namespace MPostRend
 		{
 			return false;
 		}
-		std::shared_ptr<mPostCuttingPlaneRender> planerender = make_shared<mPostCuttingPlaneRender>(_parent, cuttingPlaneStateSet, transparentPlaneStateSet);
+		std::shared_ptr<mPostCuttingPlaneRender> planerender = make_shared<mPostCuttingPlaneRender>(_geode, cuttingPlaneStateSet, transparentPlaneStateSet);
 		planerender->createCuttingPlane(_oneFrameData, _oneFrameRendData, num, normal, vertex, hasVector);
 		if (num < _cuttingPlaneRenders.size())
 		{
@@ -249,7 +256,20 @@ namespace MPostRend
 
 	void mPostOneFrameRender::setIsShowPlane(bool isShow)
 	{
+		_rendStatus->_isShowTransparentPlane = isShow;
+		for (auto cuttingPlane : _cuttingPlaneRenders)
+		{
+			cuttingPlane->setIsShowCuttingPlane(isShow);
+		}
 		//_isShowPlane = isShow;
+	}
+	void mPostOneFrameRender::initial()
+	{
+		if (!_viewer)
+		{
+			_viewer = MakeAsset<mxr::Viewer>();
+			_viewer->setSceneData(_geode);
+		}
 	}
 	void mPostOneFrameRender::updateCuttingPlaneUniform()
 	{

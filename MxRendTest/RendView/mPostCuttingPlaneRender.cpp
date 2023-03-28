@@ -2070,7 +2070,6 @@ namespace MPostRend
 		if (_transparentPlaneDrawable)
 		{
 			_parent->removeChild(_transparentPlaneDrawable);
-			_transparentPlaneDrawable.reset();
 		}
 	}
 
@@ -2110,16 +2109,15 @@ namespace MPostRend
 
 	void mPostCuttingPlaneRender::setIsShowCuttingPlane(bool isShow)
 	{
-		_isShowCuttingPlane = isShow;
-		if (_cuttingPlaneDrawable)
+		if (_transparentPlaneDrawable)
 		{
 			if (isShow)
 			{
-				_cuttingPlaneDrawable->setNodeMask(0);
+				_transparentPlaneDrawable->setNodeMask(0);
 			}
 			else
 			{
-				_cuttingPlaneDrawable->setNodeMask(1);
+				_transparentPlaneDrawable->setNodeMask(1);
 			}
 		}
 	}

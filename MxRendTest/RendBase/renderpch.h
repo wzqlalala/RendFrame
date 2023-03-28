@@ -5,5 +5,6 @@
 #include "RenderPass.h"
 #include "Viewer.h"
 #include "Geode.h"
+#include "Frode.h"
 #include "app.h"
 #include "log.h"
