@@ -49,7 +49,7 @@ namespace mxr
 			_Size = 0;
 		};
 
-		TemplateArray(QVector<T> &data) :Array()
+		TemplateArray(const QVector<T> &data) :Array()
 		{
 			_data = data;
 			_dataSize = DataSize;
@@ -83,7 +83,7 @@ namespace mxr
 			_Size++; 
 		}
 
-		void append(QVector<T> &data) 
+		void append(const QVector<T> &data) 
 		{ 
 			_data.append(data); 
 			_Size += data.size(); 

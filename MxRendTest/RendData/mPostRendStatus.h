@@ -22,7 +22,7 @@ namespace MPostRend
 
 	public:
 		//渲染模式
-		PostMode _postMode;
+		PostMode _postMode = OneFrame;
 
 		//是否显示变形前的图
 		bool _isShowInitialShape{false};

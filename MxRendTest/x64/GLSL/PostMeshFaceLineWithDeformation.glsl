@@ -1,4 +1,4 @@
-#version 330 core
+#version 450 core
 
 
 #ifdef vertex_shader
@@ -12,6 +12,7 @@ uniform mat4 projection;
 uniform vec3 deformationScale;
 
 uniform vec4 planes[8];
+float gl_ClipDistance[8];
 
 out VS_OUT 
 {

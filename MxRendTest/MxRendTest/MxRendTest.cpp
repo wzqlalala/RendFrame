@@ -246,7 +246,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
-		_postRender->createLinearAnimation();
+		_postRender->createLinearAnimation(_isLinearAnimation ? OneFrameLinearAnimation : OneFrameSinAnimation);
 	}
 	else if (event->key() == Qt::Key_S)
 	{
@@ -254,7 +254,8 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
-		_postRender->setTimerOn(true);
+		_postRender->setTimerOn(_isLinearAnimation);
+		_isLinearAnimation = !_isLinearAnimation;
 	}
 	else if (event->key() == Qt::Key_Asterisk)
 	{
@@ -400,6 +401,7 @@ bool MxRendTest::getData(shared_ptr<mDataPost1> dp, mPostOneFrameRendData *oneFr
 		mxdbThread1->slot_importAllMxDbFile();
 		mxdbThread1->readCloudData();
 		mxdbThread1->readDisplacementData();
+		delete mxdbThread1;
 	}
 
 	return true;

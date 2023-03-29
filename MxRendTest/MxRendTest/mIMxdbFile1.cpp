@@ -3013,7 +3013,7 @@ namespace MIOFile
 			//partData->setMeshFaceData(_meshFace.values().toVector());
 			//输出信息
 			//mGlobalSignals::getInstance()->outputMessageSig(0, QString("%1部件数据读取成功！").arg(QString(partname)));
-			meshFaces.clear();
+			//meshFaces.clear();
 			QVector<QVector<QPair<QPair<int, int>, mPostMeshFaceData1*>>>().swap(meshFaces);
 			//QHash<QVector<int>, mPostMeshFaceData1*>().swap(_meshFace);
 		}

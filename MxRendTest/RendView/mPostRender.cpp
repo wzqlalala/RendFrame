@@ -27,12 +27,18 @@
 #include "mPostAnimationRendData.h"
 #include "mPostColorTableData.h"
 
+#define _USE_MATH_DEFINES
+#include <math.h>
+
 using namespace mxr;
 using namespace std;
 namespace MPostRend
 {
 	mPostRender::mPostRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> parent):mBaseRender(app, parent)
 	{
+		this->makeCurrent();
+		//QOpenGLContext *context = QOpenGLContext::currentContext();
+		//qDebug() << "mPostRender" << QString::number(long long int(context), 16);
 		_dataPost = nullptr;
 		_texture = nullptr;
 		_oneFrameRender = nullptr;
@@ -290,9 +296,12 @@ namespace MPostRend
 		_aniTimer = new QTimer;
 		_aniTimer->setInterval(0);
 		connect(_aniTimer, SIGNAL(timeout()), this, SLOT(slot_aniTimer()));
+
+		this->doneCurrent();
 	}
 	void mPostRender::updateOneModelOperate(QPair<MBasicFunction::PostModelOperateEnum, std::set<QString>> postModelOperates)
 	{
+		this->makeCurrent();
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->updateOneModelOperate(postModelOperates);
@@ -304,6 +313,7 @@ namespace MPostRend
 	}
 	void mPostRender::updateAllModelOperate(MBasicFunction::PostModelOperateEnum postModelOperate)
 	{
+		this->makeCurrent();
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->updateAllModelOperate(postModelOperate);
@@ -315,18 +325,20 @@ namespace MPostRend
 	}
 	void mPostRender::clearRender()
 	{
+		this->makeCurrent();
+		_dataPost.reset();
+		//QOpenGLContext *context = QOpenGLContext::currentContext();
+		//qDebug() << "deletecontext" << QString::number(long long int(context), 16);
 		if (_oneFrameRender)
 		{
+			_oneFrameRender->deleteThieFrame();
 			_oneFrameRender.reset();
 		}
-		//if (_animationRender)
-		//{
-		//	_animationRender.reset();
-		//}
-
+		deleteAnimation();
 	}
 	void mPostRender::setRendCurrentFrameData(mPostOneFrameRendData* postOneFrameRendData)
 	{
+		this->makeCurrent();
 		if (!_dataPost || nullptr == postOneFrameRendData)
 		{
 			return;
@@ -361,20 +373,23 @@ namespace MPostRend
 	}
 	void mPostRender::setRendAnimationFrame(mPostAnimationRendData *allFrameRendData)
 	{
+		this->makeCurrent();
 		if (!_dataPost || !allFrameRendData)
 		{
 			return;
 		}
-
+		deleteAnimation();
 
 	}
 
-	void mPostRender::createLinearAnimation()
+	void mPostRender::createLinearAnimation(PostMode postMode)
 	{
+		this->makeCurrent();
 		if (!_dataPost || nullptr == _oneFrameRender)
 		{
 			return;
 		}
+		deleteAnimation();
 		mPostOneFrameRendData* postOneFrameRendData = _oneFrameRender->getOneFrameRendData();
 		int id = postOneFrameRendData->getRendID();
 		QVector3D deformationScale = postOneFrameRendData->getDeformationScale();
@@ -382,7 +397,7 @@ namespace MPostRend
 		int ids = 10;
 		for (int i = 0; i < ids; i++)
 		{
-			float scale = i / float(ids - 1);
+			float scale = postMode == OneFrameLinearAnimation ? i / float(ids - 1) : sin(2 * M_PI * i / float(ids - 1));
 			mPostOneFrameRendData *newFrameRendData = new mPostOneFrameRendData(*postOneFrameRendData);
 			std::shared_ptr<mPostOneFrameRender> oneFrameRender = make_shared<mPostOneFrameRender>(_rendStatus, oneFrameData, newFrameRendData);
 			oneFrameRender->setFaceStateSet(_faceStateSet);
@@ -397,11 +412,28 @@ namespace MPostRend
 			oneFrameRender->updateAllModelOperate(ImportOperate);
 			_animationRender.insert(i + 1, oneFrameRender);
 		}
-		_animationId = 0;
+		for (auto rend : _animationRender)
+		{
+			rend->bufferThisFrame();
+		}
+		_animationId = 1;
+		_rendStatus->_postMode = postMode;
+	}
+
+	void mPostRender::deleteAnimation()
+	{
+		this->makeCurrent();
+		for (auto render : _animationRender)
+		{
+			render->deleteThieFrame();
+			render.reset();
+		}
+		_animationRender.clear();
 	}
 
 	void mPostRender::setShowFuntion(ShowFuntion showFuntion)
 	{
+		this->makeCurrent();
 		_rendStatus->_showFunction = showFuntion;
 		if (_oneFrameRender)
 		{
@@ -415,6 +447,7 @@ namespace MPostRend
 
 	void mPostRender::setDispersed(bool isdispersed)
 	{
+		this->makeCurrent();
 		_texture->Bind(_texture->ID());
 		if (isdispersed)
 		{
@@ -428,6 +461,7 @@ namespace MPostRend
 
 	void mPostRender::setDeformationScale(QVector3D deformationScale)
 	{
+		this->makeCurrent();
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setDeformationScale(deformationScale);
@@ -440,6 +474,7 @@ namespace MPostRend
 
 	void mPostRender::setIsShowInitialShape(bool isShowInitialShape)
 	{
+		this->makeCurrent();
 		_rendStatus->_isShowInitialShape = isShowInitialShape;
 		if (_oneFrameRender)
 		{
@@ -453,6 +488,7 @@ namespace MPostRend
 
 	void mPostRender::setTextureCoordScale(float textureCoordScale)
 	{
+		this->makeCurrent();
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setTextureCoordScale(textureCoordScale);
@@ -465,6 +501,7 @@ namespace MPostRend
 
 	void mPostRender::setMinMaxData(float maxValue, float minValue)
 	{
+		this->makeCurrent();
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setMinMaxData(maxValue, minValue);
@@ -473,6 +510,7 @@ namespace MPostRend
 
 	void mPostRender::setRangeType(int index)
 	{
+		this->makeCurrent();
 		_rendStatus->_rangeType = index;
 		if (_oneFrameRender)
 		{
@@ -505,6 +543,7 @@ namespace MPostRend
 
 	void mPostRender::deleteCuttingPlane(int num)
 	{
+		this->makeCurrent();
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->deleteCuttingPlane(num);
@@ -513,6 +552,7 @@ namespace MPostRend
 
 	void mPostRender::reverseCuttingPlaneNormal(int num)
 	{
+		this->makeCurrent();
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->reverseCuttingPlaneNormal(num);
@@ -521,6 +561,7 @@ namespace MPostRend
 
 	void mPostRender::setOnlyShowCuttingPlane(bool isOnlyShowCuttingPlane)
 	{
+		this->makeCurrent();
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setOnlyShowCuttingPlane(isOnlyShowCuttingPlane);
@@ -529,6 +570,7 @@ namespace MPostRend
 
 	void mPostRender::setIsShowCuttingPlane(int num, bool isShow)
 	{
+		this->makeCurrent();
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setIsShowCuttingPlane(num, isShow);
@@ -537,6 +579,7 @@ namespace MPostRend
 
 	void mPostRender::createCuttingPlane(int num, QVector3D normal, QVector3D vertex, bool hasVector)
 	{
+		this->makeCurrent();
 		bool hasCreateCuttingPlane = false;
 		if (_oneFrameRender)
 		{
@@ -546,6 +589,7 @@ namespace MPostRend
 
 	void mPostRender::setPlaneData(int num, QVector3D normal, QVector3D centervertex, float maxR)
 	{
+		this->makeCurrent();
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setPlaneData(num, normal, centervertex, maxR);
@@ -554,6 +598,7 @@ namespace MPostRend
 
 	void mPostRender::setIsShowPlane(bool isShow)
 	{
+		this->makeCurrent();
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setIsShowPlane(isShow);
@@ -576,8 +621,8 @@ namespace MPostRend
 	
 	void mPostRender::slot_aniTimer()
 	{
-		qDebug() << __LINE__ << mxr::time->elapsed();
-		mxr::time->start();
+		//qDebug() << __LINE__ << mxr::time->elapsed();
+		//mxr::time->start();
 		if (_animationRender.empty())
 		{
 			return;
@@ -600,11 +645,12 @@ namespace MPostRend
 		////thisrender->showThisFrame();
 		//thisrender->updateAllModelOperate(ShowAllPartOperate);
 		emit update();
-		qDebug() << __LINE__ << mxr::time->elapsed();
+		//qDebug() << __LINE__ << mxr::time->elapsed();
 	}
 
 	mPostRender::~mPostRender()
 	{
+		this->makeCurrent();
 		_oneFrameRender.reset();
 		//_animationRender.reset();
 		
@@ -678,23 +724,21 @@ namespace MPostRend
 			_facelineStateSet->getUniform("rightToLeft")->SetData(float(modelView->_Right - modelView->_Left));
 			_edgelineStateSet->getUniform("rightToLeft")->SetData(float(modelView->_Right - modelView->_Left));
 		}
-
-		if (!_animationRender.empty())
+		if (_rendStatus->_postMode == OneFrame)
 		{
-			if (_animationId == 0)
+			if (_oneFrameRender)
 			{
-				for (auto rend : _animationRender)
+				_oneFrameRender->updateUniform(modelView, commonView);
+				GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
+				if (error != 0)
 				{
-					rend->bufferThisFrame();
+					qDebug() << error;
 				}
-				_animationId = 1;
 			}
-			_animationRender.value(_animationId)->updateUniform(modelView, commonView);
 		}
-		else if (_oneFrameRender)
+		else if (!_animationRender.empty())
 		{
-			_oneFrameRender->updateUniform(modelView, commonView);
-		}
-		
+			_animationRender.value(_animationId)->updateUniform(modelView, commonView);
+		}	
 	}
 }

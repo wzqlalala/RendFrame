@@ -32,22 +32,31 @@ namespace MPostRend
 		_geode = MakeAsset<Geode>();
 		_viewer = nullptr;
 
+		this->initial();
+
 		_modelRender = make_shared<mPostModelRender>(_geode, _rendStatus, oneFrameData, oneFrameRendData);
 	}
 	mPostOneFrameRender::~mPostOneFrameRender()
 	{
 		_modelRender.reset();
+		delete _oneFrameRendData;
 	}
 
 	void mPostOneFrameRender::bufferThisFrame()
 	{
-		this->initial();
 		_viewer->compile();
+	}
+
+	void mPostOneFrameRender::deleteThieFrame()
+	{
+		if (_viewer)
+		{
+			_viewer->deleteAllData();
+		}
 	}
 
 	void mPostOneFrameRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
 	{
-		this->initial();
 		if (_modelRender)
 		{
 			//std::vector<QVector4D> cutplanes;
@@ -69,7 +78,17 @@ namespace MPostRend
 			//_modelRender->setTexture(_texture);
 			//_modelRender->setDistancePlane(cutplanes);
 		}
+		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
+		if (error != 0)
+		{
+			qDebug() << error;
+		}
 		_viewer->noClearRun();
+		error = QOpenGLContext::currentContext()->functions()->glGetError();
+		if (error != 0)
+		{
+			qDebug() << error;
+		}
 	}
 
 	void mPostOneFrameRender::updateOneModelOperate(QPair<MBasicFunction::PostModelOperateEnum, std::set<QString>> postModelOperates)

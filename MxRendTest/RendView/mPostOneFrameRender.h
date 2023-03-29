@@ -51,6 +51,8 @@ namespace MPostRend
 
 		void bufferThisFrame();
 
+		void deleteThieFrame();
+
 		mPostOneFrameRendData *getOneFrameRendData() { return _oneFrameRendData; };
 
 		std::shared_ptr<mPostModelRender> getModelRender() {return _modelRender;};

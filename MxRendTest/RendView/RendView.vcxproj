@@ -53,6 +53,8 @@
     </Link>
     <ClCompile>
       <AdditionalIncludeDirectories>..\RendBase;..\RendBase\spdlog\include;.\;..\RendData;..\RendBasic;$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>
+      </LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

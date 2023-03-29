@@ -1,4 +1,4 @@
-#version 330 core
+#version 450 core
 
 #ifdef vertex_shader
 layout (location = 0) in vec3 aPos;
@@ -24,6 +24,7 @@ uniform vec3 deformationScale;
 //uniform vec4 plane7;
 
 uniform vec4 planes[8];
+float gl_ClipDistance[8];
 
 out float Value;
 flat out int isColor;
@@ -44,14 +45,14 @@ void main()
 	isColor = int(aIsColor);
 	material = aMaterial;
 	hasValue = int(aHasValue);
-//	gl_ClipDistance[0] = dot(plane0,vec4(deformationpos, 1.0f));
-//	gl_ClipDistance[1] = dot(plane1,vec4(deformationpos, 1.0f));
-//	gl_ClipDistance[2] = dot(plane2,vec4(deformationpos, 1.0f));
-//	gl_ClipDistance[3] = dot(plane3,vec4(deformationpos, 1.0f));
-//	gl_ClipDistance[4] = dot(plane4,vec4(deformationpos, 1.0f));
-//	gl_ClipDistance[5] = dot(plane5,vec4(deformationpos, 1.0f));
-//	gl_ClipDistance[6] = dot(plane6,vec4(deformationpos, 1.0f));
-//	gl_ClipDistance[7] = dot(plane7,vec4(deformationpos, 1.0f));
+//	gl_ClipDistance[0] = dot(planes[0],vec4(deformationpos, 1.0f));
+//	gl_ClipDistance[1] = dot(planes[1],vec4(deformationpos, 1.0f));
+//	gl_ClipDistance[2] = dot(planes[2],vec4(deformationpos, 1.0f));
+//	gl_ClipDistance[3] = dot(planes[3],vec4(deformationpos, 1.0f));
+//	gl_ClipDistance[4] = dot(planes[4],vec4(deformationpos, 1.0f));
+//	gl_ClipDistance[5] = dot(planes[5],vec4(deformationpos, 1.0f));
+//	gl_ClipDistance[6] = dot(planes[6],vec4(deformationpos, 1.0f));
+//	gl_ClipDistance[7] = dot(planes[7],vec4(deformationpos, 1.0f));
 
 	for(int i = 0;i < 8; ++i)
 	{

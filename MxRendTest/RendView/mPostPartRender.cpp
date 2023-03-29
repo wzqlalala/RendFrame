@@ -243,7 +243,7 @@ namespace MPostRend
 					value = values.value(meshID);
 					if (values.contains(meshID))
 					{
-						_pointrend->_vertex5->append(QVector<float>{1});
+						_pointrend->_vertex5->append(QVector<float>{ 1});
 						_minValue = min(_minValue, value);
 						_maxValue = max(_maxValue, value);
 
@@ -346,11 +346,11 @@ namespace MPostRend
 			{
 				if (hasValue)
 				{
-					_linerend->_vertex5->append(QVector<float>{ 1, 1 });
+					_linerend->_vertex5->append(QVector<float>{1, 1});
 				}
 				else
 				{
-					_linerend->_vertex5->append(QVector<float>{ 0, 0 });
+					_linerend->_vertex5->append(QVector<float>{0, 0});
 				}
 			}
 		}

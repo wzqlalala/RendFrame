@@ -22,7 +22,7 @@ namespace MBaseRend
 	mBaseRend::mBaseRend(const QString& name): _name(name)
 	{
 		setMouseTracking(true);
-
+		QOpenGLContext *context = QOpenGLContext::currentContext();
 		_app = MakeAsset<mxr::Application>();
 		//_app->setContext(context);
 		mxr::ApplicationInstance::GetInstance().appendApplication(name, _app);
@@ -43,9 +43,11 @@ namespace MBaseRend
 	{
 		//_app->setContext(context());
 		//_context->makeCurrent(_context->surface());
-		QOpenGLContext *context = QOpenGLContext::currentContext();
+		//QOpenGLContext *context = QOpenGLContext::currentContext();
 
 		this->initializeOpenGLFunctions();
+		QOpenGLContext *context = QOpenGLContext::currentContext();
+		_app->setContext(context);
 
 		_modelView = MakeAsset<mModelView>();
 		_commonView = MakeAsset<mCommonView>();
@@ -69,6 +71,7 @@ namespace MBaseRend
 	void mBaseRend::paintGL()
 	{
 		QOpenGLContext *context = QOpenGLContext::currentContext();
+		//qDebug() << "mBaseRend::paintGL()" << QString::number(long long int(context), 16);
 		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
 		if (error != 0)
 		{
@@ -83,6 +86,11 @@ namespace MBaseRend
 		for (auto baseRender : _renderArray)
 		{
 			baseRender->updateUniform(_modelView, _commonView);
+		}
+		error = QOpenGLContext::currentContext()->functions()->glGetError();
+		if (error != 0)
+		{
+			qDebug() << error;
 		}
 	}
 

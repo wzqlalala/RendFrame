@@ -11,12 +11,15 @@ namespace mxr
 		//QOpenGLContext *_context = Application::GetInstance()._context;
 		//QSurface *_surface = _context->surface();
 		//_context->makeCurrent(_surface);
+		//QOpenGLContext *context = QOpenGLContext::currentContext();
+		//qDebug() << "createcontext" << context;
 		initializeOpenGLFunctions();
 	}
 
 	IBuffer::IBuffer(GLsizeiptr size, const void* data, GLbitfield access) : _size(size), data_ptr(),_access(access)
 	{
-
+		//QOpenGLContext *context = QOpenGLContext::currentContext();
+		//qDebug() << "createbuffer" << QString::number(long long int(context), 16);
 		//Application::GetInstance()._context->makeCurrent(Application::GetInstance()._surface);
 		initializeOpenGLFunctions();
 		glCreateBuffers(1, &id);

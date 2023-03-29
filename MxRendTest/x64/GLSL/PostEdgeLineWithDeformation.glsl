@@ -1,4 +1,4 @@
-#version 330 core
+#version 450 core
 
 #ifdef vertex_shader
 layout (location = 0) in vec3 aPos;
@@ -11,6 +11,7 @@ uniform vec3 deformationScale;
 
 
 uniform vec4 planes[8];
+float gl_ClipDistance[8];
 
 out vec3 deformationpos;
 

@@ -65,6 +65,7 @@ namespace mxr
 		void clear();//清除原始渲染数据
 		void run();
 		void RemoveDrawableAttribute(Drawable *node);
+		void RemoveAllData();
 		
 	protected:
 		//具有相同顶点数据格式的drawable为一组

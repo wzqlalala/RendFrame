@@ -14,13 +14,28 @@ namespace mxr
 	{
 		//qDebug() << __LINE__ << time->elapsed();
 		//time->start();
-		qDebug() << __LINE__ << time->elapsed();
+		//qDebug() << __LINE__ << time->elapsed();
 		_sceneData->accept(_visitor);//20帧的动画花费100ms，云图花费97ms
-		qDebug() << __LINE__ << time->elapsed();
+		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
+		if (error != 0)
+		{
+			qDebug() << error;
+		}
+		//qDebug() << __LINE__ << time->elapsed();
 		_visitor->compile();//20帧的动画花费43ms，云图花费23ms
-		qDebug() << __LINE__ << time->elapsed();
+		error = QOpenGLContext::currentContext()->functions()->glGetError();
+		if (error != 0)
+		{
+			qDebug() << error;
+		}
+		//qDebug() << __LINE__ << time->elapsed();
 		_visitor->clear();
-		qDebug() << __LINE__ << time->elapsed();
+		error = QOpenGLContext::currentContext()->functions()->glGetError();
+		if (error != 0)
+		{
+			qDebug() << error;
+		}
+		//qDebug() << __LINE__ << time->elapsed();
 	}
 
 	void Viewer::noClearRun()
@@ -28,7 +43,12 @@ namespace mxr
 		this->compile();
 		//绘制
 		_visitor->run();
-		qDebug() << __LINE__ << time->elapsed();
+		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
+		if (error != 0)
+		{
+			qDebug() << error;
+		}
+		//qDebug() << __LINE__ << time->elapsed();
 	}
 
 	void Viewer::run()
@@ -37,7 +57,11 @@ namespace mxr
 		//绘制
 		_clear->apply();
 		_visitor->run();
-		qDebug() << __LINE__ << time->elapsed();
+		//qDebug() << __LINE__ << time->elapsed();
 
+	}
+	void Viewer::deleteAllData()
+	{
+		_visitor->RemoveAllData();
 	}
 }

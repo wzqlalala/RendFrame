@@ -29,6 +29,13 @@ namespace MBaseRend
 
 		virtual void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView) {};
 
+
+	protected:
+
+		void makeCurrent() { _app->GLContext()->makeCurrent(_app->GLContext()->surface()); };
+
+		void doneCurrent() { _app->GLContext()->doneCurrent(); };
+
 	signals:
 
 		void update();

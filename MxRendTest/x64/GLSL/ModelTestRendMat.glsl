@@ -1,4 +1,4 @@
-#version 430 core
+#version 450 core
 
 #ifdef vertex_shader
 layout (location = 0) in vec3 aPos;
