@@ -470,6 +470,10 @@ namespace mxr
 
 	void NodeVisitor::compile()
 	{
+		if (_vaoattributes.size() == 0)
+		{
+			return;
+		}
 		for (int i = 0; i < drawableattributes.size(); i++)
 		{
 			_vaoattributes[i].compile(drawableattributes[i]);			
@@ -623,7 +627,10 @@ namespace mxr
 
 	void NodeVisitor::RemoveDrawableAttribute(Drawable * node)
 	{
-	
+		if (_vaoattributes.size() == 0)
+		{
+			return;
+		}
 		for (auto item = drawableattributes.begin(); item != drawableattributes.end(); )
 		{
 			if (item->size() == 0)
@@ -660,9 +667,35 @@ namespace mxr
 		
 	}
 
+	void NodeVisitor::RemoveAllData()
+	{
+		for (auto &iter : _vaoattributes)
+		{
+			iter.vao.reset();
+			iter.vbos.clear();
+			iter._arraystates.clear();
+			iter._drawbuffers.clear();
+			iter._elementstates.clear();
+		}
+		std::vector<VaoDrawArrayAttribute>().swap(_vaoattributes);
+		//_vaoattributes.clear();
+		//for (auto &iter : drawableattributes)
+		//{
+		//	for (int i = 0; i < iter.size(); i++)
+		//	{
+		//		delete iter[i].drawable;
+		//	}
+		//}
+		std::vector<std::vector<DrawableAttribute>>().swap(drawableattributes);
+		//drawableattributes.clear();
+	}
+
 	void NodeVisitor::RemoveVaoAttribute(Drawable * node, int index)
 	{
-
+		if (_vaoattributes.size() == 0)
+		{
+			return;
+		}
 		Drawable::ArrayList arraylist = node->getVertexAttribArrayList();
 		std::map<int, BufferAttribute> _bufferattribute;
 		BufferAttribute _indexattribute;

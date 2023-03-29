@@ -11,9 +11,11 @@ namespace MBaseRend
 	float id = 1;
 	mBackGroundRender::mBackGroundRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> root)
 	{
-		//QOpenGLContext *context = app->GLContext();
-		//QSurface *surface = context->surface();
-		//context->makeCurrent(surface);
+		QOpenGLContext *context = app->GLContext();
+		QSurface *surface = context->surface();
+		context->makeCurrent(surface);
+		//context = QOpenGLContext::currentContext();
+		qDebug() << "mBaseRend::paintGL()" << QString::number(long long int(context), 16);
 
 		_backGroundMode = GradientL_R;
 		_backGroundVertex = QVector<QVector2D>{ QVector2D(-1,-1),QVector2D(-1,1), QVector2D(1,1),QVector2D(-1,-1), QVector2D(1,1), QVector2D(1,-1) };//左下，左上，右上，右下
@@ -40,6 +42,8 @@ namespace MBaseRend
 		set->setShader(_backgroundShader);
 
 		root->addChild(_drawable);
+
+		app->GLContext()->doneCurrent();
 	}
 
 	mBackGroundRender::~mBackGroundRender()

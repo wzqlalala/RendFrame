@@ -394,6 +394,10 @@ namespace MDataPost
 							mPostMeshNodeData1* nodeData1 = this->getNodeDataByID(nodeIDs.at(0));
 							mPostMeshNodeData1* nodeData2 = this->getNodeDataByID(nodeIDs.at(1));
 							mPostMeshNodeData1* nodeData3 = this->getNodeDataByID(nodeIDs.at(2));
+							if (nodeData1 == nullptr || nodeData2 == nullptr || nodeData3 == nullptr)
+							{
+								continue;
+							}
 
 							QVector3D direction1 = QVector3D::crossProduct(nodeData2->getNodeVertex() - nodeData1->getNodeVertex(), nodeData3->getNodeVertex() - nodeData2->getNodeVertex()).normalized();
 

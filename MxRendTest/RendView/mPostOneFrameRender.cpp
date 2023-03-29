@@ -37,12 +37,21 @@ namespace MPostRend
 	mPostOneFrameRender::~mPostOneFrameRender()
 	{
 		_modelRender.reset();
+		delete _oneFrameRendData;
 	}
 
 	void mPostOneFrameRender::bufferThisFrame()
 	{
 		this->initial();
 		_viewer->compile();
+	}
+
+	void mPostOneFrameRender::deleteThieFrame()
+	{
+		if (_viewer)
+		{
+			_viewer->deleteAllData();
+		}
 	}
 
 	void mPostOneFrameRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)

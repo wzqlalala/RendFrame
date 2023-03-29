@@ -69,6 +69,7 @@ namespace MPostRend
 	mPostModelRender::~mPostModelRender()
 	{
 		_parent->removeChild(_geode);
+		_partRenders.clear();
 	}
 	void mPostModelRender::UpdateModelBuffer()
 	{

@@ -16,7 +16,7 @@ namespace mxr
 		void compile();
 		void noClearRun();
 		void run();
-
+		void deleteAllData();
 	protected:
 		asset_ref<Node> _sceneData;
 		asset_ref<NodeVisitor> _visitor;

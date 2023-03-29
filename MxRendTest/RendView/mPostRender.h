@@ -71,12 +71,6 @@ namespace MPostRend
 
 		//设置当前帧的渲染数据
 		void setRendCurrentFrameData(mPostOneFrameRendData *postOneFrameRendData);
-	
-		//设置动画的渲染数据	
-		void setRendAnimationFrame(mPostAnimationRendData *allFrameRendData);
-
-		//生成线性动画
-		void createLinearAnimation();
 		
 		//设置当前的显示模式	
 		void setShowFuntion(ShowFuntion shoFuntion);
@@ -136,6 +130,15 @@ namespace MPostRend
 		void setIsShowPlane(bool isShow);
 
 		/**********************************动画*********************************************/
+
+		//设置瞬态动画的渲染数据	
+		void setRendAnimationFrame(mPostAnimationRendData *allFrameRendData);
+
+		//生成单帧动画
+		void createLinearAnimation(PostMode postMode);
+
+		//删除动画
+		void deleteAnimation();
 		
 		//控制计时器开关		
 		void setTimerOn(bool ison);
