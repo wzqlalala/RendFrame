@@ -32,6 +32,8 @@ namespace MPostRend
 		_geode = MakeAsset<Geode>();
 		_viewer = nullptr;
 
+		this->initial();
+
 		_modelRender = make_shared<mPostModelRender>(_geode, _rendStatus, oneFrameData, oneFrameRendData);
 	}
 	mPostOneFrameRender::~mPostOneFrameRender()
@@ -42,7 +44,6 @@ namespace MPostRend
 
 	void mPostOneFrameRender::bufferThisFrame()
 	{
-		this->initial();
 		_viewer->compile();
 	}
 
@@ -56,7 +57,6 @@ namespace MPostRend
 
 	void mPostOneFrameRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
 	{
-		this->initial();
 		if (_modelRender)
 		{
 			//std::vector<QVector4D> cutplanes;
