@@ -88,7 +88,7 @@ namespace MPostRend
 		/*********************************切面图*******************************************/
 
 		//删除切面图	
-		void deleteCuttingPlane(int num);
+		bool deleteCuttingPlane(int num);
 
 		//切面图法向量取反
 		void reverseCuttingPlaneNormal(int num);
@@ -111,8 +111,6 @@ namespace MPostRend
 	private:
 
 		void initial();
-
-		void updateCuttingPlaneUniform();
 	private:
 		std::shared_ptr<mxr::Geode> _geode;//当前总节点
 

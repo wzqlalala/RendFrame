@@ -323,6 +323,10 @@ namespace MPostRend
 			rend->updateAllModelOperate(postModelOperate);
 		}
 	}
+	void mPostRender::setPostMode(PostMode postMode)
+	{
+		_rendStatus->_postMode = postMode;
+	}
 	void mPostRender::clearRender()
 	{
 		this->makeCurrent();
@@ -423,6 +427,7 @@ namespace MPostRend
 	void mPostRender::deleteAnimation()
 	{
 		this->makeCurrent();
+		setTimerOn(false);
 		for (auto render : _animationRender)
 		{
 			render->deleteThieFrame();
@@ -544,10 +549,21 @@ namespace MPostRend
 	void mPostRender::deleteCuttingPlane(int num)
 	{
 		this->makeCurrent();
+		bool hasDeleteCuttingPlane = false;
 		if (_oneFrameRender)
 		{
-			_oneFrameRender->deleteCuttingPlane(num);
+			hasDeleteCuttingPlane = _oneFrameRender->deleteCuttingPlane(num);
 		}
+		for (auto rend : _animationRender)
+		{
+			hasDeleteCuttingPlane = rend->deleteCuttingPlane(num);
+		}
+		if (!hasDeleteCuttingPlane)
+		{
+			return;
+		}
+		_rendStatus->_cuttingPlanes.removeAt(num);
+		this->updateCuttingPlaneUniform();
 	}
 
 	void mPostRender::reverseCuttingPlaneNormal(int num)
@@ -555,7 +571,11 @@ namespace MPostRend
 		this->makeCurrent();
 		if (_oneFrameRender)
 		{
-			_oneFrameRender->reverseCuttingPlaneNormal(num);
+			 _oneFrameRender->reverseCuttingPlaneNormal(num);
+		}
+		for (auto rend : _animationRender)
+		{
+			rend->reverseCuttingPlaneNormal(num);
 		}
 	}
 
@@ -566,6 +586,10 @@ namespace MPostRend
 		{
 			_oneFrameRender->setOnlyShowCuttingPlane(isOnlyShowCuttingPlane);
 		}
+		for (auto rend : _animationRender)
+		{
+			rend->setOnlyShowCuttingPlane(isOnlyShowCuttingPlane);
+		}
 	}
 
 	void mPostRender::setIsShowCuttingPlane(int num, bool isShow)
@@ -574,6 +598,10 @@ namespace MPostRend
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setIsShowCuttingPlane(num, isShow);
+		}
+		for (auto rend : _animationRender)
+		{
+			rend->setIsShowCuttingPlane(num, isShow);
 		}
 	}
 
@@ -585,6 +613,24 @@ namespace MPostRend
 		{
 			hasCreateCuttingPlane = _oneFrameRender->createCuttingPlane(_cuttingPlaneStateSet, _transparentPlaneStateSet, num, normal, vertex, hasVector);
 		}
+		for (auto rend : _animationRender)
+		{
+			hasCreateCuttingPlane = rend->createCuttingPlane(_cuttingPlaneStateSet, _transparentPlaneStateSet, num, normal, vertex, hasVector);
+		}
+		if (!hasCreateCuttingPlane)
+		{
+			return;
+		}
+		QVector4D plane = QVector4D(normal, -QVector3D::dotProduct(normal, vertex));
+		if (num < _rendStatus->_cuttingPlanes.size())
+		{
+			_rendStatus->_cuttingPlanes.replace(num, plane);
+		}
+		else if (num == _rendStatus->_cuttingPlanes.size())
+		{
+			_rendStatus->_cuttingPlanes.append(plane);
+		}
+		this->updateCuttingPlaneUniform();
 	}
 
 	void mPostRender::setPlaneData(int num, QVector3D normal, QVector3D centervertex, float maxR)
@@ -594,6 +640,10 @@ namespace MPostRend
 		{
 			_oneFrameRender->setPlaneData(num, normal, centervertex, maxR);
 		}
+		for (auto rend : _animationRender)
+		{
+			rend->setPlaneData(num, normal, centervertex, maxR);
+		}
 	}
 
 	void mPostRender::setIsShowPlane(bool isShow)
@@ -602,6 +652,10 @@ namespace MPostRend
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setIsShowPlane(isShow);
+		}
+		for (auto rend : _animationRender)
+		{
+			rend->setIsShowPlane(isShow);
 		}
 	}
 
@@ -654,6 +708,69 @@ namespace MPostRend
 		_oneFrameRender.reset();
 		//_animationRender.reset();
 		
+	}
+
+	void mPostRender::updateCuttingPlaneUniform()
+	{
+		int cuttingPlaneSize = _rendStatus->_cuttingPlanes.size();
+		for (int i = 0; i < 7; i++)
+		{
+			string str = QString("planes[%1]").arg(i).toStdString();
+			if (i < cuttingPlaneSize)
+			{
+				_cuttingPlaneStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
+				_cuttingPlaneStateSet->getUniform(str)->SetEnable(true);
+				_faceStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
+				_faceStateSet->getUniform(str)->SetEnable(true);
+				_faceTransparentStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
+				_faceTransparentStateSet->getUniform(str)->SetEnable(true);
+				_faceTransparentNodeformationStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
+				_faceTransparentNodeformationStateSet->getUniform(str)->SetEnable(true);
+				_edgelineStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
+				_edgelineStateSet->getUniform(str)->SetEnable(true);
+				_facelineStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
+				_facelineStateSet->getUniform(str)->SetEnable(true);
+				_lineStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
+				_lineStateSet->getUniform(str)->SetEnable(true);
+				_pointStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
+				_pointStateSet->getUniform(str)->SetEnable(true);
+				_cuttingPlaneStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
+				_faceStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
+				_faceTransparentStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
+				_faceTransparentNodeformationStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
+				_edgelineStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
+				_facelineStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
+				_lineStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
+				_pointStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
+			}
+			else
+			{
+				_cuttingPlaneStateSet->getUniform(str)->SetEnable(false);
+				_cuttingPlaneStateSet->getUniform(str)->SetData(QVector4D());
+				_faceStateSet->getUniform(str)->SetEnable(false);
+				_faceStateSet->getUniform(str)->SetData(QVector4D());
+				_faceTransparentStateSet->getUniform(str)->SetEnable(false);
+				_faceTransparentStateSet->getUniform(str)->SetData(QVector4D());
+				_faceTransparentNodeformationStateSet->getUniform(str)->SetEnable(false);
+				_faceTransparentNodeformationStateSet->getUniform(str)->SetData(QVector4D());
+				_edgelineStateSet->getUniform(str)->SetEnable(false);
+				_edgelineStateSet->getUniform(str)->SetData(QVector4D());
+				_facelineStateSet->getUniform(str)->SetEnable(false);
+				_facelineStateSet->getUniform(str)->SetData(QVector4D());
+				_lineStateSet->getUniform(str)->SetEnable(false);
+				_lineStateSet->getUniform(str)->SetData(QVector4D());
+				_pointStateSet->getUniform(str)->SetEnable(false);
+				_pointStateSet->getUniform(str)->SetData(QVector4D());
+				_cuttingPlaneStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
+				_faceStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
+				_faceTransparentStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
+				_faceTransparentNodeformationStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
+				_edgelineStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
+				_facelineStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
+				_lineStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
+				_pointStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
+			}
+		}
 	}
 
 	void mPostRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)

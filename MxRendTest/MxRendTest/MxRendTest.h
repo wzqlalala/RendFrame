@@ -53,6 +53,7 @@ private:
 	shared_ptr<MBaseRend::mTestRender> _testRender;
 
 	//≤‚ ‘
+	PostMode _postMode{ OneFrame};
 	ShowFuntion _showfuntion{ ElementFace };
 	bool _isShowInitialShape{ false };
 	PostModelOperateEnum _modelOperate{ ColorAllPartOperate };
