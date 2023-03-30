@@ -9,7 +9,7 @@ uniform mat4 view;
 uniform mat4 projection;
 
 uniform vec4 planes[8];
-float gl_ClipDistance[8];
+//float gl_ClipDistance[8];
 
 //光照部分
 out vec3 FragPos;

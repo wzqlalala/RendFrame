@@ -248,6 +248,14 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		}
 		_postRender->createLinearAnimation(_isLinearAnimation ? OneFrameLinearAnimation : OneFrameSinAnimation);
 	}
+	else if (event->key() == Qt::Key_F)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		_postRender->setPostMode(_postMode);
+	}
 	else if (event->key() == Qt::Key_S)
 	{
 		if (_postRend == nullptr)
@@ -256,6 +264,14 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		}
 		_postRender->setTimerOn(_isLinearAnimation);
 		_isLinearAnimation = !_isLinearAnimation;
+	}
+	else if (event->key() == Qt::Key_D)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		_postRender->deleteAnimation();
 	}
 	else if (event->key() == Qt::Key_Asterisk)
 	{

@@ -64,9 +64,10 @@ namespace MPostRend
 		//更新全部部件操作
 		void updateAllModelOperate(MBasicFunction::PostModelOperateEnum postModelOperate);
 
-		/*
-		* 清除全部的渲染
-		*/
+		//设置后处理渲染模式
+		void setPostMode(PostMode postMode);
+		
+		//清除全部的渲染
 		void clearRender();
 
 		//设置当前帧的渲染数据
@@ -147,6 +148,11 @@ namespace MPostRend
 		~mPostRender();
 
 		void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView) override;
+
+	private:
+
+		//更新切面的uniform值
+		void updateCuttingPlaneUniform();
 
 		//
 	private slots:

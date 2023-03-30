@@ -693,7 +693,7 @@ namespace MPostRend
 		_edgelinerend->_vertex0->push_back(vertex0); _edgelinerend->_vertex0->push_back(vertex1);
 		_edgelinerend->_vertex1->push_back(dis.value(mesh->getMeshLineNodeIndex1()));
 		_edgelinerend->_vertex1->push_back(dis.value(mesh->getMeshLineNodeIndex2()));
-		_edgelinerend->_vertex2->append(QVector<float>(2, vertex0.distanceToPoint(vertex1)));
+		//_edgelinerend->_vertex2->append(QVector<float>(2, vertex0.distanceToPoint(vertex1)));
 		
 	}
 
@@ -1292,11 +1292,11 @@ namespace MPostRend
 		_drawable = MakeAsset<Drawable>();
 		_vertex0 = MakeAsset<mxr::Vec3Array>();
 		_vertex1 = MakeAsset<mxr::Vec3Array>();
-		_vertex2 = MakeAsset<mxr::FloatArray>();
+		//_vertex2 = MakeAsset<mxr::FloatArray>();
 
 		_drawable->setVertexAttribArray(0, _vertex0);
 		_drawable->setVertexAttribArray(1, _vertex1);
-		_drawable->setVertexAttribArray(2, _vertex2);
+		//_drawable->setVertexAttribArray(2, _vertex2);
 
 		_parent = parent;
 		_parent->addChild(_drawable);

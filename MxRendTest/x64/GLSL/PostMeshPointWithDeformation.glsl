@@ -15,7 +15,7 @@ uniform vec3 deformationScale;
 uniform int PointSize;
 
 uniform vec4 planes[8];
-float gl_ClipDistance[8];
+//float gl_ClipDistance[8];
 
 out float Value;
 flat out int isColor;

@@ -78,17 +78,7 @@ namespace MPostRend
 			//_modelRender->setTexture(_texture);
 			//_modelRender->setDistancePlane(cutplanes);
 		}
-		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
-		if (error != 0)
-		{
-			qDebug() << error;
-		}
 		_viewer->noClearRun();
-		error = QOpenGLContext::currentContext()->functions()->glGetError();
-		if (error != 0)
-		{
-			qDebug() << error;
-		}
 	}
 
 	void mPostOneFrameRender::updateOneModelOperate(QPair<MBasicFunction::PostModelOperateEnum, std::set<QString>> postModelOperates)
@@ -184,11 +174,11 @@ namespace MPostRend
 		}
 	}
 
-	void mPostOneFrameRender::deleteCuttingPlane(int num)
+	bool mPostOneFrameRender::deleteCuttingPlane(int num)
 	{
 		if (num >= _cuttingPlaneRenders.size())
 		{
-			return;
+			return false;
 		}
 		for (int i = num; i < _cuttingPlaneRenders.size(); i++)
 		{
@@ -197,8 +187,7 @@ namespace MPostRend
 		_cuttingPlaneRenders[num].reset();
 		_cuttingPlaneRenders[num] = nullptr;
 		_cuttingPlaneRenders.removeAt(num);
-		_rendStatus->_cuttingPlanes.removeAt(num);
-		this->updateCuttingPlaneUniform();
+		return true;
 	}
 
 	void mPostOneFrameRender::reverseCuttingPlaneNormal(int num)
@@ -246,17 +235,6 @@ namespace MPostRend
 			_cuttingPlaneRenders.append(planerender);
 		}
 
-		QVector4D plane = QVector4D(normal, -QVector3D::dotProduct(normal, vertex));
-		if (num < _rendStatus->_cuttingPlanes.size())
-		{
-			_rendStatus->_cuttingPlanes.replace(num, plane);
-		}
-		else if (num == _rendStatus->_cuttingPlanes.size())
-		{
-			_rendStatus->_cuttingPlanes.append(plane);
-		}
-		this->updateCuttingPlaneUniform();
-
 		return true;
 	}
 
@@ -290,66 +268,5 @@ namespace MPostRend
 			_viewer->setSceneData(_geode);
 		}
 	}
-	void mPostOneFrameRender::updateCuttingPlaneUniform()
-	{
-		int cuttingPlaneSize = _rendStatus->_cuttingPlanes.size();
-		for (int i = 0; i < 7; i++)
-		{
-			string str = QString("planes[%1]").arg(i).toStdString();
-			if (i < cuttingPlaneSize)
-			{
-				_cuttingPlaneStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
-				_cuttingPlaneStateSet->getUniform(str)->SetEnable(true);
-				_faceStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
-				_faceStateSet->getUniform(str)->SetEnable(true);
-				_faceTransparentStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
-				_faceTransparentStateSet->getUniform(str)->SetEnable(true);
-				_faceTransparentNodeformationStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
-				_faceTransparentNodeformationStateSet->getUniform(str)->SetEnable(true);
-				_edgelineStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
-				_edgelineStateSet->getUniform(str)->SetEnable(true);
-				_facelineStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
-				_facelineStateSet->getUniform(str)->SetEnable(true);
-				_lineStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
-				_lineStateSet->getUniform(str)->SetEnable(true);
-				_pointStateSet->getUniform(str)->SetData(_rendStatus->_cuttingPlanes[i]);
-				_pointStateSet->getUniform(str)->SetEnable(true);
-				_cuttingPlaneStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
-				_faceStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
-				_faceTransparentStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
-				_faceTransparentNodeformationStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
-				_edgelineStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
-				_facelineStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
-				_lineStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
-				_pointStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 1);
-			}
-			else
-			{
-				_cuttingPlaneStateSet->getUniform(str)->SetEnable(false);
-				_cuttingPlaneStateSet->getUniform(str)->SetData(QVector4D());
-				_faceStateSet->getUniform(str)->SetEnable(false);
-				_faceStateSet->getUniform(str)->SetData(QVector4D());
-				_faceTransparentStateSet->getUniform(str)->SetEnable(false);
-				_faceTransparentStateSet->getUniform(str)->SetData(QVector4D());
-				_faceTransparentNodeformationStateSet->getUniform(str)->SetEnable(false);
-				_faceTransparentNodeformationStateSet->getUniform(str)->SetData(QVector4D());
-				_edgelineStateSet->getUniform(str)->SetEnable(false);
-				_edgelineStateSet->getUniform(str)->SetData(QVector4D());
-				_facelineStateSet->getUniform(str)->SetEnable(false);
-				_facelineStateSet->getUniform(str)->SetData(QVector4D());
-				_lineStateSet->getUniform(str)->SetEnable(false);
-				_lineStateSet->getUniform(str)->SetData(QVector4D());
-				_pointStateSet->getUniform(str)->SetEnable(false);
-				_pointStateSet->getUniform(str)->SetData(QVector4D());
-				_cuttingPlaneStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
-				_faceStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
-				_faceTransparentStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
-				_faceTransparentNodeformationStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
-				_edgelineStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
-				_facelineStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
-				_lineStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
-				_pointStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
-			}
-		}
-	}
+
 }

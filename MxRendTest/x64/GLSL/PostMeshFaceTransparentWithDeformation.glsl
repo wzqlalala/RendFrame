@@ -15,7 +15,7 @@ uniform mat4 projection;
 uniform vec3 deformationScale;
 
 uniform vec4 planes[8];
-float gl_ClipDistance[8];
+//float gl_ClipDistance[8];
 
 flat out int isColor;
 
