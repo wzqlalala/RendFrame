@@ -10,7 +10,7 @@
 #include "mShaderManage.h"
 #include "mTextureManage.h"
 
-//ÊÓÍ¼Àà
+//è§†å›¾ç±»
 #include "mModelView.h"
 #include "mCommonView.h"
 
@@ -20,6 +20,7 @@
 #include <QApplication>
 
 #include "mPostOneFrameRendData.h"
+#include "mOneFrameData1.h"
 
 using namespace mxr;
 using namespace std;
@@ -65,7 +66,7 @@ namespace MPostRend
 			//	cutplanes.push_back(_cuttingPlaneRenders[i]->getCuttingPlane());
 			//}
 
-			//Ä£ÐÍ
+			//æ¨¡åž‹
 			_modelRender->setDeformationScale(_oneFrameRendData->getDeformationScale());
 			_modelRender->setTextureArgument(_rendStatus->_isEquivariance, _oneFrameRendData->getCurrentMinData(), _oneFrameRendData->getCurrentMaxData(), _oneFrameRendData->getTextureCoordScale());
 			if (_cuttingPlaneStateSet)
@@ -190,18 +191,26 @@ namespace MPostRend
 		return true;
 	}
 
-	void mPostOneFrameRender::reverseCuttingPlaneNormal(int num)
+	bool mPostOneFrameRender::reverseCuttingPlaneNormal(int num)
 	{
 		if (num >= _cuttingPlaneRenders.size())
 		{
-			return;
+			return false;
 		}
 		_cuttingPlaneRenders[num]->reverseCuttingPlaneNormal();
+		return true;
 	}
 
 	void mPostOneFrameRender::setOnlyShowCuttingPlane(bool isOnlyShowCuttingPlane)
 	{
-		_rendStatus->_isOnlyShowCuttingPlane = isOnlyShowCuttingPlane;
+		if (isOnlyShowCuttingPlane)
+		{
+			this->updateAllModelOperate(HideAllPartOperate);
+		}
+		else
+		{
+			this->updateOneModelOperate({ShowOnePartOperate ,_oneFrameData->getAllPartNames() });
+		}
 		//_modelRender
 	}
 
