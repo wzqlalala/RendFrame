@@ -1415,21 +1415,21 @@ namespace MPostRend
 						}
 						int num = sss.size();
 
-						if (num == 3)
+						//if (num == 3)
 						{
-							_triPlane.append(sss.at(0).first);
+	/*						_triPlane.append(sss.at(0).first);
 							_triPlane.append(sss.at(1).first);
 							_triPlane.append(sss.at(2).first);
 							_triValue.append(sss.at(0).second);
 							_triValue.append(sss.at(1).second);
 							_triValue.append(sss.at(2).second);
 
-							_triMeshID.append(QVector<float>(3, (float)meshID));
+							_triMeshID.append(QVector<float>(3, (float)meshID));*/
 							//_triTexture.append((sss.at(0).second - _currentFrameRendData->getMinData()) / fenmu);
 							//_triTexture.append((sss.at(1).second - _currentFrameRendData->getMinData()) / fenmu);
 							//_triTexture.append((sss.at(2).second - _currentFrameRendData->getMinData()) / fenmu);
-						}
-						else if (num > 3)
+						}//
+						if (num > 2)
 						{
 							QVector3D center;
 							for (int i = 0; i < num; ++i)
@@ -1490,6 +1490,8 @@ namespace MPostRend
 								//_triTexture.append((sss.at(0).second - _currentFrameRendData->getMinData()) / fenmu);
 								//_triTexture.append((sss.at(i).second - _currentFrameRendData->getMinData()) / fenmu);
 								//_triTexture.append((sss.at(i + 1).second - _currentFrameRendData->getMinData()) / fenmu);
+
+								qDebug() <<"¼ÆËã·¨Ïò" << QVector3D::normal((sss.at(i).first - sss.at(0).first), (sss.at(i + 1).first - sss.at(0).first));
 							}
 						}
 					}

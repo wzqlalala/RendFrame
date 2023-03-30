@@ -65,6 +65,7 @@ private:
 	QVector<QVector3D> planeNormals{ QVector3D(0,0,1), QVector3D(0,1,0),QVector3D(1,0,0), QVector3D(1,1,1), QVector3D(1,1,0),QVector3D(0,1,1),QVector3D(1,0,1), QVector3D(1,2,0) };
 	int _cuttingPlaneNum = 0;
 	bool _isShowPlane = true;
+	bool _isOnlyShowPlane = false;
 
 	//¶¯»­
 	bool _isStartAnimation = false;

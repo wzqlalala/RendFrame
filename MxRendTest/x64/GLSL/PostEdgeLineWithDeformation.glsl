@@ -11,23 +11,19 @@ uniform vec3 deformationScale;
 
 
 uniform vec4 planes[8];
-//float gl_ClipDistance[8];
-
-out vec3 deformationpos;
 
 out VS_OUT 
 {
-	vec3 deformationpos;
+	vec3 deformationPos;
 } vs_out;
 
 void main()
 {
-	vs_out.deformationpos = aPos + vec3(deformationScale.x*aDisplacement.x, deformationScale.y*aDisplacement.y, deformationScale.z * aDisplacement.z);
-    gl_Position = projection * view * model * vec4(vs_out.deformationpos, 1.0f);
+    vs_out.deformationPos = aPos + deformationScale * aDisplacement;
+	gl_Position = projection * view * model * vec4(vs_out.deformationPos, 1.0f);
 
-	for(int i = 0;i < 8; ++i)
-	{
-		gl_ClipDistance[i] = dot(planes[i],vec4(vs_out.deformationpos, 1.0f));	
+	for(int i = 0;i < 8; ++i){
+		gl_ClipDistance[i] = dot(planes[i],vec4(vs_out.deformationPos, 1.0f));	
 	}
 
 }
@@ -39,7 +35,7 @@ layout (triangle_strip, max_vertices = 4) out;
 
 in VS_OUT
 {
-	vec3 deformationpos;
+	vec3 deformationPos;
 } gs_in[];
 
 uniform vec4 showColor;
@@ -50,32 +46,18 @@ out vec4 fColor;
 
 void outclipdistance(int index)
 {
-	gl_ClipDistance[0] = gl_in[index].gl_ClipDistance[0];
-	gl_ClipDistance[1] = gl_in[index].gl_ClipDistance[1];
-	gl_ClipDistance[2] = gl_in[index].gl_ClipDistance[2];
-	gl_ClipDistance[3] = gl_in[index].gl_ClipDistance[3];
-	gl_ClipDistance[4] = gl_in[index].gl_ClipDistance[4];
-	gl_ClipDistance[5] = gl_in[index].gl_ClipDistance[5];
-	gl_ClipDistance[6] = gl_in[index].gl_ClipDistance[6];
-	gl_ClipDistance[7] = gl_in[index].gl_ClipDistance[7];
+    for (int i = 0; i < 8; ++i) {
+        gl_ClipDistance[i] = gl_in[index].gl_ClipDistance[i];
+    }
 }
 
 void main() 
 {    
-	float meshSize = distance(gs_in[0].deformationpos,gs_in[1].deformationpos);
-	float ratio = rightToLeft/meshSize;
-	if(ratio < 4000)
-	{
-		fColor = vec4(showColor.xyz, 1 - sqrt(ratio / 4000));
-	}
-	else
-	{
-		fColor = vec4(showColor.xyz, 0.1);
-	}
+	float ratio = rightToLeft / distance(gs_in[0].deformationPos, gs_in[1].deformationPos);
+    fColor = (ratio < 4000) ? vec4(showColor.xyz, 1 - sqrt(ratio / 4000)) : vec4(showColor.xyz, 0.1);
 	vec2 dir = normalize(gl_in[1].gl_Position.xy - gl_in[0].gl_Position.xy) * (lineWidth/2.0)/500.0;
     vec2 normal = vec2(-dir.y, dir.x);
 	
-
 	gl_Position = gl_in[0].gl_Position + vec4(normal, 0.0, 0.0)/* - vec4(dir, 0.0, 0.0)*/;
 	outclipdistance(0);
     EmitVertex();
@@ -105,7 +87,6 @@ in vec4 fColor;
 
 void main()
 {	
-//	gl_FragDepth+=0.0000000001f;
 	FragColor = fColor;
 } 
 #endif

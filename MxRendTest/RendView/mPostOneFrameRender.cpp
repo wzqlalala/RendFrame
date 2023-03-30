@@ -20,6 +20,7 @@
 #include <QApplication>
 
 #include "mPostOneFrameRendData.h"
+#include "mOneFrameData1.h"
 
 using namespace mxr;
 using namespace std;
@@ -190,18 +191,26 @@ namespace MPostRend
 		return true;
 	}
 
-	void mPostOneFrameRender::reverseCuttingPlaneNormal(int num)
+	bool mPostOneFrameRender::reverseCuttingPlaneNormal(int num)
 	{
 		if (num >= _cuttingPlaneRenders.size())
 		{
-			return;
+			return false;
 		}
 		_cuttingPlaneRenders[num]->reverseCuttingPlaneNormal();
+		return true;
 	}
 
 	void mPostOneFrameRender::setOnlyShowCuttingPlane(bool isOnlyShowCuttingPlane)
 	{
-		_rendStatus->_isOnlyShowCuttingPlane = isOnlyShowCuttingPlane;
+		if (isOnlyShowCuttingPlane)
+		{
+			this->updateAllModelOperate(HideAllPartOperate);
+		}
+		else
+		{
+			this->updateOneModelOperate({ShowOnePartOperate ,_oneFrameData->getAllPartNames() });
+		}
 		//_modelRender
 	}
 

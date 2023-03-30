@@ -18,10 +18,6 @@ out vec4 FragColor;
 uniform vec4 showColor;
 void main()
 {	
-	//if(isShow != 1)
-	//{
-	//	discard;
-	//}
-	 FragColor = vec4(0.5,0.5,0.5,0.5);
+	 FragColor = vec4(0.5);
 } 
 #endif

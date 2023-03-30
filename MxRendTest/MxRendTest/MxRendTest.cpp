@@ -237,8 +237,28 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
+		if (_cuttingPlaneNum > 0)
+		{
+			_postRender->reverseCuttingPlaneNormal(_cuttingPlaneNum - 1);
+		}
+	}
+	else if (event->key() == Qt::Key_T)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
 		_isShowPlane = !_isShowPlane;
 		_postRender->setIsShowPlane(_isShowPlane);
+	}
+	else if (event->key() == Qt::Key_Y)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		_isOnlyShowPlane = !_isOnlyShowPlane;
+		_postRender->setOnlyShowCuttingPlane(_isOnlyShowPlane);
 	}
 	else if (event->key() == Qt::Key_A)
 	{

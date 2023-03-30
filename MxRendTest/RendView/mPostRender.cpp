@@ -375,66 +375,6 @@ namespace MPostRend
 		_oneFrameRender->updateAllModelOperate(ImportOperate);
 		this->setDispersed(true);
 	}
-	void mPostRender::setRendAnimationFrame(mPostAnimationRendData *allFrameRendData)
-	{
-		this->makeCurrent();
-		if (!_dataPost || !allFrameRendData)
-		{
-			return;
-		}
-		deleteAnimation();
-
-	}
-
-	void mPostRender::createLinearAnimation(PostMode postMode)
-	{
-		this->makeCurrent();
-		if (!_dataPost || nullptr == _oneFrameRender)
-		{
-			return;
-		}
-		deleteAnimation();
-		mPostOneFrameRendData* postOneFrameRendData = _oneFrameRender->getOneFrameRendData();
-		int id = postOneFrameRendData->getRendID();
-		QVector3D deformationScale = postOneFrameRendData->getDeformationScale();
-		mOneFrameData1 *oneFrameData = _dataPost->getOneFrameData(id);
-		int ids = 10;
-		for (int i = 0; i < ids; i++)
-		{
-			float scale = postMode == OneFrameLinearAnimation ? i / float(ids - 1) : sin(2 * M_PI * i / float(ids - 1));
-			mPostOneFrameRendData *newFrameRendData = new mPostOneFrameRendData(*postOneFrameRendData);
-			std::shared_ptr<mPostOneFrameRender> oneFrameRender = make_shared<mPostOneFrameRender>(_rendStatus, oneFrameData, newFrameRendData);
-			oneFrameRender->setFaceStateSet(_faceStateSet);
-			oneFrameRender->setFaceTransparentNoDeformationStateSet(_faceTransparentNodeformationStateSet);
-			oneFrameRender->setFaceTransparentStateSet(_faceTransparentStateSet);
-			oneFrameRender->setEdgeLineStateSet(_edgelineStateSet);
-			oneFrameRender->setFaceLineStateSet(_facelineStateSet);
-			oneFrameRender->setLineStateSet(_lineStateSet);
-			oneFrameRender->setPointStateSet(_pointStateSet);
-			oneFrameRender->setTextureCoordScale(scale);
-			oneFrameRender->setDeformationScale(deformationScale*scale);
-			oneFrameRender->updateAllModelOperate(ImportOperate);
-			_animationRender.insert(i + 1, oneFrameRender);
-		}
-		for (auto rend : _animationRender)
-		{
-			rend->bufferThisFrame();
-		}
-		_animationId = 1;
-		_rendStatus->_postMode = postMode;
-	}
-
-	void mPostRender::deleteAnimation()
-	{
-		this->makeCurrent();
-		setTimerOn(false);
-		for (auto render : _animationRender)
-		{
-			render->deleteThieFrame();
-			render.reset();
-		}
-		_animationRender.clear();
-	}
 
 	void mPostRender::setShowFuntion(ShowFuntion showFuntion)
 	{
@@ -569,19 +509,28 @@ namespace MPostRend
 	void mPostRender::reverseCuttingPlaneNormal(int num)
 	{
 		this->makeCurrent();
+		bool hasReverseCuttingPlane = false;
 		if (_oneFrameRender)
 		{
-			 _oneFrameRender->reverseCuttingPlaneNormal(num);
+			hasReverseCuttingPlane = _oneFrameRender->reverseCuttingPlaneNormal(num);
 		}
 		for (auto rend : _animationRender)
 		{
-			rend->reverseCuttingPlaneNormal(num);
+			hasReverseCuttingPlane = rend->reverseCuttingPlaneNormal(num);
 		}
+		if (!hasReverseCuttingPlane)
+		{
+			return;
+		}
+		_rendStatus->_cuttingPlanes[num] = -_rendStatus->_cuttingPlanes[num];
+		updateCuttingPlaneUniform();
 	}
 
 	void mPostRender::setOnlyShowCuttingPlane(bool isOnlyShowCuttingPlane)
 	{
+		_rendStatus->_isOnlyShowCuttingPlane = isOnlyShowCuttingPlane;
 		this->makeCurrent();
+
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setOnlyShowCuttingPlane(isOnlyShowCuttingPlane);
@@ -657,6 +606,67 @@ namespace MPostRend
 		{
 			rend->setIsShowPlane(isShow);
 		}
+	}
+
+	void mPostRender::setRendAnimationFrame(mPostAnimationRendData *allFrameRendData)
+	{
+		this->makeCurrent();
+		if (!_dataPost || !allFrameRendData)
+		{
+			return;
+		}
+		deleteAnimation();
+
+	}
+
+	void mPostRender::createLinearAnimation(PostMode postMode)
+	{
+		this->makeCurrent();
+		if (!_dataPost || nullptr == _oneFrameRender)
+		{
+			return;
+		}
+		deleteAnimation();
+		mPostOneFrameRendData* postOneFrameRendData = _oneFrameRender->getOneFrameRendData();
+		int id = postOneFrameRendData->getRendID();
+		QVector3D deformationScale = postOneFrameRendData->getDeformationScale();
+		mOneFrameData1 *oneFrameData = _dataPost->getOneFrameData(id);
+		int ids = 10;
+		for (int i = 0; i < ids; i++)
+		{
+			float scale = postMode == OneFrameLinearAnimation ? i / float(ids - 1) : sin(2 * M_PI * i / float(ids - 1));
+			mPostOneFrameRendData *newFrameRendData = new mPostOneFrameRendData(*postOneFrameRendData);
+			std::shared_ptr<mPostOneFrameRender> oneFrameRender = make_shared<mPostOneFrameRender>(_rendStatus, oneFrameData, newFrameRendData);
+			oneFrameRender->setFaceStateSet(_faceStateSet);
+			oneFrameRender->setFaceTransparentNoDeformationStateSet(_faceTransparentNodeformationStateSet);
+			oneFrameRender->setFaceTransparentStateSet(_faceTransparentStateSet);
+			oneFrameRender->setEdgeLineStateSet(_edgelineStateSet);
+			oneFrameRender->setFaceLineStateSet(_facelineStateSet);
+			oneFrameRender->setLineStateSet(_lineStateSet);
+			oneFrameRender->setPointStateSet(_pointStateSet);
+			oneFrameRender->setTextureCoordScale(scale);
+			oneFrameRender->setDeformationScale(deformationScale*scale);
+			oneFrameRender->updateAllModelOperate(ImportOperate);
+			_animationRender.insert(i + 1, oneFrameRender);
+		}
+		for (auto rend : _animationRender)
+		{
+			rend->bufferThisFrame();
+		}
+		_animationId = 1;
+		_rendStatus->_postMode = postMode;
+	}
+
+	void mPostRender::deleteAnimation()
+	{
+		this->makeCurrent();
+		setTimerOn(false);
+		for (auto render : _animationRender)
+		{
+			render->deleteThieFrame();
+			render.reset();
+		}
+		_animationRender.clear();
 	}
 
 	void mPostRender::setTimerOn(bool ison)

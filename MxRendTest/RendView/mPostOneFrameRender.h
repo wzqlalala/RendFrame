@@ -91,7 +91,7 @@ namespace MPostRend
 		bool deleteCuttingPlane(int num);
 
 		//切面图法向量取反
-		void reverseCuttingPlaneNormal(int num);
+		bool reverseCuttingPlaneNormal(int num);
 
 		//仅仅只显示切面的图，不显示其他单元的云图
 		void setOnlyShowCuttingPlane(bool isOnlyShowCuttingPlane);

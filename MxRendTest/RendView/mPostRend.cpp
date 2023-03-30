@@ -25,6 +25,9 @@ namespace MPostRend
 	{
 		mBaseRend::initializeGL();
 
+		QOpenGLContext *context = QOpenGLContext::currentContext();
+		//_app->setContext(context);
+
 		//glEnable(GL_FRAMEBUFFER_SRGB);
 
 		//this->initializeOpenGLFunctions();
