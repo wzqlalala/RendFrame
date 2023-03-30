@@ -9,7 +9,6 @@ uniform mat4 view;
 uniform mat4 projection;
 
 uniform vec4 planes[8];
-//float gl_ClipDistance[8];
 
 //光照部分
 out vec3 FragPos;
@@ -52,42 +51,25 @@ uniform Light light;
 
 vec3 calculateLightResult(vec3 normal, vec3 matColor)
 {
-	if(lightIsOn == 0)
-	{
-		return matColor;
-	}
-	//ambient
-	vec3 ambient = light.ambient * matColor;
-		
-	// diffuse 
+	if(lightIsOn == 0) return matColor;
+
+	vec3 ambient = light.ambient * matColor;		//ambient
 	vec3 norm = normalize(normal);
 	vec3 lightDir = normalize(light.position - FragPos);
 	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse = light.diffuse * (diff * matColor);
-
-	// specular
+	vec3 diffuse = light.diffuse * (diff * matColor);	// diffuse 
     vec3 viewDir = normalize(viewPos - FragPos);
 	vec3 halfwayDir = normalize(lightDir + viewDir); 
 	float spec = pow(max(dot(normal, halfwayDir), 0.0), light.shiness);
-    vec3 specular = light.specular * (spec * 0.3);  
+    vec3 specular = light.specular * (spec * 0.3); 	// specular 
 
-	vec3 result = ambient + diffuse + specular;
-	return result;
+	return ambient + diffuse + specular;
 	
 }
 
 void main()
 {
-	vec3 normal;
-	if( gl_FrontFacing ) 
-	{
-		normal = Normal;
-	}
-	else
-	{
-		normal = -Normal;
-	}
-	
+	vec3 normal = gl_FrontFacing ? Normal : -Normal;
 	vec3 color = vec3(1,1,1);
 	FragColor = vec4(calculateLightResult(normal,color), 0.3);
 } 
