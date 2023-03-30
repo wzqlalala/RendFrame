@@ -23,17 +23,16 @@ flat out int hasValue;
 
 void main()
 {
-	vec3 deformationpos = aPos + vec3(deformationScale.x*aDisplacement.x, deformationScale.y*aDisplacement.y, deformationScale.z*aDisplacement.z);
-    gl_Position = projection * view * model * vec4(deformationpos, 1.0);
+	vec3 deformationPos = aPos + deformationScale * aDisplacement;
+	gl_Position = projection * view * model * vec4(deformationPos, 1.0);
 	
 	Value  = aValue;
 	isColor = int(aIsColor);
 	material = aMaterial;
 	hasValue = int(aHasValue);
 
-	for(int i = 0;i < 8; ++i)
-	{
-		gl_ClipDistance[i] = dot(planes[i],vec4(deformationpos, 1.0f));	
+	for(int i = 0;i < 8; ++i){
+		gl_ClipDistance[i] = dot(planes[i],vec4(deformationPos, 1.0f));	
 	}
 }
 #endif
@@ -60,35 +59,8 @@ void main()
 {
 //	float distance = length(light.position - FragPos);
 //    float attenuation = 1.0 / (distance * distance);
-	vec3 color;
-	if(isColor == 0)//部件材质颜色与光照
-	{
-		color = material;
-	}
-	else if(isColor == 1)
-	{
-		if(hasValue == 1)//纹理与光照
-		{
-			float textCoord;
-			if(isEquivariance == 0)
-			{
-				textCoord = log2(Value/minValue)/log2(maxValue/minValue);
-			}
-			else
-			{
-				textCoord = (Value-minValue)/(maxValue-minValue);
-			}
-			textCoord *= textureCoordRatio;
-			color = vec3(texture(Texture, textCoord));			
-		}
-		else
-		{
-			color = vec3(0.5,0.5,0.5);			
-		}
-	}
-	FragColor = vec4(color, 1.0);
-	float gamma = 2.2;
-    FragColor.rgb = pow(FragColor.rgb, vec3(1.0/gamma));
+	vec3 color = isColor == 0 ? material : hasValue == 1 ? vec3(texture(Texture, (isEquivariance == 0 ? log2(Value/minValue) / log2(maxValue/minValue) : (Value-minValue) / (maxValue-minValue)) * textureCoordRatio)) : vec3(0.5f);
+    FragColor.rgb = pow(color, vec3(1.0/2.2));
 } 
 
 #endif
