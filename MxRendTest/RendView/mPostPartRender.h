@@ -158,7 +158,7 @@ namespace MPostRend
 		//meshline stateset
 		std::shared_ptr<mxr::Vec3Array>   _vertex0;
 		std::shared_ptr<mxr::Vec3Array>   _vertex1;
-		std::shared_ptr<mxr::FloatArray>   _vertex2;
+		//std::shared_ptr<mxr::FloatArray>   _vertex2;
 		mPostPartEdgeLineRender(std::shared_ptr<mxr::Group> parent);
 		~mPostPartEdgeLineRender();
 		std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }

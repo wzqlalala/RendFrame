@@ -1,4 +1,4 @@
-#version 330 core
+#version 450 core
 
 #ifdef vertex_shader
 layout (location = 0) in vec3 aPos;
@@ -10,6 +10,7 @@ uniform mat4 view;
 uniform mat4 projection;
 
 uniform vec4 planes[8];
+//float gl_ClipDistance[8];
 
 out float TexCoord;
 out vec3 FragPos;
