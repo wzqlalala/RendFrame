@@ -15,7 +15,6 @@ uniform mat4 projection;
 uniform vec3 deformationScale;
 
 uniform vec4 planes[8];
-//float gl_ClipDistance[8];
 
 flat out int isColor;
 
@@ -25,14 +24,13 @@ out vec3 Normal;
 
 void main()
 {
-	vec3 deformationpos = aPos + vec3(deformationScale.x*aDisplacement.x, deformationScale.y*aDisplacement.y, deformationScale.z*aDisplacement.z);
-	FragPos = vec3(model * vec4(deformationpos, 1.0));
+	vec3 deformationPos = aPos + deformationScale * aDisplacement;
+	FragPos = vec3(model * vec4(deformationPos, 1.0));
     gl_Position = projection * view * vec4(FragPos, 1.0);
 	
-	isColor = int(aIsColor+0.01);
-	for(int i = 0;i < 8; ++i)
-	{
-		gl_ClipDistance[i] = dot(planes[i],vec4(deformationpos, 1.0f));	
+	isColor = int(aIsColor);
+	for(int i = 0;i < 8; ++i){
+		gl_ClipDistance[i] = dot(planes[i],vec4(deformationPos, 1.0f));	
 	}
 	
 	Normal = mat3(transpose(inverse(model))) * aNormal; 
@@ -43,7 +41,6 @@ void main()
 #ifdef fragment_shader
 
 out vec4 FragColor;
-
 struct Light {
     vec3 position;
     vec3 ambient;
@@ -54,53 +51,33 @@ struct Light {
 
 in vec3 FragPos;  
 in vec3 Normal; 
-
 flat in int isColor;
 
 uniform int lightIsOn;
-
 uniform vec3 viewPos;
 uniform Light light;
 
 vec3 calculateLightResult(vec3 normal, vec3 matColor)
 {
-	if(lightIsOn == 0)
-	{
-		return matColor;
-	}
-	//ambient
-	vec3 ambient = light.ambient * matColor;
-		
-	// diffuse 
+	if(lightIsOn == 0) return matColor;
+
+	vec3 ambient = light.ambient * matColor;		//ambient
 	vec3 norm = normalize(normal);
 	vec3 lightDir = normalize(light.position - FragPos);
 	float diff = max(dot(norm, lightDir), 0.0);
-	vec3 diffuse = light.diffuse * (diff * matColor);
-
-	// specular
+	vec3 diffuse = light.diffuse * (diff * matColor);	// diffuse 
     vec3 viewDir = normalize(viewPos - FragPos);
 	vec3 halfwayDir = normalize(lightDir + viewDir); 
 	float spec = pow(max(dot(normal, halfwayDir), 0.0), light.shiness);
-    vec3 specular = light.specular * (spec * 0.3);  
+    vec3 specular = light.specular * (spec * 0.3); 	// specular 
 
-	vec3 result = ambient + diffuse + specular;
-	return result;
-	
+	return ambient + diffuse + specular;
 }
 
 void main()
 {
-	vec3 normal;
-	if( gl_FrontFacing ) 
-	{
-		normal = Normal;
-	}
-	else
-	{
-		normal = -Normal;
-	}
-	
-	vec3 color = vec3(1,1,1);
+	vec3 normal = gl_FrontFacing ? Normal : -Normal;
+	vec3 color = vec3(1.0);
 	FragColor = vec4(calculateLightResult(normal,color), 0.3);
 } 
 
