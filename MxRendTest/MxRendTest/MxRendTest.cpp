@@ -64,7 +64,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
-		QString filename = QFileDialog::getOpenFileName(this, "Ñ¡ÔñobjÎÄ¼ş", qApp->applicationDirPath(), "*.obj");
+		QString filename = QFileDialog::getOpenFileName(this, "é€‰æ‹©objæ–‡ä»¶", qApp->applicationDirPath(), "*.obj");
 		QFileInfo info(filename);
 
 		tinyobj::attrib_t attrib;
@@ -237,8 +237,28 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
+		if (_cuttingPlaneNum > 0)
+		{
+			_postRender->reverseCuttingPlaneNormal(_cuttingPlaneNum - 1);
+		}
+	}
+	else if (event->key() == Qt::Key_T)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
 		_isShowPlane = !_isShowPlane;
 		_postRender->setIsShowPlane(_isShowPlane);
+	}
+	else if (event->key() == Qt::Key_Y)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		_isOnlyShowPlane = !_isOnlyShowPlane;
+		_postRender->setOnlyShowCuttingPlane(_isOnlyShowPlane);
 	}
 	else if (event->key() == Qt::Key_A)
 	{
@@ -344,18 +364,18 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 
 bool MxRendTest::getData(shared_ptr<mDataPost1> dp, mPostOneFrameRendData *oneFrameRendData)
 {
-	QStringList names = QFileDialog::getOpenFileNames(this, "Ñ¡ÔñobjÎÄ¼ş", qApp->applicationDirPath(), "*.mxdb;*.mxdb0");
+	QStringList names = QFileDialog::getOpenFileNames(this, "é€‰æ‹©objæ–‡ä»¶", qApp->applicationDirPath(), "*.mxdb;*.mxdb0");
 	
 	if (names.empty())
 	{
 		return false;
 	}
 
-	//°´ÕÕÃû³ÆÉ¸Ñ¡·ÖÀà
+	//æŒ‰ç…§åç§°ç­›é€‰åˆ†ç±»
 	QMultiHash<QString, QString> postframefiles;
 	QHash<QString, QString> postinitfile;
 
-	//»ñÈ¡µ±Ç°ÎÄ¼ş¼ĞÏÂËùÓĞµÄmxdb0ÎÄ¼ş
+	//è·å–å½“å‰æ–‡ä»¶å¤¹ä¸‹æ‰€æœ‰çš„mxdb0æ–‡ä»¶
 	QFileInfo initinfo(names.at(0));
 	QDir filedir = initinfo.absoluteDir();
 	QStringList db0filter = QStringList{ QString("*.mxdb0") };
@@ -365,7 +385,7 @@ bool MxRendTest::getData(shared_ptr<mDataPost1> dp, mPostOneFrameRendData *oneFr
 		postinitfile.insert(finfo.completeBaseName(), finfo.absoluteFilePath());
 	}
 
-	//ÌáÈ¡ËùÓĞÑ¡ÖĞµÄmxdbÎÄ¼ş
+	//æå–æ‰€æœ‰é€‰ä¸­çš„mxdbæ–‡ä»¶
 	QStringList initnames = postinitfile.keys();
 	for (QString filename : names)
 	{
@@ -395,14 +415,14 @@ bool MxRendTest::getData(shared_ptr<mDataPost1> dp, mPostOneFrameRendData *oneFr
 
 			continue;
 		}
-		//ÈôÃ»ÓĞÑ¡Ôñ³õÊ¼¹¹ĞÍÎÄ¼ş£¬Ôò×Ô¶¯»ñÈ¡
+		//è‹¥æ²¡æœ‰é€‰æ‹©åˆå§‹æ„å‹æ–‡ä»¶ï¼Œåˆ™è‡ªåŠ¨è·å–
 		QString initfile = postinitfile.value(pname);
 		if (initfile.isEmpty())
 		{
 
 			continue;
 		}
-		//¶ÔÖ¡ÎÄ¼ş½øĞĞÅÅĞò
+		//å¯¹å¸§æ–‡ä»¶è¿›è¡Œæ’åº
 		QCollator collator;
 		collator.setNumericMode(true);
 		std::sort(framefiles.begin(), framefiles.end(), [&collator](const QString & str1, const QString & str2)
@@ -410,7 +430,7 @@ bool MxRendTest::getData(shared_ptr<mDataPost1> dp, mPostOneFrameRendData *oneFr
 			return collator.compare(str1, str2) < 0;
 		});
 
-		//¶ÁÈ¡ÎÄ¼ş
+		//è¯»å–æ–‡ä»¶
 		MIOFile::mIMxdbFile1* mxdbThread1 = new MIOFile::mIMxdbFile1(initfile, framefiles);
 		mxdbThread1->setDataPost(dp);
 		mxdbThread1->setOneFrameRenderData(oneFrameRendData);
