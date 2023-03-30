@@ -22,9 +22,9 @@ namespace MPostRend
 {
 	mPostCuttingPlaneData::mPostCuttingPlaneData(mOneFrameData1 *oneFrameData, mPostOneFrameRendData *currentFrameRendData, QVector3D normal, QVector3D vertex, bool hasVector)
 	{
-		//ºó´¦ÀíÄ£ĞÍÊı¾İ
+		//åå¤„ç†æ¨¡å‹æ•°æ®
 		_oneFrameData = oneFrameData;
-		//ºó´¦Àí±äÁ¿Êı¾İ
+		//åå¤„ç†å˜é‡æ•°æ®
 		_currentFrameRendData = currentFrameRendData;
 
 		_cuttingPlane = QVector4D(normal, -QVector3D::dotProduct(normal, vertex));
@@ -111,7 +111,7 @@ namespace MPostRend
 
 	QPair<QVector<QVector3D>, QVector<QVector3D>> mPostCuttingPlaneData::getCuttingNodeData()
 	{
-		//Ö»ÅĞ¶Ï½ÚµãÊ¸Á¿
+		//åªåˆ¤æ–­èŠ‚ç‚¹çŸ¢é‡
 		QVector3D vertex0, vertex1, vertex2, vertex3, vertex4, vertex5, vertex6, vertex7;
 		if (_currentFrameRendData == nullptr)
 		{
@@ -570,7 +570,7 @@ namespace MPostRend
 					}
 					int num = sss.size();
 
-					if (num == 3)
+/*					if (num == 3)
 					{
 						trivertexs.append(sss.at(0).first);
 						trivertexs.append(sss.at(1).first);
@@ -579,7 +579,7 @@ namespace MPostRend
 						trivalues.append(sss.at(1).second);
 						trivalues.append(sss.at(2).second);
 					}
-					else if (num > 3)
+					else */if (num > 2)
 					{
 						QVector3D center;
 						for (int i = 0; i < num; ++i)
@@ -595,7 +595,7 @@ namespace MPostRend
 							QVector3D OA = a.first - center;
 							QVector3D OB = b.first - center;
 
-							//ÏòÁ¿OAºÍÏòÁ¿OBµÄ²æ»ı
+							//å‘é‡OAå’Œå‘é‡OBçš„å‰ç§¯
 							QVector3D voa = QVector3D::crossProduct(OA, OO);
 							QVector3D vob = QVector3D::crossProduct(OB, OO);
 
@@ -613,7 +613,7 @@ namespace MPostRend
 							return cosA < cosB;
 						});
 
-						//Èı½Ç»¯
+						//ä¸‰è§’åŒ–
 						for (int i = 1; i < num - 1; ++i)
 						{
 							trivertexs.append(sss.at(0).first);
@@ -825,7 +825,7 @@ namespace MPostRend
 						}
 					}
 					int num = sss.size();
-					if (num == 3)
+/*					if (num == 3)
 					{
 						trivertexs.append(sss.at(0));
 						trivertexs.append(sss.at(1));
@@ -834,7 +834,8 @@ namespace MPostRend
 						trivalues.append(value);
 						trivalues.append(value);
 					}
-					else if (num > 3)
+					else */
+					if (num > 2)
 					{
 						QVector3D center;
 						for (int i = 0; i < num; ++i)
@@ -850,7 +851,7 @@ namespace MPostRend
 							QVector3D OA = a - center;
 							QVector3D OB = b - center;
 
-							//ÏòÁ¿OAºÍÏòÁ¿OBµÄ²æ»ı
+							//å‘é‡OAå’Œå‘é‡OBçš„å‰ç§¯
 							QVector3D voa = QVector3D::crossProduct(OA, OO);
 							QVector3D vob = QVector3D::crossProduct(OB, OO);
 
@@ -868,7 +869,7 @@ namespace MPostRend
 							return cosA < cosB;
 						});
 
-						//Èı½Ç»¯
+						//ä¸‰è§’åŒ–
 						for (int i = 1; i < num - 1; ++i)
 						{
 							trivertexs.append(sss.at(0));
@@ -1115,7 +1116,7 @@ namespace MPostRend
 					}
 					int num = sss.size();
 
-					if (num == 3)
+/*					if (num == 3)
 					{
 						trivertexs.append(sss.at(0));
 						trivertexs.append(sss.at(1));
@@ -1125,7 +1126,8 @@ namespace MPostRend
 						trivalues.append(isInvectorValue.at(1));
 						trivalues.append(isInvectorValue.at(2));
 					}
-					else if (num > 3)
+					else */
+					if (num > 2)
 					{
 						QVector3D center;
 						for (int i = 0; i < num; ++i)
@@ -1141,7 +1143,7 @@ namespace MPostRend
 							QVector3D OA = a - center;
 							QVector3D OB = b - center;
 
-							//ÏòÁ¿OAºÍÏòÁ¿OBµÄ²æ»ı
+							//å‘é‡OAå’Œå‘é‡OBçš„å‰ç§¯
 							QVector3D voa = QVector3D::crossProduct(OA, OO);
 							QVector3D vob = QVector3D::crossProduct(OB, OO);
 
@@ -1159,7 +1161,7 @@ namespace MPostRend
 							return cosA < cosB;
 						});
 
-						//Èı½Ç»¯
+						//ä¸‰è§’åŒ–
 						for (int i = 1; i < num - 1; ++i)
 						{
 							trivertexs.append(sss.at(0));
@@ -1194,7 +1196,7 @@ namespace MPostRend
 
 		if (_currentFrameRendData->getNodeOrElement() == MViewBasic::PostNode)
 		{
-			//ÊÇ·ñ¼ÆËãÊ¸Á¿
+			//æ˜¯å¦è®¡ç®—çŸ¢é‡
 			if (!_hasVector)
 			{
 				QHash<int, float> values = _currentFrameRendData->getRendValue();
@@ -1415,21 +1417,21 @@ namespace MPostRend
 						}
 						int num = sss.size();
 
-						if (num == 3)
+						//if (num == 3)
 						{
-							_triPlane.append(sss.at(0).first);
+	/*						_triPlane.append(sss.at(0).first);
 							_triPlane.append(sss.at(1).first);
 							_triPlane.append(sss.at(2).first);
 							_triValue.append(sss.at(0).second);
 							_triValue.append(sss.at(1).second);
 							_triValue.append(sss.at(2).second);
 
-							_triMeshID.append(QVector<float>(3, (float)meshID));
+							_triMeshID.append(QVector<float>(3, (float)meshID));*/
 							//_triTexture.append((sss.at(0).second - _currentFrameRendData->getMinData()) / fenmu);
 							//_triTexture.append((sss.at(1).second - _currentFrameRendData->getMinData()) / fenmu);
 							//_triTexture.append((sss.at(2).second - _currentFrameRendData->getMinData()) / fenmu);
-						}
-						else if (num > 3)
+						}//
+						if (num > 2)
 						{
 							QVector3D center;
 							for (int i = 0; i < num; ++i)
@@ -1445,7 +1447,7 @@ namespace MPostRend
 								QVector3D OA = a.first - center;
 								QVector3D OB = b.first - center;
 
-								//ÏòÁ¿OAºÍÏòÁ¿OBµÄ²æ»ı
+								//å‘é‡OAå’Œå‘é‡OBçš„å‰ç§¯
 								QVector3D voa = QVector3D::crossProduct(OA, OO);
 								QVector3D vob = QVector3D::crossProduct(OB, OO);
 
@@ -1463,7 +1465,7 @@ namespace MPostRend
 								return cosA < cosB;
 							});
 
-							//ÅÅĞò
+							//æ’åº
 							//for (int i = 0; i < num; ++i)
 							//{
 							//	for (int j = 0; j < num - i - 1; ++j)
@@ -1477,7 +1479,7 @@ namespace MPostRend
 							//	}
 							//}
 
-							//Èı½Ç»¯
+							//ä¸‰è§’åŒ–
 							for (int i = 1; i < num - 1; ++i)
 							{
 								_triPlane.append(sss.at(0).first);
@@ -1490,6 +1492,8 @@ namespace MPostRend
 								//_triTexture.append((sss.at(0).second - _currentFrameRendData->getMinData()) / fenmu);
 								//_triTexture.append((sss.at(i).second - _currentFrameRendData->getMinData()) / fenmu);
 								//_triTexture.append((sss.at(i + 1).second - _currentFrameRendData->getMinData()) / fenmu);
+
+								qDebug() <<"è®¡ç®—æ³•å‘" << QVector3D::normal((sss.at(i).first - sss.at(0).first), (sss.at(i + 1).first - sss.at(0).first));
 							}
 						}
 					}
@@ -1710,24 +1714,24 @@ namespace MPostRend
 						}
 						int num = sss.size();
 
-						if (num == 3)
-						{
-							_triPlane.append(sss.at(0).first);
-							_triPlane.append(sss.at(1).first);
-							_triPlane.append(sss.at(2).first);
-							_triValue.append(sss.at(0).second);
-							_triValue.append(sss.at(1).second);
-							_triValue.append(sss.at(2).second);
-							_triMeshID.append(QVector<float>(3, (float)meshID));
-							//_triTexture.append((sss.at(0).second - _currentFrameRendData->getMinData()) / fenmu);
-							//_triTexture.append((sss.at(1).second - _currentFrameRendData->getMinData()) / fenmu);
-							//_triTexture.append((sss.at(2).second - _currentFrameRendData->getMinData()) / fenmu);
+						//if (num == 3)
+						//{
+						//	_triPlane.append(sss.at(0).first);
+						//	_triPlane.append(sss.at(1).first);
+						//	_triPlane.append(sss.at(2).first);
+						//	_triValue.append(sss.at(0).second);
+						//	_triValue.append(sss.at(1).second);
+						//	_triValue.append(sss.at(2).second);
+						//	_triMeshID.append(QVector<float>(3, (float)meshID));
+						//	//_triTexture.append((sss.at(0).second - _currentFrameRendData->getMinData()) / fenmu);
+						//	//_triTexture.append((sss.at(1).second - _currentFrameRendData->getMinData()) / fenmu);
+						//	//_triTexture.append((sss.at(2).second - _currentFrameRendData->getMinData()) / fenmu);
 
-							_triVectorValue.append(isInvectorValue.at(0));
-							_triVectorValue.append(isInvectorValue.at(1));
-							_triVectorValue.append(isInvectorValue.at(2));
-						}
-						else if (num > 3)
+						//	_triVectorValue.append(isInvectorValue.at(0));
+						//	_triVectorValue.append(isInvectorValue.at(1));
+						//	_triVectorValue.append(isInvectorValue.at(2));
+						//}
+						if (num > 2)
 						{
 							QVector3D center;
 							for (int i = 0; i < num; ++i)
@@ -1743,7 +1747,7 @@ namespace MPostRend
 								QVector3D OA = a.first - center;
 								QVector3D OB = b.first - center;
 
-								//ÏòÁ¿OAºÍÏòÁ¿OBµÄ²æ»ı
+								//å‘é‡OAå’Œå‘é‡OBçš„å‰ç§¯
 								QVector3D voa = QVector3D::crossProduct(OA, OO);
 								QVector3D vob = QVector3D::crossProduct(OB, OO);
 
@@ -1761,7 +1765,7 @@ namespace MPostRend
 								return cosA < cosB;
 							});
 
-							//Èı½Ç»¯
+							//ä¸‰è§’åŒ–
 							for (int i = 1; i < num - 1; ++i)
 							{
 								_triPlane.append(sss.at(0).first);
@@ -1982,20 +1986,20 @@ namespace MPostRend
 						}
 					}
 					int num = sss.size();
-					if (num == 3)
-					{
-						_triPlane.append(sss.at(0));
-						_triPlane.append(sss.at(1));
-						_triPlane.append(sss.at(2));
-						_triValue.append(value);
-						_triValue.append(value);
-						_triValue.append(value);
-						_triMeshID.append(QVector<float>(3, (float)meshID));
-						//_triTexture.append((value - _currentFrameRendData->getMinData()) / fenmu);
-						//_triTexture.append((value - _currentFrameRendData->getMinData()) / fenmu);
-						//_triTexture.append((value - _currentFrameRendData->getMinData()) / fenmu);
-					}
-					else if (num > 3)
+					//if (num == 3)
+					//{
+					//	_triPlane.append(sss.at(0));
+					//	_triPlane.append(sss.at(1));
+					//	_triPlane.append(sss.at(2));
+					//	_triValue.append(value);
+					//	_triValue.append(value);
+					//	_triValue.append(value);
+					//	_triMeshID.append(QVector<float>(3, (float)meshID));
+					//	//_triTexture.append((value - _currentFrameRendData->getMinData()) / fenmu);
+					//	//_triTexture.append((value - _currentFrameRendData->getMinData()) / fenmu);
+					//	//_triTexture.append((value - _currentFrameRendData->getMinData()) / fenmu);
+					//}
+					if (num > 2)
 					{
 						QVector3D center;
 						for (int i = 0; i < num; ++i)
@@ -2011,7 +2015,7 @@ namespace MPostRend
 							QVector3D OA = a - center;
 							QVector3D OB = b - center;
 
-							//ÏòÁ¿OAºÍÏòÁ¿OBµÄ²æ»ı
+							//å‘é‡OAå’Œå‘é‡OBçš„å‰ç§¯
 							QVector3D voa = QVector3D::crossProduct(OA, OO);
 							QVector3D vob = QVector3D::crossProduct(OB, OO);
 
@@ -2029,7 +2033,7 @@ namespace MPostRend
 							return cosA < cosB;
 						});
 
-						//Èı½Ç»¯
+						//ä¸‰è§’åŒ–
 						for (int i = 1; i < num - 1; ++i)
 						{
 							_triPlane.append(sss.at(0));
@@ -2066,7 +2070,7 @@ namespace MPostRend
 		{
 			_parent->removeChild(_cuttingPlaneDrawable);
 		}
-		//Õâ¶ùÎö¹¹ºóÓĞÎÊÌâ
+		//è¿™å„¿ææ„åæœ‰é—®é¢˜
 		if (_transparentPlaneDrawable)
 		{
 			_parent->removeChild(_transparentPlaneDrawable);
