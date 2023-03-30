@@ -570,7 +570,7 @@ namespace MPostRend
 					}
 					int num = sss.size();
 
-					if (num == 3)
+/*					if (num == 3)
 					{
 						trivertexs.append(sss.at(0).first);
 						trivertexs.append(sss.at(1).first);
@@ -579,7 +579,7 @@ namespace MPostRend
 						trivalues.append(sss.at(1).second);
 						trivalues.append(sss.at(2).second);
 					}
-					else if (num > 3)
+					else */if (num > 2)
 					{
 						QVector3D center;
 						for (int i = 0; i < num; ++i)
@@ -825,7 +825,7 @@ namespace MPostRend
 						}
 					}
 					int num = sss.size();
-					if (num == 3)
+/*					if (num == 3)
 					{
 						trivertexs.append(sss.at(0));
 						trivertexs.append(sss.at(1));
@@ -834,7 +834,8 @@ namespace MPostRend
 						trivalues.append(value);
 						trivalues.append(value);
 					}
-					else if (num > 3)
+					else */
+					if (num > 2)
 					{
 						QVector3D center;
 						for (int i = 0; i < num; ++i)
@@ -1115,7 +1116,7 @@ namespace MPostRend
 					}
 					int num = sss.size();
 
-					if (num == 3)
+/*					if (num == 3)
 					{
 						trivertexs.append(sss.at(0));
 						trivertexs.append(sss.at(1));
@@ -1125,7 +1126,8 @@ namespace MPostRend
 						trivalues.append(isInvectorValue.at(1));
 						trivalues.append(isInvectorValue.at(2));
 					}
-					else if (num > 3)
+					else */
+					if (num > 2)
 					{
 						QVector3D center;
 						for (int i = 0; i < num; ++i)
@@ -1712,24 +1714,24 @@ namespace MPostRend
 						}
 						int num = sss.size();
 
-						if (num == 3)
-						{
-							_triPlane.append(sss.at(0).first);
-							_triPlane.append(sss.at(1).first);
-							_triPlane.append(sss.at(2).first);
-							_triValue.append(sss.at(0).second);
-							_triValue.append(sss.at(1).second);
-							_triValue.append(sss.at(2).second);
-							_triMeshID.append(QVector<float>(3, (float)meshID));
-							//_triTexture.append((sss.at(0).second - _currentFrameRendData->getMinData()) / fenmu);
-							//_triTexture.append((sss.at(1).second - _currentFrameRendData->getMinData()) / fenmu);
-							//_triTexture.append((sss.at(2).second - _currentFrameRendData->getMinData()) / fenmu);
+						//if (num == 3)
+						//{
+						//	_triPlane.append(sss.at(0).first);
+						//	_triPlane.append(sss.at(1).first);
+						//	_triPlane.append(sss.at(2).first);
+						//	_triValue.append(sss.at(0).second);
+						//	_triValue.append(sss.at(1).second);
+						//	_triValue.append(sss.at(2).second);
+						//	_triMeshID.append(QVector<float>(3, (float)meshID));
+						//	//_triTexture.append((sss.at(0).second - _currentFrameRendData->getMinData()) / fenmu);
+						//	//_triTexture.append((sss.at(1).second - _currentFrameRendData->getMinData()) / fenmu);
+						//	//_triTexture.append((sss.at(2).second - _currentFrameRendData->getMinData()) / fenmu);
 
-							_triVectorValue.append(isInvectorValue.at(0));
-							_triVectorValue.append(isInvectorValue.at(1));
-							_triVectorValue.append(isInvectorValue.at(2));
-						}
-						else if (num > 3)
+						//	_triVectorValue.append(isInvectorValue.at(0));
+						//	_triVectorValue.append(isInvectorValue.at(1));
+						//	_triVectorValue.append(isInvectorValue.at(2));
+						//}
+						if (num > 2)
 						{
 							QVector3D center;
 							for (int i = 0; i < num; ++i)
@@ -1984,20 +1986,20 @@ namespace MPostRend
 						}
 					}
 					int num = sss.size();
-					if (num == 3)
-					{
-						_triPlane.append(sss.at(0));
-						_triPlane.append(sss.at(1));
-						_triPlane.append(sss.at(2));
-						_triValue.append(value);
-						_triValue.append(value);
-						_triValue.append(value);
-						_triMeshID.append(QVector<float>(3, (float)meshID));
-						//_triTexture.append((value - _currentFrameRendData->getMinData()) / fenmu);
-						//_triTexture.append((value - _currentFrameRendData->getMinData()) / fenmu);
-						//_triTexture.append((value - _currentFrameRendData->getMinData()) / fenmu);
-					}
-					else if (num > 3)
+					//if (num == 3)
+					//{
+					//	_triPlane.append(sss.at(0));
+					//	_triPlane.append(sss.at(1));
+					//	_triPlane.append(sss.at(2));
+					//	_triValue.append(value);
+					//	_triValue.append(value);
+					//	_triValue.append(value);
+					//	_triMeshID.append(QVector<float>(3, (float)meshID));
+					//	//_triTexture.append((value - _currentFrameRendData->getMinData()) / fenmu);
+					//	//_triTexture.append((value - _currentFrameRendData->getMinData()) / fenmu);
+					//	//_triTexture.append((value - _currentFrameRendData->getMinData()) / fenmu);
+					//}
+					if (num > 2)
 					{
 						QVector3D center;
 						for (int i = 0; i < num; ++i)
