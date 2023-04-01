@@ -37,6 +37,7 @@ namespace MPostRend
 	mPostRender::mPostRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> parent):mBaseRender(app, parent)
 	{
 		this->makeCurrent();
+
 		//QOpenGLContext *context = QOpenGLContext::currentContext();
 		//qDebug() << "mPostRender" << QString::number(long long int(context), 16);
 		_dataPost = nullptr;
@@ -471,7 +472,7 @@ namespace MPostRend
 	void mPostRender::setPointSize(int size)
 	{
 		_rendStatus->_pointSize = size;
-		_facelineStateSet->getUniform("PointSize")->SetData(_rendStatus->_pointSize);
+		_pointStateSet->getUniform("PointSize")->SetData(_rendStatus->_pointSize);
 	}
 
 	void mPostRender::setEdgeLineWidth(float size)
