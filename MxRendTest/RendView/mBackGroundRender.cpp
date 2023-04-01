@@ -18,12 +18,12 @@ namespace MBaseRend
 		qDebug() << "mBaseRend::paintGL()" << QString::number(long long int(context), 16);
 
 		_backGroundMode = GradientL_R;
-		_backGroundVertex = QVector<QVector2D>{ QVector2D(-1,-1),QVector2D(-1,1), QVector2D(1,1),QVector2D(-1,-1), QVector2D(1,1), QVector2D(1,-1) };//×óÏÂ£¬×óÉÏ£¬ÓÒÉÏ£¬ÓÒÏÂ
+		_backGroundVertex = QVector<QVector2D>{ QVector2D(-1,-1),QVector2D(-1,1), QVector2D(1,1),QVector2D(-1,-1), QVector2D(1,1), QVector2D(1,-1) };//å·¦ä¸‹ï¼Œå·¦ä¸Šï¼Œå³ä¸Šï¼Œå³ä¸‹
 		//for (QVector2D &v: _backGroundVertex)
 		//{
 		//	v /= id;
 		//}
-		_backGroundColor = QVector<QVector3D>{ QVector3D(0.59,0.78,0.93),QVector3D(0.59,0.78,0.93),QVector3D(0.88,0.93,0.98), QVector3D(0.59,0.78,0.93),QVector3D(0.88,0.93,0.98),QVector3D(0.88,0.93,0.98) };//×óÏÂ£¬×óÉÏ£¬ÓÒÉÏ£¬ÓÒÏÂ
+		_backGroundColor = QVector<QVector3D>{ QVector3D(0.59,0.78,0.93),QVector3D(0.59,0.78,0.93),QVector3D(0.88,0.93,0.98), QVector3D(0.59,0.78,0.93),QVector3D(0.88,0.93,0.98),QVector3D(0.88,0.93,0.98) };//å·¦ä¸‹ï¼Œå·¦ä¸Šï¼Œå³ä¸Šï¼Œå³ä¸‹
 		for (QVector3D &v : _backGroundColor)
 		{
 			v /= id;
@@ -43,7 +43,7 @@ namespace MBaseRend
 
 		root->addChild(_drawable);
 
-		app->GLContext()->doneCurrent();
+		//app->GLContext()->doneCurrent();
 	}
 
 	mBackGroundRender::~mBackGroundRender()
@@ -68,14 +68,14 @@ namespace MBaseRend
 		color2 = color2 / 255.0;
 		if (_backGroundMode == GradientL_R)
 		{
-			_backGroundColor = QVector<QVector3D>{ color1,color1,color2, color1, color2, color2 };//×óÏÂ£¬×óÉÏ£¬ÓÒÉÏ£¬ÓÒÏÂ
+			_backGroundColor = QVector<QVector3D>{ color1,color1,color2, color1, color2, color2 };//å·¦ä¸‹ï¼Œå·¦ä¸Šï¼Œå³ä¸Šï¼Œå³ä¸‹
 		}
 		else if (_backGroundMode == GradientT_B)
 		{
-			_backGroundColor = QVector<QVector3D>{ color2,color1,color1, color2,color1,color2 };//×óÏÂ£¬×óÉÏ£¬ÓÒÉÏ£¬ÓÒÏÂ
+			_backGroundColor = QVector<QVector3D>{ color2,color1,color1, color2,color1,color2 };//å·¦ä¸‹ï¼Œå·¦ä¸Šï¼Œå³ä¸Šï¼Œå³ä¸‹
 		}
 		
-		//¸üĞÂ
+		//æ›´æ–°
 		Array* color = _drawable->getVertexAttribArray(1);
 		color->updata(0, _backGroundColor.size() * sizeof(QVector3D), _backGroundColor.data());
 	}
@@ -97,7 +97,7 @@ namespace MBaseRend
 	void mBackGroundRender::setPureColor(QVector3D color)
 	{
 		color = color / 255.0;
-		_backGroundColor = QVector<QVector3D>{ color,color,color, color,color,color };//×óÏÂ£¬×óÉÏ£¬ÓÒÉÏ£¬ÓÒÏÂ
+		_backGroundColor = QVector<QVector3D>{ color,color,color, color,color,color };//å·¦ä¸‹ï¼Œå·¦ä¸Šï¼Œå³ä¸Šï¼Œå³ä¸‹
 		
 	}
 
