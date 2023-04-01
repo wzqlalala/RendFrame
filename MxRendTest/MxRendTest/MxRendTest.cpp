@@ -311,27 +311,29 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		_showfuntion = ShowFuntion(show);
 		_postRender->setShowFuntion(_showfuntion);
 	}
-	else if (event->key() == Qt::Key_Plus || event->key() == Qt::Key_Minus)
+	else if (event->key() == Qt::Key_Minus)
 	{
 		if (_postRend == nullptr)
 		{
 			return;
 		}
-		if (event->key() == Qt::Key_Plus)
+		_pointSize += 1;
+		if (_pointSize > 20.0f)
 		{
-			_lineWidth += 0.1f;
-			if (_lineWidth > 20.0f)
-			{
-				_lineWidth = 1.0f;
-			}
+			_pointSize = 1.0f;
 		}
-		else
+		_postRender->setPointSize(_pointSize);
+	}
+	else if (event->key() == Qt::Key_Plus)
+	{
+		if (_postRend == nullptr)
 		{
-			_lineWidth -= 0.1f;
-			if (_lineWidth < 0.0f)
-			{
-				_lineWidth = 1.0f;
-			}
+			return;
+		}
+		_lineWidth += 0.1f;
+		if (_lineWidth > 20.0f)
+		{
+			_lineWidth = 1.0f;
 		}
 
 		_postRender->setEdgeLineWidth(_lineWidth);
