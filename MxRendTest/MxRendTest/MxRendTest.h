@@ -61,6 +61,7 @@ private:
 	bool _dispersed{ false };
 	bool _isEquivariance{ true };
 	float _lineWidth = 1.0f;
+	int _pointSize = 1.0;
 	//ÇÐÃæ
 	QVector<QVector3D> planeNormals{ QVector3D(0,0,1), QVector3D(0,1,0),QVector3D(1,0,0), QVector3D(1,1,1), QVector3D(1,1,0),QVector3D(0,1,1),QVector3D(1,0,1), QVector3D(1,2,0) };
 	int _cuttingPlaneNum = 0;

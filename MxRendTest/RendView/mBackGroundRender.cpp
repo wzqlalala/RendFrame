@@ -43,7 +43,7 @@ namespace MBaseRend
 
 		root->addChild(_drawable);
 
-		app->GLContext()->doneCurrent();
+		//app->GLContext()->doneCurrent();
 	}
 
 	mBackGroundRender::~mBackGroundRender()

@@ -25,16 +25,18 @@ namespace MPostRend
 	{
 		mBaseRend::initializeGL();
 
-		QOpenGLContext *context = QOpenGLContext::currentContext();
-		//_app->setContext(context);
-
+		//QOpenGLContext *context = QOpenGLContext::currentContext();
+		QOpenGLContext *context = _app->GLContext();
+		context->makeCurrent(context->surface());
 		//glEnable(GL_FRAMEBUFFER_SRGB);
 
 		//this->initializeOpenGLFunctions();
 
 		/*mxr::Application::GetInstance()._context = context();
 
-
+		glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
+		glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
+		glEnable(GL_DEPTH_TEST);
 
 		mxr::Log::Init();
 		_viewer = MakeAsset<mxr::Viewer>();
@@ -44,6 +46,12 @@ namespace MPostRend
 
 		//glEnable(GL_DEPTH_TEST);
 		//glLineWidth(5.0);
+
+		//_app->GLContext()->functions()->glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
+		//_app->GLContext()->functions()->glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
+
+		//glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
+		//glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
 		qDebug() << "Post Initial";
 	}
 

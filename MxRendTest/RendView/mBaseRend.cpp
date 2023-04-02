@@ -60,6 +60,8 @@ namespace MBaseRend
 		_bgRend = MakeAsset<mBackGroundRender>(_app, _root);
 
 		/**/
+		//_app->GLContext()->functions()->glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
+		//_app->GLContext()->functions()->glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
 
 		glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
 		glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
@@ -71,6 +73,8 @@ namespace MBaseRend
 	void mBaseRend::paintGL()
 	{
 		QOpenGLContext *context = QOpenGLContext::currentContext();
+		//glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
+		//glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
 		//qDebug() << "mBaseRend::paintGL()" << QString::number(long long int(context), 16);
 		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
 		if (error != 0)
