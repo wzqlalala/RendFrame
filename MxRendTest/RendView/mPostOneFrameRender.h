@@ -1,9 +1,10 @@
 #pragma once
 #include "rendview_global.h"
-//è§£å†³ä¸­æ–‡ä¹±ç 
+//½â¾öÖĞÎÄÂÒÂë
 #pragma execution_character_set("utf-8")
 //#define TINYOBJLOADER_IMPLEMENTATION
 #include <QObject>
+#include <QOpenGLContext>
 #include <set>
 
 #include "mBasicEnum.h"
@@ -49,9 +50,11 @@ namespace MPostRend
 
 		~mPostOneFrameRender();
 
-		void bufferThisFrame();
+		void bufferThisFrame(QOpenGLContext *context);
 
 		void deleteThieFrame();
+
+		mOneFrameData1 *getOneFrameData() { return _oneFrameData; };
 
 		mPostOneFrameRendData *getOneFrameRendData() { return _oneFrameRendData; };
 
@@ -61,9 +64,9 @@ namespace MPostRend
 
 		//void UpdateModelBuffer();
 
-		//æ›´æ–°å•ä¸ªéƒ¨ä»¶æ“ä½œ
+		//¸üĞÂµ¥¸ö²¿¼ş²Ù×÷
 		void updateOneModelOperate(QPair<MBasicFunction::PostModelOperateEnum, std::set<QString>> postModelOperates);
-		//æ›´æ–°å…¨éƒ¨éƒ¨ä»¶æ“ä½œ
+		//¸üĞÂÈ«²¿²¿¼ş²Ù×÷
 		void updateAllModelOperate(MBasicFunction::PostModelOperateEnum postModelOperate);
 
 		void setFaceStateSet(std::shared_ptr<mxr::StateSet> faceStateSet);
@@ -76,69 +79,69 @@ namespace MPostRend
 
 		void setTexture(std::shared_ptr<mxr::Texture> texture);
 
-		//è®¾ç½®å˜å½¢å€æ•°	
+		//ÉèÖÃ±äĞÎ±¶Êı	
 		void setDeformationScale(QVector3D deformationScale);
 
-		//è®¾ç½®çº¹ç†åæ ‡ç³»æ•°	
+		//ÉèÖÃÎÆÀí×ø±êÏµÊı	
 		void setTextureCoordScale(float textureCoordScale);
 
-		//è®¾ç½®æœ€å¤§æœ€å°å€¼	
+		//ÉèÖÃ×î´ó×îĞ¡Öµ	
 		void setMinMaxData(float maxValue, float minValue);
 
-		/*********************************åˆ‡é¢å›¾*******************************************/
+		/*********************************ÇĞÃæÍ¼*******************************************/
 
-		//åˆ é™¤åˆ‡é¢å›¾	
+		//É¾³ıÇĞÃæÍ¼	
 		bool deleteCuttingPlane(int num);
 
-		//åˆ‡é¢å›¾æ³•å‘é‡å–å
+		//ÇĞÃæÍ¼·¨ÏòÁ¿È¡·´
 		bool reverseCuttingPlaneNormal(int num);
 
-		//ä»…ä»…åªæ˜¾ç¤ºåˆ‡é¢çš„å›¾ï¼Œä¸æ˜¾ç¤ºå…¶ä»–å•å…ƒçš„äº‘å›¾
+		//½ö½öÖ»ÏÔÊ¾ÇĞÃæµÄÍ¼£¬²»ÏÔÊ¾ÆäËûµ¥ÔªµÄÔÆÍ¼
 		void setOnlyShowCuttingPlane(bool isOnlyShowCuttingPlane);
 
-		//è®¾ç½®æ˜¯å¦å¼€å¯æŸä¸€ä¸ªåˆ‡é¢æˆ–è€…åˆ‡å‰²å›¾
+		//ÉèÖÃÊÇ·ñ¿ªÆôÄ³Ò»¸öÇĞÃæ»òÕßÇĞ¸îÍ¼
 		void setIsShowCuttingPlane(int num, bool isShow);
 
-		// ç”Ÿæˆåˆ‡é¢å›¾
+		// Éú³ÉÇĞÃæÍ¼
 		bool createCuttingPlane(std::shared_ptr<mxr::StateSet> cuttingPlaneStateSet, std::shared_ptr<mxr::StateSet> transparentPlaneStateSet, int num, QVector3D normal = QVector3D(0, 0, 1), QVector3D vertex = QVector3D(0, 0, 0), bool hasVector = false);
 
-		// å®æ—¶ä¼ é€’åˆ‡å‰²çš„é‚£ä¸ªå¹³é¢ä¿¡æ¯
+		// ÊµÊ±´«µİÇĞ¸îµÄÄÇ¸öÆ½ÃæĞÅÏ¢
 		void setPlaneData(int num, QVector3D normal = QVector3D(0, 0, 1), QVector3D centervertex = QVector3D(0, 0, 0), float maxR = 0.0);
 
-		//è®¾ç½®æ˜¯å¦å®æ—¶æ˜¾ç¤ºå¹³é¢
+		//ÉèÖÃÊÇ·ñÊµÊ±ÏÔÊ¾Æ½Ãæ
 		void setIsShowPlane(bool isShow);
 
 	private:
 
 		void initial();
 	private:
-		std::shared_ptr<mxr::Geode> _geode;//å½“å‰æ€»èŠ‚ç‚¹
+		std::shared_ptr<mxr::Geode> _geode;//µ±Ç°×Ü½Úµã
 
 		std::shared_ptr<mPostRendStatus> _rendStatus;
 
-		mOneFrameData1 *_oneFrameData;//æ¨¡å‹æ•°æ®
-		mPostOneFrameRendData *_oneFrameRendData;//å½“å‰å¸§å˜é‡æ•°æ®
+		mOneFrameData1 *_oneFrameData;//Ä£ĞÍÊı¾İ
+		mPostOneFrameRendData *_oneFrameRendData;//µ±Ç°Ö¡±äÁ¿Êı¾İ
 
-		std::shared_ptr<mPostModelRender> _modelRender;	//æ¨¡å‹æ¸²æŸ“
+		std::shared_ptr<mPostModelRender> _modelRender;	//Ä£ĞÍäÖÈ¾
 
-		QVector<std::shared_ptr<mPostCuttingPlaneRender>> _cuttingPlaneRenders;//åˆ‡é¢æ¸²æŸ“
+		QVector<std::shared_ptr<mPostCuttingPlaneRender>> _cuttingPlaneRenders;//ÇĞÃæäÖÈ¾
 
-		std::shared_ptr<mxr::Texture> _texture;//é¢œè‰²è¡¨çº¹ç†
+		std::shared_ptr<mxr::Texture> _texture;//ÑÕÉ«±íÎÆÀí
 
-		/*********************************æ¨¡å‹*****************************************************/
-		std::shared_ptr<mxr::StateSet> _faceStateSet;//æ¸²æŸ“é¢çš„çŠ¶æ€
-		std::shared_ptr<mxr::StateSet> _faceTransparentStateSet;//æ¸²æŸ“é€æ˜é¢çš„çŠ¶æ€
-		std::shared_ptr<mxr::StateSet> _faceTransparentNodeformationStateSet;//æ¸²æŸ“æ¨¡å‹é€æ˜é¢æ— å˜å½¢çš„çŠ¶æ€
-		std::shared_ptr<mxr::StateSet> _facelineStateSet;//æ¸²æŸ“é¢çº¿çš„çŠ¶æ€
-		std::shared_ptr<mxr::StateSet> _edgelineStateSet;//æ¸²æŸ“è¾¹ç•Œçº¿çš„çŠ¶æ€
-		std::shared_ptr<mxr::StateSet> _lineStateSet;//æ¸²æŸ“çº¿çš„çŠ¶æ€
-		std::shared_ptr<mxr::StateSet> _pointStateSet;//æ¸²æŸ“ç‚¹çš„çŠ¶æ€
+		/*********************************Ä£ĞÍ*****************************************************/
+		std::shared_ptr<mxr::StateSet> _faceStateSet;//äÖÈ¾ÃæµÄ×´Ì¬
+		std::shared_ptr<mxr::StateSet> _faceTransparentStateSet;//äÖÈ¾Í¸Ã÷ÃæµÄ×´Ì¬
+		std::shared_ptr<mxr::StateSet> _faceTransparentNodeformationStateSet;//äÖÈ¾Ä£ĞÍÍ¸Ã÷ÃæÎŞ±äĞÎµÄ×´Ì¬
+		std::shared_ptr<mxr::StateSet> _facelineStateSet;//äÖÈ¾ÃæÏßµÄ×´Ì¬
+		std::shared_ptr<mxr::StateSet> _edgelineStateSet;//äÖÈ¾±ß½çÏßµÄ×´Ì¬
+		std::shared_ptr<mxr::StateSet> _lineStateSet;//äÖÈ¾ÏßµÄ×´Ì¬
+		std::shared_ptr<mxr::StateSet> _pointStateSet;//äÖÈ¾µãµÄ×´Ì¬
 
-		/***********************************åˆ‡é¢******************************************************/
-		std::shared_ptr<mxr::StateSet> _cuttingPlaneStateSet;//æ¸²æŸ“é¢çš„çŠ¶æ€
-		std::shared_ptr<mxr::StateSet> _transparentPlaneStateSet;//æ¸²æŸ“é€æ˜é¢çš„çŠ¶æ€
+		/***********************************ÇĞÃæ******************************************************/
+		std::shared_ptr<mxr::StateSet> _cuttingPlaneStateSet;//äÖÈ¾ÃæµÄ×´Ì¬
+		std::shared_ptr<mxr::StateSet> _transparentPlaneStateSet;//äÖÈ¾Í¸Ã÷ÃæµÄ×´Ì¬
 
-		/*************************************å½“å‰å¸§æ¸²æŸ“********************************************************/
+		/*************************************µ±Ç°Ö¡äÖÈ¾********************************************************/
 		std::shared_ptr<mxr::Viewer> _viewer;
 	};
 	

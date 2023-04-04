@@ -10,7 +10,7 @@
 #include "mShaderManage.h"
 #include "mTextureManage.h"
 
-//è§†å›¾ç±»
+//ÊÓÍ¼Àà
 #include "mModelView.h"
 #include "mCommonView.h"
 
@@ -43,8 +43,9 @@ namespace MPostRend
 		delete _oneFrameRendData;
 	}
 
-	void mPostOneFrameRender::bufferThisFrame()
+	void mPostOneFrameRender::bufferThisFrame(QOpenGLContext *context)
 	{
+		context->makeCurrent(context->surface());
 		_viewer->compile();
 	}
 
@@ -66,7 +67,7 @@ namespace MPostRend
 			//	cutplanes.push_back(_cuttingPlaneRenders[i]->getCuttingPlane());
 			//}
 
-			//æ¨¡åž‹
+			//Ä£ÐÍ
 			_modelRender->setDeformationScale(_oneFrameRendData->getDeformationScale());
 			_modelRender->setTextureArgument(_rendStatus->_isEquivariance, _oneFrameRendData->getCurrentMinData(), _oneFrameRendData->getCurrentMaxData(), _oneFrameRendData->getTextureCoordScale());
 			if (_cuttingPlaneStateSet)

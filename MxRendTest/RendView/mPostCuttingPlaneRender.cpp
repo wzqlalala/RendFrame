@@ -22,9 +22,9 @@ namespace MPostRend
 {
 	mPostCuttingPlaneData::mPostCuttingPlaneData(mOneFrameData1 *oneFrameData, mPostOneFrameRendData *currentFrameRendData, QVector3D normal, QVector3D vertex, bool hasVector)
 	{
-		//åå¤„ç†æ¨¡å‹æ•°æ®
+		//ºó´¦ÀíÄ£ĞÍÊı¾İ
 		_oneFrameData = oneFrameData;
-		//åå¤„ç†å˜é‡æ•°æ®
+		//ºó´¦Àí±äÁ¿Êı¾İ
 		_currentFrameRendData = currentFrameRendData;
 
 		_cuttingPlane = QVector4D(normal, -QVector3D::dotProduct(normal, vertex));
@@ -111,7 +111,7 @@ namespace MPostRend
 
 	QPair<QVector<QVector3D>, QVector<QVector3D>> mPostCuttingPlaneData::getCuttingNodeData()
 	{
-		//åªåˆ¤æ–­èŠ‚ç‚¹çŸ¢é‡
+		//Ö»ÅĞ¶Ï½ÚµãÊ¸Á¿
 		QVector3D vertex0, vertex1, vertex2, vertex3, vertex4, vertex5, vertex6, vertex7;
 		if (_currentFrameRendData == nullptr)
 		{
@@ -595,7 +595,7 @@ namespace MPostRend
 							QVector3D OA = a.first - center;
 							QVector3D OB = b.first - center;
 
-							//å‘é‡OAå’Œå‘é‡OBçš„å‰ç§¯
+							//ÏòÁ¿OAºÍÏòÁ¿OBµÄ²æ»ı
 							QVector3D voa = QVector3D::crossProduct(OA, OO);
 							QVector3D vob = QVector3D::crossProduct(OB, OO);
 
@@ -613,7 +613,7 @@ namespace MPostRend
 							return cosA < cosB;
 						});
 
-						//ä¸‰è§’åŒ–
+						//Èı½Ç»¯
 						for (int i = 1; i < num - 1; ++i)
 						{
 							trivertexs.append(sss.at(0).first);
@@ -851,7 +851,7 @@ namespace MPostRend
 							QVector3D OA = a - center;
 							QVector3D OB = b - center;
 
-							//å‘é‡OAå’Œå‘é‡OBçš„å‰ç§¯
+							//ÏòÁ¿OAºÍÏòÁ¿OBµÄ²æ»ı
 							QVector3D voa = QVector3D::crossProduct(OA, OO);
 							QVector3D vob = QVector3D::crossProduct(OB, OO);
 
@@ -869,7 +869,7 @@ namespace MPostRend
 							return cosA < cosB;
 						});
 
-						//ä¸‰è§’åŒ–
+						//Èı½Ç»¯
 						for (int i = 1; i < num - 1; ++i)
 						{
 							trivertexs.append(sss.at(0));
@@ -1143,7 +1143,7 @@ namespace MPostRend
 							QVector3D OA = a - center;
 							QVector3D OB = b - center;
 
-							//å‘é‡OAå’Œå‘é‡OBçš„å‰ç§¯
+							//ÏòÁ¿OAºÍÏòÁ¿OBµÄ²æ»ı
 							QVector3D voa = QVector3D::crossProduct(OA, OO);
 							QVector3D vob = QVector3D::crossProduct(OB, OO);
 
@@ -1161,7 +1161,7 @@ namespace MPostRend
 							return cosA < cosB;
 						});
 
-						//ä¸‰è§’åŒ–
+						//Èı½Ç»¯
 						for (int i = 1; i < num - 1; ++i)
 						{
 							trivertexs.append(sss.at(0));
@@ -1196,7 +1196,7 @@ namespace MPostRend
 
 		if (_currentFrameRendData->getNodeOrElement() == MViewBasic::PostNode)
 		{
-			//æ˜¯å¦è®¡ç®—çŸ¢é‡
+			//ÊÇ·ñ¼ÆËãÊ¸Á¿
 			if (!_hasVector)
 			{
 				QHash<int, float> values = _currentFrameRendData->getRendValue();
@@ -1447,7 +1447,7 @@ namespace MPostRend
 								QVector3D OA = a.first - center;
 								QVector3D OB = b.first - center;
 
-								//å‘é‡OAå’Œå‘é‡OBçš„å‰ç§¯
+								//ÏòÁ¿OAºÍÏòÁ¿OBµÄ²æ»ı
 								QVector3D voa = QVector3D::crossProduct(OA, OO);
 								QVector3D vob = QVector3D::crossProduct(OB, OO);
 
@@ -1465,7 +1465,7 @@ namespace MPostRend
 								return cosA < cosB;
 							});
 
-							//æ’åº
+							//ÅÅĞò
 							//for (int i = 0; i < num; ++i)
 							//{
 							//	for (int j = 0; j < num - i - 1; ++j)
@@ -1479,7 +1479,7 @@ namespace MPostRend
 							//	}
 							//}
 
-							//ä¸‰è§’åŒ–
+							//Èı½Ç»¯
 							for (int i = 1; i < num - 1; ++i)
 							{
 								_triPlane.append(sss.at(0).first);
@@ -1493,7 +1493,7 @@ namespace MPostRend
 								//_triTexture.append((sss.at(i).second - _currentFrameRendData->getMinData()) / fenmu);
 								//_triTexture.append((sss.at(i + 1).second - _currentFrameRendData->getMinData()) / fenmu);
 
-								qDebug() <<"è®¡ç®—æ³•å‘" << QVector3D::normal((sss.at(i).first - sss.at(0).first), (sss.at(i + 1).first - sss.at(0).first));
+								//qDebug() <<"¼ÆËã·¨Ïò" << QVector3D::normal((sss.at(i).first - sss.at(0).first), (sss.at(i + 1).first - sss.at(0).first));
 							}
 						}
 					}
@@ -1747,7 +1747,7 @@ namespace MPostRend
 								QVector3D OA = a.first - center;
 								QVector3D OB = b.first - center;
 
-								//å‘é‡OAå’Œå‘é‡OBçš„å‰ç§¯
+								//ÏòÁ¿OAºÍÏòÁ¿OBµÄ²æ»ı
 								QVector3D voa = QVector3D::crossProduct(OA, OO);
 								QVector3D vob = QVector3D::crossProduct(OB, OO);
 
@@ -1765,7 +1765,7 @@ namespace MPostRend
 								return cosA < cosB;
 							});
 
-							//ä¸‰è§’åŒ–
+							//Èı½Ç»¯
 							for (int i = 1; i < num - 1; ++i)
 							{
 								_triPlane.append(sss.at(0).first);
@@ -2015,7 +2015,7 @@ namespace MPostRend
 							QVector3D OA = a - center;
 							QVector3D OB = b - center;
 
-							//å‘é‡OAå’Œå‘é‡OBçš„å‰ç§¯
+							//ÏòÁ¿OAºÍÏòÁ¿OBµÄ²æ»ı
 							QVector3D voa = QVector3D::crossProduct(OA, OO);
 							QVector3D vob = QVector3D::crossProduct(OB, OO);
 
@@ -2033,7 +2033,7 @@ namespace MPostRend
 							return cosA < cosB;
 						});
 
-						//ä¸‰è§’åŒ–
+						//Èı½Ç»¯
 						for (int i = 1; i < num - 1; ++i)
 						{
 							_triPlane.append(sss.at(0));
@@ -2070,7 +2070,7 @@ namespace MPostRend
 		{
 			_parent->removeChild(_cuttingPlaneDrawable);
 		}
-		//è¿™å„¿ææ„åæœ‰é—®é¢˜
+		//Õâ¶ùÎö¹¹ºóÓĞÎÊÌâ
 		if (_transparentPlaneDrawable)
 		{
 			_parent->removeChild(_transparentPlaneDrawable);

@@ -49,15 +49,15 @@ namespace MPostRend
 	{
 	public:
 		//0 - 原始坐标；1 - 部件颜色；2 - 部件颜色、纹理值0, 1；3 - 变量值；
-		//4 - 位移值； 5 - 是否有值，没有值的话显示灰色，有值的话按照IsColor判断；6 - 法向量, 7 -ID
+		//4 - 位移值；
 		//QVector3D, GLubyte, GLubyte, float, QVector3D, GLubyte, QVector3D, float
 		std::shared_ptr<mxr::Vec3Array>  _vertex0;
 		std::shared_ptr<mxr::Vec3Array>  _vertex1;
 		std::shared_ptr<mxr::FloatArray> _vertex2;
 		std::shared_ptr<mxr::FloatArray> _vertex3;
 		std::shared_ptr<mxr::Vec3Array>  _vertex4;
-		std::shared_ptr<mxr::FloatArray> _vertex5;
-		std::shared_ptr<mxr::Vec3Array>  _vertex6;
+		//std::shared_ptr<mxr::FloatArray> _vertex5;
+		//std::shared_ptr<mxr::Vec3Array>  _vertex6;
 		//std::shared_ptr<mxr::FloatArray> _vertex8;
 		mPostPartFaceRender(std::shared_ptr<mxr::Group> parent);
 		~mPostPartFaceRender();
@@ -75,7 +75,7 @@ namespace MPostRend
 	public:
 		//meshline stateset
 		std::shared_ptr<mxr::Vec3Array>  _vertex0;
-		std::shared_ptr<mxr::Vec3Array>  _vertex1;
+		//std::shared_ptr<mxr::Vec3Array>  _vertex1;
 		mPostPartFaceTransparentNodeformationRender(std::shared_ptr<mxr::Group> parent);
 		~mPostPartFaceTransparentNodeformationRender();
 		std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
@@ -94,7 +94,6 @@ namespace MPostRend
 		std::shared_ptr<mxr::Vec3Array>   _vertex0;
 		std::shared_ptr<mxr::Vec3Array>   _vertex1;
 		std::shared_ptr<mxr::FloatArray>  _vertex2;
-		//std::shared_ptr<mxr::FloatArray>  _vertex3;
 		mPostPartFaceLineRender(std::shared_ptr<mxr::Group> parent);
 		~mPostPartFaceLineRender();
 		std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
@@ -117,7 +116,7 @@ namespace MPostRend
 		std::shared_ptr<mxr::FloatArray> _vertex2;
 		std::shared_ptr<mxr::FloatArray> _vertex3;
 		std::shared_ptr<mxr::Vec3Array>  _vertex4;
-		std::shared_ptr<mxr::FloatArray> _vertex5;
+		//std::shared_ptr<mxr::FloatArray> _vertex5;
 		mPostPartLineRender(std::shared_ptr<mxr::Group> parent);
 		~mPostPartLineRender();
 		std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
@@ -132,15 +131,15 @@ namespace MPostRend
 	class RENDVIEW_EXPORT mPostPartPointRender
 	{
 	public:
-		//0 - 原始坐标；1 - 部件颜色；2 - 部件颜色、纹理值0, 1；3 - 变量值；
-		//4 - 位移值； 5 - 是否有值，没有值的话显示灰色，有值的话按照IsColor判断
+		//0 - 原始坐标；1 - 部件颜色；2 - 部件颜色、纹理值、是否灰色0, 1, 2, 3；3 - 变量值；
+		//4 - 位移值
 		//QVector3D, GLubyte, GLubyte, float, QVector3D, GLubyte, QVector3D, float
 		std::shared_ptr<mxr::Vec3Array>  _vertex0;
 		std::shared_ptr<mxr::Vec3Array>  _vertex1;
 		std::shared_ptr<mxr::FloatArray> _vertex2;
 		std::shared_ptr<mxr::FloatArray> _vertex3;
 		std::shared_ptr<mxr::Vec3Array>  _vertex4;
-		std::shared_ptr<mxr::FloatArray> _vertex5;
+		//std::shared_ptr<mxr::FloatArray> _vertex5;
 		mPostPartPointRender(std::shared_ptr<mxr::Group> parent);
 		~mPostPartPointRender();
 		std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
@@ -196,6 +195,7 @@ namespace MPostRend
 		void setShowFuntion(ShowFuntion showFuntion);
 		void setIsShowInitialShape(bool isShowInitialShape);//设置是否显示初始构型的透明图形
 		std::shared_ptr<mxr::Drawable> getFaceDrawable() { return _facerend->getDrawable(); };
+		std::shared_ptr<mxr::Drawable> getLineDrawable() { return _linerend->getDrawable(); };
 		std::shared_ptr<mxr::Drawable> getPointDrawable() { return _pointrend->getDrawable(); };
 		std::shared_ptr<mxr::Drawable> getFaceTransparentNodeformationDrawable() { return _facetransparentnodeformationrend->getDrawable(); };
 		std::shared_ptr<mxr::Geode> getGeode() { return _geode; }

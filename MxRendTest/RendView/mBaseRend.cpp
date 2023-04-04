@@ -1,9 +1,9 @@
 #include "mBaseRend.h"
 #include "mBackGroundRender.h"
 #include "mBaseRender.h"
-//å·¥å…·ç±»
+//¹¤¾ßÀà
 #include"mViewToolClass.h"
-//è§†å›¾ç±»
+//ÊÓÍ¼Àà
 #include "mModelView.h"
 #include "mCommonView.h"
 
@@ -22,7 +22,7 @@ namespace MBaseRend
 	mBaseRend::mBaseRend(const QString& name): _name(name)
 	{
 		setMouseTracking(true);
-		QOpenGLContext *context = QOpenGLContext::currentContext();
+		//QOpenGLContext *context = QOpenGLContext::currentContext();
 		_app = MakeAsset<mxr::Application>();
 		//_app->setContext(context);
 		mxr::ApplicationInstance::GetInstance().appendApplication(name, _app);
@@ -35,7 +35,7 @@ namespace MBaseRend
 		//format.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
 		//format.setSamples(4);
 		//setFormat(format);
-
+		//this->showMaximized();
 		qDebug() << "Base Struct";
 	}
 
@@ -47,8 +47,9 @@ namespace MBaseRend
 
 		this->initializeOpenGLFunctions();
 		QOpenGLContext *context = QOpenGLContext::currentContext();
+		//qDebug() << "initializeGL" << QString::number(long long int(context->surface()), 16);
 		_app->setContext(context);
-
+		//glViewport(0, 0, this->width(), this->height());
 		_modelView = MakeAsset<mModelView>();
 		_commonView = MakeAsset<mCommonView>();
 
@@ -60,11 +61,11 @@ namespace MBaseRend
 		_bgRend = MakeAsset<mBackGroundRender>(_app, _root);
 
 		/**/
-		//_app->GLContext()->functions()->glEnable(GL_POINT_SPRITE);		//å¼€å¯æ¸²æŸ“ç‚¹ç²¾çµåŠŸèƒ½
-		//_app->GLContext()->functions()->glEnable(GL_PROGRAM_POINT_SIZE); //è®©é¡¶ç‚¹ç¨‹åºå†³å®šç‚¹å—å¤§å°
+		//_app->GLContext()->functions()->glEnable(GL_POINT_SPRITE);		//¿ªÆôäÖÈ¾µã¾«Áé¹¦ÄÜ
+		//_app->GLContext()->functions()->glEnable(GL_PROGRAM_POINT_SIZE); //ÈÃ¶¥µã³ÌĞò¾ö¶¨µã¿é´óĞ¡
 
-		glEnable(GL_POINT_SPRITE);		//å¼€å¯æ¸²æŸ“ç‚¹ç²¾çµåŠŸèƒ½
-		glEnable(GL_PROGRAM_POINT_SIZE); //è®©é¡¶ç‚¹ç¨‹åºå†³å®šç‚¹å—å¤§å°
+		glEnable(GL_POINT_SPRITE);		//¿ªÆôäÖÈ¾µã¾«Áé¹¦ÄÜ
+		glEnable(GL_PROGRAM_POINT_SIZE); //ÈÃ¶¥µã³ÌĞò¾ö¶¨µã¿é´óĞ¡
 		glEnable(GL_DEPTH_TEST);
 
 		qDebug() << "Base Initial";
@@ -73,8 +74,8 @@ namespace MBaseRend
 	void mBaseRend::paintGL()
 	{
 		QOpenGLContext *context = QOpenGLContext::currentContext();
-		//glEnable(GL_POINT_SPRITE);		//å¼€å¯æ¸²æŸ“ç‚¹ç²¾çµåŠŸèƒ½
-		//glEnable(GL_PROGRAM_POINT_SIZE); //è®©é¡¶ç‚¹ç¨‹åºå†³å®šç‚¹å—å¤§å°
+		//glEnable(GL_POINT_SPRITE);		//¿ªÆôäÖÈ¾µã¾«Áé¹¦ÄÜ
+		//glEnable(GL_PROGRAM_POINT_SIZE); //ÈÃ¶¥µã³ÌĞò¾ö¶¨µã¿é´óĞ¡
 		//qDebug() << "mBaseRend::paintGL()" << QString::number(long long int(context), 16);
 		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
 		if (error != 0)
@@ -82,6 +83,8 @@ namespace MBaseRend
 			qDebug() << error;
 		}
 		_viewer->run();
+		//glClearColor(0, 0, 0, 1);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		error = QOpenGLContext::currentContext()->functions()->glGetError();
 		if (error != 0)
 		{
@@ -95,6 +98,10 @@ namespace MBaseRend
 
 	void mBaseRend::resizeGL(int w, int h)
 	{
+		QOpenGLContext *context = QOpenGLContext::currentContext();
+		context->makeCurrent(context->surface());
+		//qDebug() << "resizeGL" << QString::number(long long int(context->surface()), 16);
+		//qDebug() << "resizeGL" << QString::number(long long int(context), 16);
 		glViewport(0, 0, w, h);
 		SCR_WIDTH = w;
 		SCR_HEIGHT = h;
@@ -109,15 +116,15 @@ namespace MBaseRend
 			isFirstMouse = true;
 			isMiddleMousePress = true;
 
-			//è®¾ç½®é¼ æ ‡ç§»åŠ¨ç¼©æ”¾çš„å‚æ•°
+			//ÉèÖÃÊó±êÒÆ¶¯Ëõ·ÅµÄ²ÎÊı
 			if (ifZoomByMouseMove == true)
 			{
-				//ç¬¬ä¸€æ¬¡é¼ æ ‡ç‚¹å‡»çš„åƒç´ åæ ‡
+				//µÚÒ»´ÎÊó±êµã»÷µÄÏñËØ×ø±ê
 				Posx_Firstmouse = event->pos().x();
 				Posy_Firstmouse = event->pos().y();
 				_modelView->IfFirstMouse = true;
 			}
-			//è®¾ç½®ç»•ç€å±å¹•ä¸­å¿ƒæ—‹è½¬(æ¯æ¬¡ç‚¹å‡»é¼ æ ‡ä¸­é”®é‡æ–°è·å–å±å¹•ä¸­å¿ƒåæ ‡)
+			//ÉèÖÃÈÆ×ÅÆÁÄ»ÖĞĞÄĞı×ª(Ã¿´Îµã»÷Êó±êÖĞ¼üÖØĞÂ»ñÈ¡ÆÁÄ»ÖĞĞÄ×ø±ê)
 			if (ifRotateAtViewCenter == true)
 			{
 				//SetRotateCenterToViewCenter();
@@ -125,7 +132,7 @@ namespace MBaseRend
 
 			//_meshRend->TestFunction();
 
-			//å‘é€ä¿¡å·
+			//·¢ËÍĞÅºÅ
 			//mGlobalSignals::getInstance()->viewMiddleButtonPressSig();
 		}
 
@@ -136,7 +143,7 @@ namespace MBaseRend
 			Posx_Firstmouse = event->pos().x();
 			Posy_Firstmouse = event->pos().y();
 
-			//æ¡†é€‰æ”¾å¤§
+			//¿òÑ¡·Å´ó
 			if (ifZoomAtFrameCenter == true)
 			{
 				left_up = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
@@ -153,11 +160,11 @@ namespace MBaseRend
 				{
 
 				}
-				if (event->modifiers() == Qt::ControlModifier)//å•é€‰
+				if (event->modifiers() == Qt::ControlModifier)//µ¥Ñ¡
 				{
 					//mMeshStaticData::_pickSoloOrMutiply = SoloPick;
 				}
-				else if (event->modifiers() == Qt::ShiftModifier)//çŸ©å½¢æ¡†é€‰
+				else if (event->modifiers() == Qt::ShiftModifier)//¾ØĞÎ¿òÑ¡
 				{
 					//mMeshStaticData::_pickSoloOrMutiply = MultiplyPick;
 					//if (mMeshStaticData::_mutiplyPickStatus)
@@ -168,7 +175,7 @@ namespace MBaseRend
 						right_up = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
 					}
 				}
-				else if (event->modifiers() == Qt::AltModifier)//åœ†å½¢æ¡†é€‰
+				else if (event->modifiers() == Qt::AltModifier)//Ô²ĞÎ¿òÑ¡
 				{
 					//mMeshStaticData::_pickSoloOrMutiply = RoundPick;
 					//if (mMeshStaticData::_mutiplyPickStatus)
@@ -179,7 +186,7 @@ namespace MBaseRend
 				}
 			}
 
-			//å¦‚æœæ—‹è½¬ä¸­å¿ƒä¸ºå±å¹•ä¸­å¿ƒï¼Œé‚£ä¹ˆæ¯æ¬¡æŠ•å½±å˜æ¢åéƒ½è¦è·å–ä¸­å¿ƒä½ç½®ï¼›
+			//Èç¹ûĞı×ªÖĞĞÄÎªÆÁÄ»ÖĞĞÄ£¬ÄÇÃ´Ã¿´ÎÍ¶Ó°±ä»»ºó¶¼Òª»ñÈ¡ÖĞĞÄÎ»ÖÃ£»
 			//if (ifRotateAtViewCenter == true && ifZoomAtFrameCenter == false && mMeshStaticData::_pickSoloOrMutiply == NoPick)
 			{
 				//SetRotateCenterToViewCenter();
@@ -196,11 +203,11 @@ namespace MBaseRend
 			Posy_Firstmouse = event->pos().y();
 			//mMeshStaticData::SetPickFuntion(ReducePick);
 			//mMeshStaticData::_pickSoloOrMutiply = NoPick;
-			if (event->modifiers() == Qt::ControlModifier)//å•é€‰
+			if (event->modifiers() == Qt::ControlModifier)//µ¥Ñ¡
 			{
 				//mMeshStaticData::_pickSoloOrMutiply = SoloPick;
 			}
-			else if (event->modifiers() == Qt::ShiftModifier)//æ¡†é€‰
+			else if (event->modifiers() == Qt::ShiftModifier)//¿òÑ¡
 			{
 				//mMeshStaticData::_pickSoloOrMutiply = MultiplyPick;
 				//if (mMeshStaticData::_mutiplyPickStatus)
@@ -211,7 +218,7 @@ namespace MBaseRend
 					right_up = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
 				}
 			}
-			else if (event->modifiers() == Qt::AltModifier)//åœ†å½¢æ¡†é€‰
+			else if (event->modifiers() == Qt::AltModifier)//Ô²ĞÎ¿òÑ¡
 			{
 				//mMeshStaticData::_pickSoloOrMutiply = RoundPick;
 				//if (mMeshStaticData::_mutiplyPickStatus)
@@ -239,14 +246,14 @@ namespace MBaseRend
 			nowY = event->pos().y();
 			//if ((mMeshStaticData::_pickFilter == PickAdjustNum))
 			{
-				//if (_tempMeshRend->PickOnLineNum(0, event->pos()))//å·¦é”®åŠ 
+				//if (_tempMeshRend->PickOnLineNum(0, event->pos()))//×ó¼ü¼Ó
 				{
 					//mGlobalSignals::getInstance()->finishPickingAdjustNumSig(0);
 				}
 			}
 			//else if ((mMeshStaticData::_pickFilter == PickBiasNum))
 			{
-				//if (_tempMeshRend->PickOnLineNum(0, event->pos()))//å·¦é”®åŠ 
+				//if (_tempMeshRend->PickOnLineNum(0, event->pos()))//×ó¼ü¼Ó
 				{
 					//mGlobalSignals::getInstance()->finishPickingBiasNumSig(0);
 				}
@@ -294,9 +301,9 @@ namespace MBaseRend
 					}
 				}
 			}
-			//å‘é€ä¿¡å·
+			//·¢ËÍĞÅºÅ
 			//mGlobalSignals::getInstance()->finishPickingSig();
-			//æ ¹æ®çŸ©å½¢æ¡†ä¸­å¿ƒè¿›è¡Œç¼©æ”¾ï¼Œé¼ æ ‡é‡Šæ”¾åä¼ é€’æ•°æ®
+			//¸ù¾İ¾ØĞÎ¿òÖĞĞÄ½øĞĞËõ·Å£¬Êó±êÊÍ·Åºó´«µİÊı¾İ
 			if (ifZoomAtFrameCenter == true)
 			{
 				_modelView->ZoomAtFrameCenter((Posx_Firstmouse + nowX) / 2, (Posy_Firstmouse + nowY) / 2);
@@ -304,19 +311,19 @@ namespace MBaseRend
 				//_meshModelRulerRend->UpdateNum();
 				ifZoomAtFrameCenter = false;
 			}
-			//ç‚¹å‡»è·å–åƒç´ ç‚¹åæ ‡ï¼Œé‡æ–°è®¾ç½®æ—‹è½¬ä¸­å¿ƒ
+			//µã»÷»ñÈ¡ÏñËØµã×ø±ê£¬ÖØĞÂÉèÖÃĞı×ªÖĞĞÄ
 			if (ifGetRotateCenter == true)
 			{
-				int posx = event->pos().x(); //QTåƒç´ åæ ‡åŸç‚¹å·¦ä¸Šè§’
+				int posx = event->pos().x(); //QTÏñËØ×ø±êÔ­µã×óÉÏ½Ç
 				int posy = event->pos().y();
 				float Depth = 0.0;
 				if (abs(BufDepth - 1.0) < 0.1)
 					Depth = 0;
 				else
-					Depth = (BufDepth - 0.5) * 2;//å°†æ·±åº¦å€¼èŒƒå›´ä»0.1è½¬æ¢åˆ°-1.1
-				//æ·»åŠ ç‚¹çš„æ¨¡å‹åæ ‡
+					Depth = (BufDepth - 0.5) * 2;//½«Éî¶ÈÖµ·¶Î§´Ó0.1×ª»»µ½-1.1
+				//Ìí¼ÓµãµÄÄ£ĞÍ×ø±ê
 				QVector3D Center = mViewToolClass::PixelToModelPosition(posx, posy, _modelView->_projection, _modelView->_view, _modelView->_model, SCR_WIDTH, SCR_HEIGHT, Depth);
-				//è·å–æœ€å¤§æ—‹è½¬åŠå¾„
+				//»ñÈ¡×î´óĞı×ª°ë¾¶
 				float maxRadius = mViewToolClass::GetMaxRadius(_left, _right, _bottom, _top, _back, _front, Center);
 				_modelView->SetRotateCenterToPoint(Center, maxRadius);
 				_center_now = Center;
@@ -325,8 +332,8 @@ namespace MBaseRend
 			}
 			else
 			{
-				//è®¾ç½®æ—‹è½¬ä¸­å¿ƒéšè—
-				//mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", false);//éšè—
+				//ÉèÖÃĞı×ªÖĞĞÄÒş²Ø
+				//mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", false);//Òş²Ø
 			}
 
 
@@ -341,14 +348,14 @@ namespace MBaseRend
 			nowY = event->pos().y();
 			//if ((mMeshStaticData::_pickFilter == PickAdjustNum))
 			{
-				//if (_tempMeshRend->PickOnLineNum(1, event->pos()))//å³é”®å‡
+				//if (_tempMeshRend->PickOnLineNum(1, event->pos()))//ÓÒ¼ü¼õ
 				{
 					//mGlobalSignals::getInstance()->finishPickingAdjustNumSig(1);
 				}
 			}
 			//else if ((mMeshStaticData::_pickFilter == PickBiasNum))
 			{
-				//if (_tempMeshRend->PickOnLineNum(1, event->pos()))//å·¦é”®åŠ 
+				//if (_tempMeshRend->PickOnLineNum(1, event->pos()))//×ó¼ü¼Ó
 				{
 					//mGlobalSignals::getInstance()->finishPickingBiasNumSig(1);
 				}
@@ -399,7 +406,7 @@ namespace MBaseRend
 			}
 			isFirstMouse = GL_TRUE;
 			isRightMousePress = false;
-			//mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", false);//éšè—
+			//mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", false);//Òş²Ø
 		}
 		left_up = QVector2D(0, 0);
 		left_down = QVector2D(0, 0);
@@ -416,7 +423,7 @@ namespace MBaseRend
 		nowX = event->pos().x();
 		nowY = event->pos().y();
 
-		//æ¡†é€‰æ”¾å¤§ï¼ˆä¼ é€’çŸ©å½¢æ¡†å‚æ•°ï¼‰
+		//¿òÑ¡·Å´ó£¨´«µİ¾ØĞÎ¿ò²ÎÊı£©
 		if (isLeftMousePress && ifZoomAtFrameCenter == true)
 		{
 			left_down = QVector2D(Posx_Firstmouse, nowY);
@@ -433,8 +440,8 @@ namespace MBaseRend
 				isFirstMouse = GL_FALSE;
 			}
 
-			GLint xoffset = lastX - nowX;//è®¡ç®—Xæ–¹å‘åç§»é‡(ç§»åŠ¨åƒç´ )
-			GLint yoffset = nowY - lastY;// è®¡ç®—Yæ–¹å‘åç§»é‡
+			GLint xoffset = lastX - nowX;//¼ÆËãX·½ÏòÆ«ÒÆÁ¿(ÒÆ¶¯ÏñËØ)
+			GLint yoffset = nowY - lastY;// ¼ÆËãY·½ÏòÆ«ÒÆÁ¿
 			lastX = nowX;
 			lastY = nowY;
 
@@ -457,14 +464,14 @@ namespace MBaseRend
 				_modelView->ZoomAtViewCenter_ByMove(Posx_Firstmouse, Posy_Firstmouse, nowX, nowY);
 			}
 
-			//è®¾ç½®æ—‹è½¬ä¸­å¿ƒæ˜¯å¦æ˜¾ç¤º
+			//ÉèÖÃĞı×ªÖĞĞÄÊÇ·ñÏÔÊ¾
 			//if (ifTranslateXY == true || ifZoomByMouseMove == true)
 			//{
-			//	mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", false);//éšè—
+			//	mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", false);//Òş²Ø
 			//}
 			//if (ifRotateAtXY == true || ifRotateAtZ == true)
 			//{
-			//	mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", true);//æ˜¾ç¤º
+			//	mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", true);//ÏÔÊ¾
 			//}
 		}
 		//else if ((isRightMousePress || isLeftMousePress)/* && mMeshStaticData::_pickSoloOrMutiply == MultiplyPick*/)
@@ -487,7 +494,7 @@ namespace MBaseRend
 				//roundPoint = QVector2D(nowX, nowY);
 			//}
 		//}
-		//å³é”®å¹³ç§»
+		//ÓÒ¼üÆ½ÒÆ
 		else if (isRightMousePress/* && mMeshStaticData::_pickSoloOrMutiply == NoPick*/)
 		{
 			if (isFirstMouse)
@@ -497,12 +504,12 @@ namespace MBaseRend
 				isFirstMouse = GL_FALSE;
 			}
 
-			GLint xoffset = lastX - nowX;//è®¡ç®—Xæ–¹å‘åç§»é‡(ç§»åŠ¨åƒç´ )
-			GLint yoffset = nowY - lastY;// è®¡ç®—Yæ–¹å‘åç§»é‡
+			GLint xoffset = lastX - nowX;//¼ÆËãX·½ÏòÆ«ÒÆÁ¿(ÒÆ¶¯ÏñËØ)
+			GLint yoffset = nowY - lastY;// ¼ÆËãY·½ÏòÆ«ÒÆÁ¿
 			lastX = nowX;
 			lastY = nowY;
-			//è®¾ç½®æ—‹è½¬ä¸­å¿ƒä¸æ˜¾ç¤º
-			//mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", false);//éšè—
+			//ÉèÖÃĞı×ªÖĞĞÄ²»ÏÔÊ¾
+			//mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", false);//Òş²Ø
 
 			_modelView->Translate(xoffset, yoffset);
 
@@ -519,7 +526,7 @@ namespace MBaseRend
 	}
 	void mBaseRend::wheelEvent(QWheelEvent *event)
 	{
-		QPoint numDegrees = event->angleDelta();//è·å–æ»šè½®çš„è½¬è§’
+		QPoint numDegrees = event->angleDelta();//»ñÈ¡¹öÂÖµÄ×ª½Ç
 		if (abs(numDegrees.y() - 0) < 0.0001)
 		{
 			return;
@@ -565,6 +572,6 @@ namespace MBaseRend
 	}
 	void mBaseRend::GetPointDepthAtMouse()
 	{
-		glReadPixels(nowX, SCR_HEIGHT - nowY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &BufDepth);//OpenGLåƒç´ åæ ‡åŸç‚¹å·¦ä¸‹è§’ BufDepthèŒƒå›´ï¼ˆ0,1ï¼‰
+		glReadPixels(nowX, SCR_HEIGHT - nowY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &BufDepth);//OpenGLÏñËØ×ø±êÔ­µã×óÏÂ½Ç BufDepth·¶Î§£¨0,1£©
 	}
 }

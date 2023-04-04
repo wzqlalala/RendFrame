@@ -2,32 +2,49 @@
 
 #ifdef vertex_shader
 layout (location = 0) in vec3 aPos;
-layout (location = 1) in vec3 aNormal;
+
+out VS_OUT 
+{
+	vec3 pos;
+} vs_out;
+
+void main()
+{
+	vs_out.pos = aPos;
+}
+#endif
+
+#ifdef geometry_shader
+layout (triangles) in;
+layout (triangle_strip, max_vertices = 3) out;
+
+in VS_OUT {
+    vec3 pos;
+} gs_in[];
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-
 uniform vec4 planes[8];
 
-//光照部分
-out vec3 FragPos;
 out vec3 Normal;
+out vec3 FragPos;
 
-void main()
+void main() 
 {
-	FragPos = vec3(model * vec4(aPos, 1.0));
-    gl_Position = projection * view * vec4(FragPos, 1.0);
-
-	for(int i = 0;i < 8; ++i)
-	{
-		gl_ClipDistance[i] = dot(planes[i],vec4(aPos, 1.0f));	
-	}
-	
-	Normal = mat3(transpose(inverse(model))) * aNormal; 
+	Normal = normalize(mat3(transpose(inverse(model))) * cross(gs_in[1].pos -  gs_in[0].pos, gs_in[2].pos -  gs_in[1].pos));
+    for (int i = 0; i < 3; ++i) {
+		FragPos = vec3(model * vec4(gs_in[i].pos, 1.0));
+		gl_Position = projection * view * vec4(FragPos, 1.0);	
+		for(int j = 0;j < 8; ++j)
+		{
+			gl_ClipDistance[j] = dot(planes[j], vec4(gs_in[i].pos, 1.0f));	
+		}
+        EmitVertex();
+    }
+    EndPrimitive();
 }
 #endif
-
 
 #ifdef fragment_shader
 

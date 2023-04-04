@@ -1,9 +1,9 @@
 #include "MxRendTest.h"
 #include <QtWidgets/QApplication>
 #include <QOpenGLContext>
-#include <qoffscreensurface.h>
-#include <qopenglfunctions.h>
-#include <qdebug.h>
+#include <QOpenGLFunctions>
+#include <QOffscreenSurface>
+#include <QDebug>
 
 int main(int argc, char *argv[])
 {
@@ -11,16 +11,16 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
 	/*
-	 // 创建一个 QOpenGLContext 对象并尝试初始化 OpenGL 上下文
-	 QScopedPointer<QOpenGLContext> context(new QOpenGLContext);
-	 context->create();
+	// 创建一个 QOpenGLContext 对象并尝试初始化 OpenGL 上下文
+	QScopedPointer<QOpenGLContext> context(new QOpenGLContext);
+	context->create();
 
-	 QSurfaceFormat form = context->format();
+	QSurfaceFormat form = context->format();
 
-	 // 查询 OpenGL 版本
-	 int major = form.majorVersion();
-	 int minor = form.minorVersion();
-	 */
+	// 查询 OpenGL 版本
+	int major = form.majorVersion();
+	int minor = form.minorVersion();
+	*/
 	/*
 	QOffscreenSurface surf;
 	surf.create();
@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
 	format.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
 	format.setSamples(4);
 	QSurfaceFormat::setDefaultFormat(format);
+	
 	//setFormat(format);
 
 	//QOpenGLContext *context1 = new QOpenGLContext;

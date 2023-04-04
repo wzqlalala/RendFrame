@@ -6,7 +6,6 @@ layout(location = 1) in vec3 aMaterial;
 layout(location = 2) in float aIsColor;
 layout(location = 3) in float aValue;
 layout(location = 4) in vec3 aDisplacement;
-layout(location = 5) in float aHasValue;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -31,10 +30,10 @@ void main()
 	FragPos = vec3(model * vec4(deformationPos, 1.0));
 	gl_Position = projection * view * vec4(FragPos, 1.0);
 
-	Value = aValue;
-	isColor = int(aIsColor);
+	Value  = aValue;
+	isColor = int(aIsColor) / 2;
 	material = aMaterial;
-	hasValue = int(aHasValue);
+	hasValue = int(aIsColor) % 2;
 	gl_PointSize = PointSize;
 
 	for (int i = 0; i < 8; ++i) {
@@ -104,9 +103,7 @@ void main()
     if(mag > 0.98f) discard;
     N.z = sqrt(1.0f - mag);
     // N = normalize(N);
-    float textCoord = isEquivariance == 1 ? (Value - minValue) / (maxValue - minValue) : log2(Value / minValue) / log2(maxValue / minValue);
-    textCoord *= textureCoordRatio;
-    vec3 color = texture(Texture, textCoord).rgb;
+    vec3 color = isColor == 0 ? material : hasValue == 1 ? vec3(texture(Texture, (isEquivariance == 0 ? log2(Value/minValue) / log2(maxValue/minValue) : (Value-minValue) / (maxValue-minValue)) * textureCoordRatio)) : vec3(0.5f);
 
 	FragColor.rgb = pow(calculateLightResult(Normal, color, 1.0, N.z), vec3(1.0 / 2.2));
     FragColor.a = 1.0;

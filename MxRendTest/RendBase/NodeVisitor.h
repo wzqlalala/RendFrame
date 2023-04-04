@@ -2,6 +2,7 @@
 #include "Array.h"
 #include "Drawable.h"
 #include "RenderPass.h"
+#include "vao.h"
 
 namespace mxr
 {
@@ -66,13 +67,17 @@ namespace mxr
 		void run();
 		void RemoveDrawableAttribute(Drawable *node);
 		void RemoveAllData();
-		
+		void changeDrawBuffer(bool changeDrawBuffer) { _changeDrawBuffer = changeDrawBuffer;};
 	protected:
 		//具有相同顶点数据格式的drawable为一组
 		std::vector<std::vector<DrawableAttribute>> drawableattributes;
 		//每个vaoAttribute对应上面的一组drawable;
 		std::vector<VaoDrawArrayAttribute> _vaoattributes;
 		void RemoveVaoAttribute(Drawable *node, int index);
+
+	private:
+
+		bool _changeDrawBuffer = true;
 	};
 
 }

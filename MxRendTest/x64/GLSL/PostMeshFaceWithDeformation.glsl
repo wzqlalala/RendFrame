@@ -6,38 +6,67 @@ layout (location = 1) in vec3 aMaterial;
 layout (location = 2) in float aIsColor;
 layout (location = 3) in float aValue;
 layout (location = 4) in vec3 aDisplacement;
-layout (location = 5) in float aHasValue;
-layout (location = 6) in vec3 aNormal;
+
+uniform vec3 deformationScale;
+
+out VS_OUT 
+{
+	vec3 deformationPos;
+	out float Value;
+	flat out int isColor;
+	out vec3 material;
+} vs_out;
+
+void main()
+{
+	vs_out.deformationPos = aPos + deformationScale * aDisplacement;
+	
+	vs_out.Value  = aValue;
+	vs_out.isColor = int(aIsColor);
+	vs_out.material = aMaterial;
+}
+#endif
+
+#ifdef geometry_shader
+layout (triangles) in;
+layout (triangle_strip, max_vertices = 3) out;
+
+in VS_OUT {
+    vec3 deformationPos;
+	in float Value;
+	flat in int isColor;
+	in vec3 material;
+} gs_in[];
 
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
-uniform vec3 deformationScale;
 uniform vec4 planes[8];
 
+out vec3 Normal;
+out vec3 FragPos;
 out float Value;
 flat out int isColor;
 out vec3 material;
 flat out int hasValue;
-out vec3 FragPos;
-out vec3 Normal;
 
-void main()
+void main() 
 {
-	vec3 deformationPos = aPos + deformationScale * aDisplacement;
-	FragPos = vec3(model * vec4(deformationPos, 1.0));
-	gl_Position = projection * view * vec4(FragPos, 1.0);
-	
-	Value  = aValue;
-	isColor = int(aIsColor);
-	material = aMaterial;
-	hasValue = int(aHasValue);
-
-	for(int i = 0;i < 8; ++i){
-		gl_ClipDistance[i] = dot(planes[i], vec4(deformationPos, 1.0f));	
-	}
-	
-	Normal = mat3(transpose(inverse(model))) * aNormal; 
+	Normal = normalize(mat3(transpose(inverse(model))) * cross(gs_in[1].deformationPos -  gs_in[0].deformationPos, gs_in[2].deformationPos -  gs_in[1].deformationPos));
+    for (int i = 0; i < 3; ++i) {
+		FragPos = vec3(model * vec4(gs_in[i].deformationPos, 1.0));
+		gl_Position = projection * view * vec4(FragPos, 1.0);
+		Value  = gs_in[i].Value;
+		isColor = gs_in[i].isColor / 2;
+		material = gs_in[i].material;
+		hasValue = gs_in[i].isColor % 2;
+		for(int j = 0;j < 8; ++j)
+		{
+			gl_ClipDistance[j] = dot(planes[j], vec4(gs_in[i].deformationPos, 1.0f));	
+		}
+        EmitVertex();
+    }
+    EndPrimitive();
 }
 #endif
 

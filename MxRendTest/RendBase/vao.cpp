@@ -1,6 +1,8 @@
 #include "vao.h"
 #include <qdebug.h>
 
+#include "Drawable.h"
+
 namespace mxr
 {
 	static GLuint curr_bound_vertex_array = 0;  // smart binding
@@ -104,6 +106,17 @@ namespace mxr
 		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, _drawbuffer);
 		glMultiDrawArraysIndirect(mode, (void*)_offset, count, 0);
 		glBindBuffer(GL_DRAW_INDIRECT_BUFFER, 0);
+		Unbind();
+
+	}
+
+	void VAO::DrawArrays(std::vector<DrawArraysIndirectCommand> draws, GLenum mode)
+	{
+		Bind();
+		for (size_t i = 0; i < draws.size(); i++)
+		{
+			glDrawArrays(mode, draws.at(i).firstVertex, draws.at(i).vertexCount);
+		}
 		Unbind();
 
 	}

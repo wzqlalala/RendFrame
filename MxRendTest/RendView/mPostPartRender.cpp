@@ -131,7 +131,7 @@ namespace MPostRend
 		qDebug() << "边界线" << meshLineIDs.size();
 
 		_facetransparentnodeformationrend->getDrawable()->setVertexAttribArray(0, _facerend->_vertex0);
-		_facetransparentnodeformationrend->getDrawable()->setVertexAttribArray(1, _facerend->_vertex6);
+		//_facetransparentnodeformationrend->getDrawable()->setVertexAttribArray(1, _facerend->_vertex6);
 
 		_facelinerend->getDrawable()->setVertexAttribArray(0, _facerend->_vertex0);
 		_facelinerend->getDrawable()->setVertexAttribArray(1, _facerend->_vertex4);
@@ -182,6 +182,10 @@ namespace MPostRend
 
 	void mPostPartRender::setShowFuntion(ShowFuntion showFuntion)
 	{
+		if (!_partData->getPartVisual())
+		{
+			return;
+		}
 		_linerend->getDrawable()->setNodeMask(0);
 		if (showFuntion == ElementFace)
 		{
@@ -205,6 +209,10 @@ namespace MPostRend
 
 	void mPostPartRender::setIsShowInitialShape(bool isShowInitialShape)
 	{
+		if (!_partData->getPartVisual())
+		{
+			return;
+		}
 		if (isShowInitialShape)
 		{
 			_facetransparentnodeformationrend->getDrawable()->setNodeMask(0);
@@ -236,21 +244,21 @@ namespace MPostRend
 				QVector3D vertex0 = _oneFrameData->getNodeDataByID(nodeID)->getNodeVertex();
 				_pointrend->_vertex0->push_back(vertex0);
 				_pointrend->_vertex1->push_back(_partData->getPartColor());
-				_pointrend->_vertex2->push_back(1);
+				//_pointrend->_vertex2->push_back(1);
 				if (type == MViewBasic::PostElement)
 				{
 					//单元
 					value = values.value(meshID);
 					if (values.contains(meshID))
 					{
-						_pointrend->_vertex5->append(QVector<float>{ 1});
+						_pointrend->_vertex2->append(QVector<float>{3});
 						_minValue = min(_minValue, value);
 						_maxValue = max(_maxValue, value);
 
 					}
 					else
 					{
-						_pointrend->_vertex5->append(QVector<float>{0});
+						_pointrend->_vertex2->append(QVector<float>{2});
 					}
 				}
 				else if (type == MViewBasic::PostNode)
@@ -259,14 +267,14 @@ namespace MPostRend
 					value = values.value(nodeID);
 					if (values.contains(nodeID))
 					{
-						_pointrend->_vertex5->append(QVector<float>{1});
+						_pointrend->_vertex2->append(QVector<float>{3});
 						_minValue = min(_minValue, value);
 						_maxValue = max(_maxValue, value);
 
 					}
 					else
 					{
-						_pointrend->_vertex5->append(QVector<float>{0});
+						_pointrend->_vertex2->append(QVector<float>{2});
 					}
 				}
 				_pointrend->_vertex3->push_back(value);
@@ -303,7 +311,7 @@ namespace MPostRend
 				QVector3D vertex0 = _oneFrameData->getNodeDataByID(nodeID)->getNodeVertex();
 				_linerend->_vertex0->push_back(vertex0);
 				_linerend->_vertex1->push_back(_partData->getPartColor());
-				_linerend->_vertex2->push_back(1);
+				//_linerend->_vertex2->push_back(1);
 				if (type == MViewBasic::PostElement)
 				{
 					//单元
@@ -333,24 +341,24 @@ namespace MPostRend
 			{
 				if (values.contains(meshID))
 				{
-					_linerend->_vertex5->append(QVector<float>{1, 1});
+					_linerend->_vertex2->append(QVector<float>{3, 3});
 					_minValue = min(_minValue, value);
 					_maxValue = max(_maxValue, value);
 				}
 				else
 				{
-					_linerend->_vertex5->append(QVector<float>{0, 0});
+					_linerend->_vertex2->append(QVector<float>{2, 2});
 				}
 			}
 			else if (type == MViewBasic::PostNode)
 			{
 				if (hasValue)
 				{
-					_linerend->_vertex5->append(QVector<float>{1, 1});
+					_linerend->_vertex2->append(QVector<float>{ 3, 3 });
 				}
 				else
 				{
-					_linerend->_vertex5->append(QVector<float>{0, 0});
+					_linerend->_vertex2->append(QVector<float>{ 2, 2 });
 				}
 			}
 		}
@@ -384,7 +392,7 @@ namespace MPostRend
 				vertex0 = _oneFrameData->getNodeDataByID(nodeID)->getNodeVertex();
 				_facerend->_vertex0->push_back(vertex0);
 				_facerend->_vertex1->push_back(_partData->getPartColor());
-				_facerend->_vertex2->push_back(1);
+				//_facerend->_vertex2->push_back(1);
 				if (type == MViewBasic::PostElement)
 				{
 					//单元
@@ -414,31 +422,31 @@ namespace MPostRend
 			{
 				if (values.contains(meshID))
 				{
-					_facerend->_vertex5->append(QVector<float>{1, 1, 1});
+					_facerend->_vertex2->append(QVector<float>{3,3,3});
 					_minValue = min(_minValue, value);
 					_maxValue = max(_maxValue, value);
 				}
 				else
 				{
-					_facerend->_vertex5->append(QVector<float>{0, 0, 0});
+					_facerend->_vertex2->append(QVector<float>{2,2,2});
 				}
 			}
 			else if (type == MViewBasic::PostNode)
 			{
 				if (hasValue)
 				{
-					_facerend->_vertex5->append(QVector<float>{ 1, 1, 1 });
+					_facerend->_vertex2->append(QVector<float>{ 3,3,3 });
 				}
 				else
 				{
-					_facerend->_vertex5->append(QVector<float>{ 0, 0, 0 });
+					_facerend->_vertex2->append(QVector<float>{ 2,2,2 });
 				}
 			}
-			vertex0 = _oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + dis.value(index.at(0)) * deformationScale;
-			vertex1 = _oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + dis.value(index.at(1)) * deformationScale;
-			vertex2 = _oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + dis.value(index.at(2)) * deformationScale;
-			QVector3D normal = QVector3D::crossProduct((vertex1 - vertex0).normalized(), (vertex2 - vertex1).normalized()).normalized();
-			_facerend->_vertex6->append(QVector<QVector3D>(3, normal));
+			//vertex0 = _oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + dis.value(index.at(0)) * deformationScale;
+			//vertex1 = _oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + dis.value(index.at(1)) * deformationScale;
+			//vertex2 = _oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + dis.value(index.at(2)) * deformationScale;
+			//QVector3D normal = QVector3D::crossProduct((vertex1 - vertex0).normalized(), (vertex2 - vertex1).normalized()).normalized();
+			//_facerend->_vertex6->append(QVector<QVector3D>(3, normal));
 			//_facerend->_vertex8->append(QVector<float>(3, (float)meshID));
 			_facelinerend->_vertex2->append(QVector<float>(3, 1.0f));
 			//_facelinerend->_vertex3->append(QVector<float>(3, (vertex0 - vertex1).length()));
@@ -453,7 +461,7 @@ namespace MPostRend
 				vertex0 = _oneFrameData->getNodeDataByID(nodeID)->getNodeVertex();
 				_facerend->_vertex0->push_back(vertex0);
 				_facerend->_vertex1->push_back(_partData->getPartColor());
-				_facerend->_vertex2->push_back(1);
+				//_facerend->_vertex2->push_back(1);
 				if (type == MViewBasic::PostElement)
 				{
 					//单元
@@ -483,32 +491,32 @@ namespace MPostRend
 			{
 				if (values.contains(meshID))
 				{
-					_facerend->_vertex5->append(QVector<float>(6, 1));
+					_facerend->_vertex2->append(QVector<float>(6, 3));
 					_minValue = min(_minValue, value);
 					_maxValue = max(_maxValue, value);
 				}
 				else
 				{
-					_facerend->_vertex5->append(QVector<float>(6, 0));
+					_facerend->_vertex2->append(QVector<float>(6, 2));
 				}
 			}
 			else if (type == MViewBasic::PostNode)
 			{
 				if (hasValue)
 				{
-					_facerend->_vertex5->append(QVector<float>(6, 1));
+					_facerend->_vertex2->append(QVector<float>(6, 3));
 				}
 				else
 				{
-					_facerend->_vertex5->append(QVector<float>(6, 0));
+					_facerend->_vertex2->append(QVector<float>(6, 2));
 				}
 			}
 
-			vertex0 = _oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + dis.value(index.at(0)) * deformationScale;
-			vertex1 = _oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + dis.value(index.at(1)) * deformationScale;
-			vertex2 = _oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + dis.value(index.at(2)) * deformationScale;
-			QVector3D normal = QVector3D::crossProduct((vertex1 - vertex0).normalized(), (vertex2 - vertex1).normalized()).normalized();
-			_facerend->_vertex6->append(QVector<QVector3D>(6, normal));
+			//vertex0 = _oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + dis.value(index.at(0)) * deformationScale;
+			//vertex1 = _oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + dis.value(index.at(1)) * deformationScale;
+			//vertex2 = _oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + dis.value(index.at(2)) * deformationScale;
+			//QVector3D normal = QVector3D::crossProduct((vertex1 - vertex0).normalized(), (vertex2 - vertex1).normalized()).normalized();
+			//_facerend->_vertex6->append(QVector<QVector3D>(6, normal));
 			//_facerend->_vertex8->append(QVector<float>(6, (float)meshID));
 			_facelinerend->_vertex2->append(QVector<float>(6, 0.0f));
 			//_facelinerend->_vertex3->append(QVector<float>(6, (vertex0 - vertex1).length()));
@@ -539,7 +547,7 @@ namespace MPostRend
 				vertex0 = _oneFrameData->getNodeDataByID(nodeID)->getNodeVertex();
 				_facerend->_vertex0->push_back(vertex0);
 				_facerend->_vertex1->push_back(_partData->getPartColor());
-				_facerend->_vertex2->push_back(1);
+				//_facerend->_vertex2->push_back(1);
 				if (type == MViewBasic::PostElement)
 				{
 					value = values.value(meshID);
@@ -567,31 +575,31 @@ namespace MPostRend
 			{
 				if (values.contains(meshID))
 				{
-					_facerend->_vertex5->append(QVector<float>{1, 1, 1});
+					_facerend->_vertex2->append(QVector<float>{3, 3, 3});
 					_minValue = min(_minValue, value);
 					_maxValue = max(_maxValue, value);
 				}
 				else
 				{
-					_facerend->_vertex5->append(QVector<float>{0, 0, 0});
+					_facerend->_vertex2->append(QVector<float>{2, 2, 2});
 				}
 			}
 			else if (type == MViewBasic::PostNode)
 			{
 				if (hasValue)
 				{
-					_facerend->_vertex5->append(QVector<float>{ 1, 1, 1 });
+					_facerend->_vertex2->append(QVector<float>{ 3, 3, 3 });
 				}
 				else
 				{
-					_facerend->_vertex5->append(QVector<float>{ 0, 0, 0 });
+					_facerend->_vertex2->append(QVector<float>{ 2, 2, 2 });
 				}
 			}
-			vertex0 = _oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + dis.value(index.at(0)) * deformationScale;
-			vertex1 = _oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + dis.value(index.at(1)) * deformationScale;
-			vertex2 = _oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + dis.value(index.at(2)) * deformationScale;
-			QVector3D normal = QVector3D::crossProduct((vertex1 - vertex0).normalized(), (vertex2 - vertex1).normalized()).normalized();
-			_facerend->_vertex6->append(QVector<QVector3D>(3, normal));
+			//vertex0 = _oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + dis.value(index.at(0)) * deformationScale;
+			//vertex1 = _oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + dis.value(index.at(1)) * deformationScale;
+			//vertex2 = _oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + dis.value(index.at(2)) * deformationScale;
+			//QVector3D normal = QVector3D::crossProduct((vertex1 - vertex0).normalized(), (vertex2 - vertex1).normalized()).normalized();
+			//_facerend->_vertex6->append(QVector<QVector3D>(3, normal));
 
 			//if (!_oneFrameData->getMeshDataByID(meshID)->getMeshVisual())
 			//{
@@ -609,7 +617,7 @@ namespace MPostRend
 				vertex0 = _oneFrameData->getNodeDataByID(nodeID)->getNodeVertex();
 				_facerend->_vertex0->push_back(vertex0);
 				_facerend->_vertex1->push_back(_partData->getPartColor());
-				_facerend->_vertex2->push_back(1);
+				//_facerend->_vertex2->push_back(1);
 				if (type == MViewBasic::PostElement)
 				{
 					//单元
@@ -639,32 +647,32 @@ namespace MPostRend
 			{
 				if (values.contains(meshID))
 				{
-					_facerend->_vertex5->append(QVector<float>(6, 1));
+					_facerend->_vertex2->append(QVector<float>(6, 3));
 					_minValue = min(_minValue, value);
 					_maxValue = max(_maxValue, value);
 				}
 				else
 				{
-					_facerend->_vertex5->append(QVector<float>(6, 0));
+					_facerend->_vertex2->append(QVector<float>(6, 2));
 				}
 			}
 			else if (type == MViewBasic::PostNode)
 			{
 				if (hasValue)
 				{
-					_facerend->_vertex5->append(QVector<float>(6, 1));
+					_facerend->_vertex2->append(QVector<float>(6, 3));
 				}
 				else
 				{
-					_facerend->_vertex5->append(QVector<float>(6, 0));
+					_facerend->_vertex2->append(QVector<float>(6, 2));
 				}
 			}
 
-			vertex0 = _oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + dis.value(index.at(0)) * deformationScale;
-			vertex1 = _oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + dis.value(index.at(1)) * deformationScale;
-			vertex2 = _oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + dis.value(index.at(2)) * deformationScale;
-			QVector3D normal = QVector3D::crossProduct((vertex1 - vertex0).normalized(), (vertex2 - vertex1).normalized()).normalized();
-			_facerend->_vertex6->append(QVector<QVector3D>(6, normal));
+			//vertex0 = _oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + dis.value(index.at(0)) * deformationScale;
+			//vertex1 = _oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + dis.value(index.at(1)) * deformationScale;
+			//vertex2 = _oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + dis.value(index.at(2)) * deformationScale;
+			//QVector3D normal = QVector3D::crossProduct((vertex1 - vertex0).normalized(), (vertex2 - vertex1).normalized()).normalized();
+			//_facerend->_vertex6->append(QVector<QVector3D>(6, normal));
 			//_facerend->_vertex8->append(QVector<float>(6, (float)meshID));
 			_facelinerend->_vertex2->append(QVector<float>(6, 0.0f));
 			//_facelinerend->_vertex3->append(QVector<float>(6, (vertex0 - vertex1).length()));
@@ -728,14 +736,14 @@ namespace MPostRend
 			}
 			if (values.contains(meshID))
 			{
-				meshhasvalues.append(QVector<float>{1});
+				meshhasvalues.append(QVector<float>{3});
 				_minValue = min(_minValue, value);
 				_maxValue = max(_maxValue, value);
 
 			}
 			else
 			{
-				meshhasvalues.append(QVector<float>{1});
+				meshhasvalues.append(QVector<float>{2});
 			}
 		}
 
@@ -1111,6 +1119,7 @@ namespace MPostRend
 			Space::destoryTree(_spaceTree);
 		}
 		_spaceTree = new Space::SpaceTree(aabb);
+		return;
 		Space::initSpaceTree(_spaceTree, 2);
 		meshDatas += _partData->getMeshDatas3();
 		for (auto item : meshDatas)
@@ -1146,8 +1155,8 @@ namespace MPostRend
 		_vertex2 = MakeAsset<FloatArray>();
 		_vertex3 = MakeAsset<FloatArray>();
 		_vertex4 = MakeAsset<Vec3Array >();
-		_vertex5 = MakeAsset<FloatArray>();
-		_vertex6 = MakeAsset<Vec3Array >();
+		//_vertex2 = MakeAsset<FloatArray>();
+		//_vertex6 = MakeAsset<Vec3Array >();
 		//_vertex8 = MakeAsset<FloatArray>();
 
 		_drawable->setVertexAttribArray(0, _vertex0);
@@ -1155,8 +1164,8 @@ namespace MPostRend
 		_drawable->setVertexAttribArray(2, _vertex2);
 		_drawable->setVertexAttribArray(3, _vertex3);
 		_drawable->setVertexAttribArray(4, _vertex4);
-		_drawable->setVertexAttribArray(5, _vertex5);
-		_drawable->setVertexAttribArray(6, _vertex6);
+		//_drawable->setVertexAttribArray(5, _vertex2);
+		//_drawable->setVertexAttribArray(6, _vertex6);
 		//_drawable->setVertexAttribArray(8, _vertex8);
 
 		_parent = parent;
@@ -1177,11 +1186,11 @@ namespace MPostRend
 	{
 		_drawable = MakeAsset<Drawable>();
 		_vertex0 = MakeAsset<Vec3Array>();
-		_vertex1 = MakeAsset<Vec3Array>();
+		//_vertex1 = MakeAsset<Vec3Array>();
 		//_vertex8 = MakeAsset<FloatArray>();
 
 		_drawable->setVertexAttribArray(0, _vertex0);
-		_drawable->setVertexAttribArray(1, _vertex1);
+		//_drawable->setVertexAttribArray(1, _vertex1);
 		//_drawable->setVertexAttribArray(8, _vertex8);
 
 		_parent = parent;
@@ -1233,14 +1242,12 @@ namespace MPostRend
 		_vertex2 = MakeAsset<FloatArray>();
 		_vertex3 = MakeAsset<FloatArray>();
 		_vertex4 = MakeAsset<Vec3Array >();
-		_vertex5 = MakeAsset<FloatArray>();
 
 		_drawable->setVertexAttribArray(0, _vertex0);
 		_drawable->setVertexAttribArray(1, _vertex1);
 		_drawable->setVertexAttribArray(2, _vertex2);
 		_drawable->setVertexAttribArray(3, _vertex3);
 		_drawable->setVertexAttribArray(4, _vertex4);
-		_drawable->setVertexAttribArray(5, _vertex5);
 
 		_parent = parent;
 		_parent->addChild(_drawable);
@@ -1264,14 +1271,14 @@ namespace MPostRend
 		_vertex2 = MakeAsset<FloatArray>();
 		_vertex3 = MakeAsset<FloatArray>();
 		_vertex4 = MakeAsset<Vec3Array >();
-		_vertex5 = MakeAsset<FloatArray>();
+		//_vertex2 = MakeAsset<FloatArray>();
 
 		_drawable->setVertexAttribArray(0, _vertex0);
 		_drawable->setVertexAttribArray(1, _vertex1);
 		_drawable->setVertexAttribArray(2, _vertex2);
 		_drawable->setVertexAttribArray(3, _vertex3);
 		_drawable->setVertexAttribArray(4, _vertex4);
-		_drawable->setVertexAttribArray(5, _vertex5);
+		//_drawable->setVertexAttribArray(5, _vertex2);
 
 		_parent = parent;
 		_parent->addChild(_drawable);

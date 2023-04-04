@@ -32,6 +32,7 @@ MxRendTest::MxRendTest(int id)
 	_preRend = nullptr;
 	_postRend = nullptr;
 	_testRender = nullptr;
+	this->showMaximized();
 	if (id == 0)
 	{
 		_preRend = new MPreRend::mPreRend(QString::number(id)); ui.gridLayout->addWidget(_preRend);
@@ -64,7 +65,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
-		QString filename = QFileDialog::getOpenFileName(this, "é€‰æ‹©objæ–‡ä»¶", qApp->applicationDirPath(), "*.obj");
+		QString filename = QFileDialog::getOpenFileName(this, "Ñ¡ÔñobjÎÄ¼ş", qApp->applicationDirPath(), "*.obj");
 		QFileInfo info(filename);
 
 		tinyobj::attrib_t attrib;
@@ -160,10 +161,13 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		_postRender->updateAllModelOperate(_modelOperate1);
 		if (_modelOperate1 == HideAllPartOperate)
 		{
+			auto list = _postRender->getOneFrameRender()->getOneFrameData()->getAllPartNameList();
+			_hideNames.insert(list.begin(), list.end());
 			_modelOperate1 = ShowAllPartOperate;
 		}
 		else
 		{
+			_hideNames.clear();
 			_modelOperate1 = HideAllPartOperate;
 		}
 	}
@@ -192,6 +196,34 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		}
 		_postRender->setDispersIsEquivariance(_isEquivariance);
 		_isEquivariance = !_isEquivariance;
+	}
+	else if (event->key() == Qt::Key_7)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		set<QString> names = _postRender->getOneFrameRender()->getOneFrameData()->getAllPartNames();
+		if (names.size() == 0)
+		{
+			return;
+		}
+		_hideNames.insert(*names.begin());
+		_postRender->updateOneModelOperate({ HideOnePartOperate, set<QString>{*names.begin()} });
+	}
+	else if (event->key() == Qt::Key_8)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		if (_hideNames.size() == 0)
+		{
+			return;
+		}
+		QString name = *_hideNames.rbegin();
+		_hideNames.erase(name);
+		_postRender->updateOneModelOperate({ ShowOnePartOperate, set<QString>{name} });
 	}
 	else if (event->key() == Qt::Key_Q)
 	{
@@ -366,18 +398,18 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 
 bool MxRendTest::getData(shared_ptr<mDataPost1> dp, mPostOneFrameRendData *oneFrameRendData)
 {
-	QStringList names = QFileDialog::getOpenFileNames(this, "é€‰æ‹©objæ–‡ä»¶", qApp->applicationDirPath(), "*.mxdb;*.mxdb0");
+	QStringList names = QFileDialog::getOpenFileNames(this, "Ñ¡ÔñobjÎÄ¼ş", qApp->applicationDirPath(), "*.mxdb;*.mxdb0");
 	
 	if (names.empty())
 	{
 		return false;
 	}
 
-	//æŒ‰ç…§åç§°ç­›é€‰åˆ†ç±»
+	//°´ÕÕÃû³ÆÉ¸Ñ¡·ÖÀà
 	QMultiHash<QString, QString> postframefiles;
 	QHash<QString, QString> postinitfile;
 
-	//è·å–å½“å‰æ–‡ä»¶å¤¹ä¸‹æ‰€æœ‰çš„mxdb0æ–‡ä»¶
+	//»ñÈ¡µ±Ç°ÎÄ¼ş¼ĞÏÂËùÓĞµÄmxdb0ÎÄ¼ş
 	QFileInfo initinfo(names.at(0));
 	QDir filedir = initinfo.absoluteDir();
 	QStringList db0filter = QStringList{ QString("*.mxdb0") };
@@ -387,7 +419,7 @@ bool MxRendTest::getData(shared_ptr<mDataPost1> dp, mPostOneFrameRendData *oneFr
 		postinitfile.insert(finfo.completeBaseName(), finfo.absoluteFilePath());
 	}
 
-	//æå–æ‰€æœ‰é€‰ä¸­çš„mxdbæ–‡ä»¶
+	//ÌáÈ¡ËùÓĞÑ¡ÖĞµÄmxdbÎÄ¼ş
 	QStringList initnames = postinitfile.keys();
 	for (QString filename : names)
 	{
@@ -417,14 +449,14 @@ bool MxRendTest::getData(shared_ptr<mDataPost1> dp, mPostOneFrameRendData *oneFr
 
 			continue;
 		}
-		//è‹¥æ²¡æœ‰é€‰æ‹©åˆå§‹æ„å‹æ–‡ä»¶ï¼Œåˆ™è‡ªåŠ¨è·å–
+		//ÈôÃ»ÓĞÑ¡Ôñ³õÊ¼¹¹ĞÍÎÄ¼ş£¬Ôò×Ô¶¯»ñÈ¡
 		QString initfile = postinitfile.value(pname);
 		if (initfile.isEmpty())
 		{
 
 			continue;
 		}
-		//å¯¹å¸§æ–‡ä»¶è¿›è¡Œæ’åº
+		//¶ÔÖ¡ÎÄ¼ş½øĞĞÅÅĞò
 		QCollator collator;
 		collator.setNumericMode(true);
 		std::sort(framefiles.begin(), framefiles.end(), [&collator](const QString & str1, const QString & str2)
@@ -432,7 +464,7 @@ bool MxRendTest::getData(shared_ptr<mDataPost1> dp, mPostOneFrameRendData *oneFr
 			return collator.compare(str1, str2) < 0;
 		});
 
-		//è¯»å–æ–‡ä»¶
+		//¶ÁÈ¡ÎÄ¼ş
 		MIOFile::mIMxdbFile1* mxdbThread1 = new MIOFile::mIMxdbFile1(initfile, framefiles);
 		mxdbThread1->setDataPost(dp);
 		mxdbThread1->setOneFrameRenderData(oneFrameRendData);

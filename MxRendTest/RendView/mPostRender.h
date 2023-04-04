@@ -172,6 +172,8 @@ namespace MPostRend
 
 		shared_ptr<mPostOneFrameRender> _oneFrameRender;//单帧
 
+		shared_ptr<mPostOneFrameRender> _oneFrameAnimationRender;//单帧动画
+
 		shared_ptr<mxr::Texture> _texture;
 
 		/*********************************模型*****************************************************/
@@ -189,9 +191,6 @@ namespace MPostRend
 
 		//计时器
 		QTimer* _aniTimer;
-
-		//动画渲染帧的当前id;
-		int _animationId;
 		
 	};
 }

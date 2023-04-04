@@ -2,6 +2,7 @@
 #include "StateSet.h"
 #include "NodeVisitor.h"
 #include "appInstance.h"
+#include "vao.h"
 
 namespace mxr
 {
@@ -25,6 +26,7 @@ namespace mxr
 		if (_nodevisitor)
 		{
 			_nodevisitor->RemoveDrawableAttribute(this);
+			_nodevisitor->changeDrawBuffer(true);
 		}
 	}
 
@@ -103,13 +105,30 @@ namespace mxr
 		//		_nodevisitor->RemoveDrawableAttribute(this);
 		//	}
 		//}
+		if (_stateset != stateset)
+		{
+			if (_nodevisitor)
+			{
+				_nodevisitor->changeDrawBuffer(true);
+			}
+		}
 		_stateset = stateset;
+	}
+
+	void Drawable::setNodeMask(NodeMask nm)
+	{
+		if (_nodevisitor)
+		{
+			_nodevisitor->changeDrawBuffer(true);
+		}
+		_nodeMask = nm;
 	}
 
 
 	void Drawable::accept(asset_ref<NodeVisitor> nv)
 	{
 		_nodevisitor = nv;
+		_nodevisitor->changeDrawBuffer(true);
 		nv->accept(this);
 	}
 

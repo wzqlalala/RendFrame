@@ -1,30 +1,11 @@
 #pragma once
 #include "Node.h"
 #include "Array.h"
-#include "vao.h"
 
 namespace mxr
 {
-	typedef MXR_EXPORT struct
-	{
-		GLuint vertexCount;
-		GLuint instanceCount;
-		GLuint firstVertex;
-		GLuint baseInstance;
-	} DrawArraysIndirectCommand;
-
-
-	typedef MXR_EXPORT struct 
-	{
-		GLuint indexCount;	
-		GLuint instanceCount;
-		GLuint firstIndex;
-		GLuint baseVertex;
-		GLuint baseInstance;
-		
-	}DrawElementsIndirectCommand;
-
 	class NodeVisitor;
+	class VAO;
 	class MXR_EXPORT Drawable : public Node
 	{
 	public:
@@ -56,6 +37,8 @@ namespace mxr
 		DrawElementsIndirectCommand& getDrawElemnetIndirect() { return _elemnetcommand; }
 
 		void setStateSet(asset_ref<StateSet> stateset) override;
+
+		virtual void setNodeMask(NodeMask nm);
 
 		GLuint getVertexCount() 
 		{ 
