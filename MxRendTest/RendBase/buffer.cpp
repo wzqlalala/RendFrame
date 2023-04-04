@@ -59,10 +59,8 @@ namespace mxr
 	}
 
 	void IBuffer::SetData(GLintptr offset, GLsizeiptr size, const void* data)
-	{
-		
+	{	
 		glNamedBufferSubData(id, offset, size, data);
-		
 	}
 
 

@@ -19,6 +19,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QApplication>
+#include <QtConcurrent/QtConcurrent>
 
 //MDataPost
 #include "mDataPost1.h"
@@ -43,7 +44,8 @@ namespace MPostRend
 		_dataPost = nullptr;
 		_texture = nullptr;
 		_oneFrameRender = nullptr;
-		_animationId = 0;
+		_oneFrameAnimationRender = nullptr;
+		//_animationId = 0;
 		//_animationRender = nullptr;
 
 		_rendStatus = make_shared<mPostRendStatus>();
@@ -307,6 +309,10 @@ namespace MPostRend
 		{
 			_oneFrameRender->updateOneModelOperate(postModelOperates);
 		}
+		if (_oneFrameAnimationRender)
+		{
+			_oneFrameAnimationRender->updateOneModelOperate(postModelOperates);
+		}
 		for (auto rend : _animationRender)
 		{
 			rend->updateOneModelOperate(postModelOperates);
@@ -318,6 +324,10 @@ namespace MPostRend
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->updateAllModelOperate(postModelOperate);
+		}
+		if (_oneFrameAnimationRender)
+		{
+			_oneFrameAnimationRender->updateAllModelOperate(postModelOperate);
 		}
 		for (auto rend : _animationRender)
 		{
@@ -385,6 +395,10 @@ namespace MPostRend
 		{
 			_oneFrameRender->getModelRender()->setShowFuntion(showFuntion);
 		}
+		if (_oneFrameAnimationRender)
+		{
+			_oneFrameAnimationRender->getModelRender()->setShowFuntion(showFuntion);
+		}
 		for (auto rend : _animationRender)
 		{
 			rend->getModelRender()->setShowFuntion(showFuntion);
@@ -408,6 +422,7 @@ namespace MPostRend
 	void mPostRender::setDeformationScale(QVector3D deformationScale)
 	{
 		this->makeCurrent();
+		_rendStatus->_deformFactor = deformationScale;
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setDeformationScale(deformationScale);
@@ -425,6 +440,10 @@ namespace MPostRend
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->getModelRender()->setIsShowInitialShape(isShowInitialShape);
+		}
+		if (_oneFrameAnimationRender)
+		{
+			_oneFrameAnimationRender->getModelRender()->setIsShowInitialShape(isShowInitialShape);
 		}
 		for (auto rend : _animationRender)
 		{
@@ -495,6 +514,10 @@ namespace MPostRend
 		{
 			hasDeleteCuttingPlane = _oneFrameRender->deleteCuttingPlane(num);
 		}
+		if (_oneFrameAnimationRender)
+		{
+			hasDeleteCuttingPlane = _oneFrameAnimationRender->deleteCuttingPlane(num);
+		}
 		for (auto rend : _animationRender)
 		{
 			hasDeleteCuttingPlane = rend->deleteCuttingPlane(num);
@@ -514,6 +537,10 @@ namespace MPostRend
 		if (_oneFrameRender)
 		{
 			hasReverseCuttingPlane = _oneFrameRender->reverseCuttingPlaneNormal(num);
+		}
+		if (_oneFrameAnimationRender)
+		{
+			hasReverseCuttingPlane = _oneFrameAnimationRender->reverseCuttingPlaneNormal(num);
 		}
 		for (auto rend : _animationRender)
 		{
@@ -536,6 +563,10 @@ namespace MPostRend
 		{
 			_oneFrameRender->setOnlyShowCuttingPlane(isOnlyShowCuttingPlane);
 		}
+		if (_oneFrameAnimationRender)
+		{
+			_oneFrameAnimationRender->setOnlyShowCuttingPlane(isOnlyShowCuttingPlane);
+		}
 		for (auto rend : _animationRender)
 		{
 			rend->setOnlyShowCuttingPlane(isOnlyShowCuttingPlane);
@@ -548,6 +579,10 @@ namespace MPostRend
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setIsShowCuttingPlane(num, isShow);
+		}
+		if (_oneFrameAnimationRender)
+		{
+			_oneFrameAnimationRender->setIsShowCuttingPlane(num, isShow);
 		}
 		for (auto rend : _animationRender)
 		{
@@ -562,6 +597,10 @@ namespace MPostRend
 		if (_oneFrameRender)
 		{
 			hasCreateCuttingPlane = _oneFrameRender->createCuttingPlane(_cuttingPlaneStateSet, _transparentPlaneStateSet, num, normal, vertex, hasVector);
+		}
+		if (_oneFrameAnimationRender)
+		{
+			hasCreateCuttingPlane = _oneFrameAnimationRender->createCuttingPlane(_cuttingPlaneStateSet, _transparentPlaneStateSet, num, normal, vertex, hasVector);
 		}
 		for (auto rend : _animationRender)
 		{
@@ -590,6 +629,10 @@ namespace MPostRend
 		{
 			_oneFrameRender->setPlaneData(num, normal, centervertex, maxR);
 		}
+		if (_oneFrameAnimationRender)
+		{
+			_oneFrameAnimationRender->setPlaneData(num, normal, centervertex, maxR);
+		}
 		for (auto rend : _animationRender)
 		{
 			rend->setPlaneData(num, normal, centervertex, maxR);
@@ -602,6 +645,10 @@ namespace MPostRend
 		if (_oneFrameRender)
 		{
 			_oneFrameRender->setIsShowPlane(isShow);
+		}
+		if (_oneFrameAnimationRender)
+		{
+			_oneFrameAnimationRender->setIsShowPlane(isShow);
 		}
 		for (auto rend : _animationRender)
 		{
@@ -632,12 +679,32 @@ namespace MPostRend
 		int id = postOneFrameRendData->getRendID();
 		QVector3D deformationScale = postOneFrameRendData->getDeformationScale();
 		mOneFrameData1 *oneFrameData = _dataPost->getOneFrameData(id);
-		int ids = 10;
+
+		mPostOneFrameRendData *newFrameRendData = new mPostOneFrameRendData(*postOneFrameRendData);
+		_oneFrameAnimationRender = make_shared<mPostOneFrameRender>(_rendStatus, oneFrameData, newFrameRendData);
+		_oneFrameAnimationRender->setFaceStateSet(_faceStateSet);
+		_oneFrameAnimationRender->setFaceTransparentNoDeformationStateSet(_faceTransparentNodeformationStateSet);
+		_oneFrameAnimationRender->setFaceTransparentStateSet(_faceTransparentStateSet);
+		_oneFrameAnimationRender->setEdgeLineStateSet(_edgelineStateSet);
+		_oneFrameAnimationRender->setFaceLineStateSet(_facelineStateSet);
+		_oneFrameAnimationRender->setLineStateSet(_lineStateSet);
+		_oneFrameAnimationRender->setPointStateSet(_pointStateSet);
+		_oneFrameAnimationRender->setTextureCoordScale(0.0);
+		_oneFrameAnimationRender->setDeformationScale(QVector3D(0,0,0));
+		_oneFrameAnimationRender->updateAllModelOperate(ImportOperate);
+		_oneFrameAnimationRender->bufferThisFrame(_app->GLContext());
+		_rendStatus->_aniCurrentFrame = 1;
+		_rendStatus->_postMode = postMode;
+
+		/*
+		int ids = 8;
+		QVector<QFuture<void>> futures;
 		for (int i = 0; i < ids; i++)
 		{
-			float scale = postMode == OneFrameLinearAnimation ? i / float(ids - 1) : sin(2 * M_PI * i / float(ids - 1));
 			mPostOneFrameRendData *newFrameRendData = new mPostOneFrameRendData(*postOneFrameRendData);
 			std::shared_ptr<mPostOneFrameRender> oneFrameRender = make_shared<mPostOneFrameRender>(_rendStatus, oneFrameData, newFrameRendData);
+			float scale = postMode == OneFrameLinearAnimation ? i / float(ids - 1) : sin(2 * M_PI * i / float(ids - 1));
+
 			oneFrameRender->setFaceStateSet(_faceStateSet);
 			oneFrameRender->setFaceTransparentNoDeformationStateSet(_faceTransparentNodeformationStateSet);
 			oneFrameRender->setFaceTransparentStateSet(_faceTransparentStateSet);
@@ -647,21 +714,41 @@ namespace MPostRend
 			oneFrameRender->setPointStateSet(_pointStateSet);
 			oneFrameRender->setTextureCoordScale(scale);
 			oneFrameRender->setDeformationScale(deformationScale*scale);
-			oneFrameRender->updateAllModelOperate(ImportOperate);
 			_animationRender.insert(i + 1, oneFrameRender);
+			futures.append(QtConcurrent::run([oneFrameRender]
+			{
+				oneFrameRender->updateAllModelOperate(ImportOperate);
+			}));
+
+		}
+		while (!futures.empty())
+		{
+			futures.back().waitForFinished();
+			//futures.back().result()->bufferThisFrame(_app->GLContext());
+			futures.takeLast();
 		}
 		for (auto rend : _animationRender)
 		{
-			rend->bufferThisFrame();
+			//QtConcurrent::run(rend.get(), &mPostOneFrameRender::bufferThisFrame,_app->GLContext());
+			rend->bufferThisFrame(_app->GLContext());
 		}
-		_animationId = 1;
-		_rendStatus->_postMode = postMode;
+		//for (auto rend : _animationRender)
+		//{
+		//	rend->getOneFrameRendData()->deleteValueAndDisplacementData();
+		//}
+		*/
+
 	}
 
 	void mPostRender::deleteAnimation()
 	{
 		this->makeCurrent();
 		setTimerOn(false);
+		if (_oneFrameAnimationRender)
+		{
+			_oneFrameAnimationRender->deleteThieFrame();
+			_oneFrameAnimationRender.reset();
+		}
 		for (auto render : _animationRender)
 		{
 			render->deleteThieFrame();
@@ -677,9 +764,11 @@ namespace MPostRend
 		{
 			int interval = 1000 / 30;
 			_aniTimer->start(interval);
+			_rendStatus->_aniIsStart = true;
 		}
 		else
 		{
+			_rendStatus->_aniIsStart = false;
 			_aniTimer->stop();
 		}
 	}
@@ -688,35 +777,51 @@ namespace MPostRend
 	{
 		//qDebug() << __LINE__ << mxr::time->elapsed();
 		//mxr::time->start();
-		if (_animationRender.empty())
+		int interval = 1000 / _rendStatus->_aniFrameRate;
+		_aniTimer->setInterval(interval);
+
+		//判断是否到达最后一帧
+		if (_rendStatus->_aniCurrentFrame >= _rendStatus->_aniEndFrame)
 		{
-			return;
-		}
-		//if (_animationId != 0)
-		//{
-		//	auto lastrender = _animationRender.value(_animationId);
-		//	//lastrender->hideThisFrame();
-		//	lastrender->updateAllModelOperate(HideAllPartOperate);
-		//}
-		if (_animationId < 10 && _animationId >= 1)
-		{
-			_animationId++;
+			//判断是否循环播放
+			if (_rendStatus->_aniLoopPlay)
+			{
+				//把当前帧设置为起始帧
+				_rendStatus->_aniCurrentFrame = _rendStatus->_aniStartFrame;
+			}
+			else
+			{
+				//停止动画
+				_rendStatus->_aniIsStart = false;
+				_aniTimer->stop();
+			}
 		}
 		else
 		{
-			_animationId = 1;
+			//根据帧间隔运行
+			_rendStatus->_aniCurrentFrame += _rendStatus->_aniFrameInterval;
 		}
-		//auto thisrender = _animationRender.value(_animationId);
-		////thisrender->showThisFrame();
-		//thisrender->updateAllModelOperate(ShowAllPartOperate);
+		
+		if (_rendStatus->_postMode == OneFrameLinearAnimation || _rendStatus->_postMode == OneFrameSinAnimation)
+		{
+			//切换帧
+			int nf = _rendStatus->_aniLinearCount;
+			float scale = _rendStatus->_postMode == OneFrameLinearAnimation ? _rendStatus->_aniCurrentFrame / float(nf - 1) : sin(2 * M_PI * _rendStatus->_aniCurrentFrame / float(nf - 1));
+			_oneFrameAnimationRender->setDeformationScale(scale * _rendStatus->_deformFactor);
+			_oneFrameAnimationRender->setTextureCoordScale(scale);
+		}
+		else
+		{
+			//this->setAnimationFrameID(_frameGUIData->_aniCurrentFrame);
+		}
 		emit update();
-		//qDebug() << __LINE__ << mxr::time->elapsed();
 	}
 
 	mPostRender::~mPostRender()
 	{
 		this->makeCurrent();
 		_oneFrameRender.reset();
+		_oneFrameAnimationRender.reset();
 		//_animationRender.reset();
 		
 	}
@@ -859,9 +964,16 @@ namespace MPostRend
 				_oneFrameRender->updateUniform(modelView, commonView);
 			}
 		}
+		else if (_rendStatus->_postMode == OneFrameLinearAnimation || _rendStatus->_postMode == OneFrameSinAnimation)
+		{
+			if (_oneFrameAnimationRender)
+			{
+				_oneFrameAnimationRender->updateUniform(modelView, commonView);
+			}
+		}
 		else if (!_animationRender.empty())
 		{
-			_animationRender.value(_animationId)->updateUniform(modelView, commonView);
+			_animationRender.value(_rendStatus->_aniCurrentFrame)->updateUniform(modelView, commonView);
 		}	
 	}
 }

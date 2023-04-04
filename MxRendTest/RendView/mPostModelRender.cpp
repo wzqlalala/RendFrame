@@ -113,6 +113,7 @@ namespace MPostRend
 		{
 			for (QString partName : partNames)
 			{
+				_oneFrameData->setMeshPartVisual(partName, false);
 				_partRenders[partName]->getGeode()->setNodeMask(1);
 			}
 		}
@@ -121,6 +122,7 @@ namespace MPostRend
 			for (QString partName : partNames)
 			{
 				//_partRenders[partName]->getGeode()->setNodeMask(0);
+				_oneFrameData->setMeshPartVisual(partName, true);
 				_partRenders[partName]->setShowFuntion(_rendStatus->_showFunction);
 				_partRenders[partName]->setIsShowInitialShape(_rendStatus->_isShowInitialShape);
 				//parts[partName]->getFaceDrawable()->setNodeMask(0);
@@ -133,14 +135,33 @@ namespace MPostRend
 			for (QString partName : partNames)
 			{
 				_partRenders[partName]->setFaceStateSet(_faceStateSet);
+
 				Array *array = _partRenders[partName]->getFaceDrawable()->getVertexAttribArray(2);
-				array->updata(0, array->size() * 4, QVector<float>(array->size(), 0).data());
+				QVector<float> data(array->size());
+				array->getData(data.data());
+				for (int i = 0; i < data.size(); i++)
+				{
+					data[i] = int(data[i]) % 2;//取余数，只能为0或者1
+				}
+				array->updata(data.data());
+
+				array = _partRenders[partName]->getLineDrawable()->getVertexAttribArray(2);
+				QVector<float> data1(array->size());
+				array->getData(data1.data());
+				for (int i = 0; i < data1.size(); i++)
+				{
+					data1[i] = int(data1[i]) % 2;//取余数，只能为0或者1
+				}
+				array->updata(data1.data());
+
 				array = _partRenders[partName]->getPointDrawable()->getVertexAttribArray(2);
-				array->updata(0, array->size() * 4, QVector<float>(array->size(), 0).data());
-				//array->updata(0, array->size() * 4, QVector<float>(array->size() * 2, 0).data());
-				//array->updata()
-				//GLenum error =  QOpenGLContext::currentContext()->functions()->glGetError();
-				//qDebug() << error;
+				QVector<float> data2(array->size());
+				array->getData(data2.data());
+				for (int i = 0; i < data2.size(); i++)
+				{
+					data2[i] = int(data2[i]) % 2;//取余数，只能为0或者1
+				}
+				array->updata(data2.data());
 			}
 		}
 		else if (postModelOperate == TextureOnePartOperate)
@@ -149,9 +170,41 @@ namespace MPostRend
 			{
 				_partRenders[partName]->setFaceStateSet(_faceStateSet);
 				Array *array = _partRenders[partName]->getFaceDrawable()->getVertexAttribArray(2);
-				array->updata(0, array->size() * 4, QVector<float>(array->size(), 1).data());
+				//float *data = (float*)array->getData();
+				QVector<float> data(array->size());
+				array->getData(data.data());
+				for (int i = 0; i < array->size(); i++)
+				{
+					if (data[i] < 2)
+					{
+						data[i] = data[i] + 2;//只能为3或者4
+					}
+				}
+				array->updata(data.data());
+
+				array = _partRenders[partName]->getLineDrawable()->getVertexAttribArray(2);
+				QVector<float> data1(array->size());
+				array->getData(data1.data());
+				for (int i = 0; i < data1.size(); i++)
+				{
+					if (data1[i] < 2)
+					{
+						data1[i] = data1[i] + 2;//只能为3或者4
+					}
+				}
+				array->updata(data1.data());
+
 				array = _partRenders[partName]->getPointDrawable()->getVertexAttribArray(2);
-				array->updata(0, array->size() * 4, QVector<float>(array->size(), 1).data());
+				QVector<float> data2(array->size());
+				array->getData(data2.data());
+				for (int i = 0; i < data2.size(); i++)
+				{
+					if (data2[i] < 2)
+					{
+						data2[i] = data2[i] + 2;//只能为3或者4
+					}
+				}
+				array->updata(data2.data());
 			}
 		}
 		else if (postModelOperate == TransparentOnePartOperate)
@@ -167,9 +220,11 @@ namespace MPostRend
 			{
 				QVector3D color = _oneFrameData->getMeshPartColor(partName);
 				Array *array = _partRenders[partName]->getFaceDrawable()->getVertexAttribArray(1);
-				array->updata(0, array->size() * 12, QVector<QVector3D>(array->size(), color).data());
+				array->updata(QVector<QVector3D>(array->size(), color).data());
+				array = _partRenders[partName]->getLineDrawable()->getVertexAttribArray(1);
+				array->updata(QVector<QVector3D>(array->size(), color).data());
 				array = _partRenders[partName]->getPointDrawable()->getVertexAttribArray(1);
-				array->updata(0, array->size() * 12, QVector<QVector3D>(array->size(), color).data());
+				array->updata(QVector<QVector3D>(array->size(), color).data());
 			}
 		}
 	}
@@ -367,7 +422,10 @@ namespace MPostRend
 		Space::AABB aabb;
 		for(auto partrend : _partRenders)
 		{
-			aabb.push(partrend->getPartSpaceTree()->space);
+			if (partrend->getPartSpaceTree())
+			{
+				aabb.push(partrend->getPartSpaceTree()->space);
+			}
 		}
 		return aabb;
 	}

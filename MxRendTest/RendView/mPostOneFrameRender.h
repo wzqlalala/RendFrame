@@ -4,6 +4,7 @@
 #pragma execution_character_set("utf-8")
 //#define TINYOBJLOADER_IMPLEMENTATION
 #include <QObject>
+#include <QOpenGLContext>
 #include <set>
 
 #include "mBasicEnum.h"
@@ -49,9 +50,11 @@ namespace MPostRend
 
 		~mPostOneFrameRender();
 
-		void bufferThisFrame();
+		void bufferThisFrame(QOpenGLContext *context);
 
 		void deleteThieFrame();
+
+		mOneFrameData1 *getOneFrameData() { return _oneFrameData; };
 
 		mPostOneFrameRendData *getOneFrameRendData() { return _oneFrameRendData; };
 

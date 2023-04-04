@@ -58,6 +58,7 @@ private:
 	bool _isShowInitialShape{ false };
 	PostModelOperateEnum _modelOperate{ ColorAllPartOperate };
 	PostModelOperateEnum _modelOperate1{ HideAllPartOperate };
+	set<QString> _hideNames;
 	bool _dispersed{ false };
 	bool _isEquivariance{ true };
 	float _lineWidth = 1.0f;

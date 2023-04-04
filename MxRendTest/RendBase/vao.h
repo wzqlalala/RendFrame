@@ -2,7 +2,13 @@
 
 #include "asset.h"
 
+#include "Node.h"
 
+#include <vector>
+
+//#include "Drawable.h"
+
+//struct DrawArraysIndirectCommand;
 namespace mxr
 {
 	class MXR_EXPORT VAO : public IAsset
@@ -27,6 +33,7 @@ namespace mxr
 		void DrawElement(GLenum mode, GLsizei count);
 
 		void DrawIndirectArray(GLenum mode, int _offset, int count);
+		void DrawArrays(std::vector<DrawArraysIndirectCommand> draws, GLenum mode);
 		void DrawIndirectElement(GLenum mode, int _offset, int count);
 	protected:
 		GLuint _drawbuffer;

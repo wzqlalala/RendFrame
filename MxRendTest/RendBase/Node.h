@@ -13,7 +13,24 @@ namespace mxr
 	class NodeVisitor;
 	class Callback;
 	class StateSet;
+	typedef MXR_EXPORT struct
+	{
+		GLuint vertexCount;
+		GLuint instanceCount;
+		GLuint firstVertex;
+		GLuint baseInstance;
+	} DrawArraysIndirectCommand;
 
+
+	typedef MXR_EXPORT struct
+	{
+		GLuint indexCount;
+		GLuint instanceCount;
+		GLuint firstIndex;
+		GLuint baseVertex;
+		GLuint baseInstance;
+
+	}DrawElementsIndirectCommand;
 	class MXR_EXPORT Node
 	{
 	public:
@@ -46,7 +63,7 @@ namespace mxr
 		inline const Group* getParent(unsigned int i) const { return _parents[i]; }
 		inline unsigned int getNumParents() const { return static_cast<unsigned int>(_parents.size()); }
 
-		inline void setNodeMask(NodeMask nm) { _nodeMask = nm; }
+		virtual void setNodeMask(NodeMask nm) { _nodeMask = nm; }
 		inline NodeMask getNodeMask() const { return _nodeMask; }
 		virtual void setStateSet(asset_ref<StateSet> stateset);
 		//virtual void deleteDrawable();

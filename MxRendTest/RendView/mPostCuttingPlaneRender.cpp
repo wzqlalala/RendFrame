@@ -1493,7 +1493,7 @@ namespace MPostRend
 								//_triTexture.append((sss.at(i).second - _currentFrameRendData->getMinData()) / fenmu);
 								//_triTexture.append((sss.at(i + 1).second - _currentFrameRendData->getMinData()) / fenmu);
 
-								qDebug() <<"计算法向" << QVector3D::normal((sss.at(i).first - sss.at(0).first), (sss.at(i + 1).first - sss.at(0).first));
+								//qDebug() <<"计算法向" << QVector3D::normal((sss.at(i).first - sss.at(0).first), (sss.at(i + 1).first - sss.at(0).first));
 							}
 						}
 					}

@@ -43,8 +43,9 @@ namespace MPostRend
 		delete _oneFrameRendData;
 	}
 
-	void mPostOneFrameRender::bufferThisFrame()
+	void mPostOneFrameRender::bufferThisFrame(QOpenGLContext *context)
 	{
+		context->makeCurrent(context->surface());
 		_viewer->compile();
 	}
 

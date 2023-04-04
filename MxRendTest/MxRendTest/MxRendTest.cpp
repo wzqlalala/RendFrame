@@ -32,6 +32,7 @@ MxRendTest::MxRendTest(int id)
 	_preRend = nullptr;
 	_postRend = nullptr;
 	_testRender = nullptr;
+	this->showMaximized();
 	if (id == 0)
 	{
 		_preRend = new MPreRend::mPreRend(QString::number(id)); ui.gridLayout->addWidget(_preRend);
@@ -160,10 +161,13 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		_postRender->updateAllModelOperate(_modelOperate1);
 		if (_modelOperate1 == HideAllPartOperate)
 		{
+			auto list = _postRender->getOneFrameRender()->getOneFrameData()->getAllPartNameList();
+			_hideNames.insert(list.begin(), list.end());
 			_modelOperate1 = ShowAllPartOperate;
 		}
 		else
 		{
+			_hideNames.clear();
 			_modelOperate1 = HideAllPartOperate;
 		}
 	}
@@ -192,6 +196,34 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		}
 		_postRender->setDispersIsEquivariance(_isEquivariance);
 		_isEquivariance = !_isEquivariance;
+	}
+	else if (event->key() == Qt::Key_7)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		set<QString> names = _postRender->getOneFrameRender()->getOneFrameData()->getAllPartNames();
+		if (names.size() == 0)
+		{
+			return;
+		}
+		_hideNames.insert(*names.begin());
+		_postRender->updateOneModelOperate({ HideOnePartOperate, set<QString>{*names.begin()} });
+	}
+	else if (event->key() == Qt::Key_8)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		if (_hideNames.size() == 0)
+		{
+			return;
+		}
+		QString name = *_hideNames.rbegin();
+		_hideNames.erase(name);
+		_postRender->updateOneModelOperate({ ShowOnePartOperate, set<QString>{name} });
 	}
 	else if (event->key() == Qt::Key_Q)
 	{

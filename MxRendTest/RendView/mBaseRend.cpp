@@ -22,7 +22,7 @@ namespace MBaseRend
 	mBaseRend::mBaseRend(const QString& name): _name(name)
 	{
 		setMouseTracking(true);
-		QOpenGLContext *context = QOpenGLContext::currentContext();
+		//QOpenGLContext *context = QOpenGLContext::currentContext();
 		_app = MakeAsset<mxr::Application>();
 		//_app->setContext(context);
 		mxr::ApplicationInstance::GetInstance().appendApplication(name, _app);
@@ -35,7 +35,7 @@ namespace MBaseRend
 		//format.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
 		//format.setSamples(4);
 		//setFormat(format);
-
+		//this->showMaximized();
 		qDebug() << "Base Struct";
 	}
 
@@ -47,8 +47,9 @@ namespace MBaseRend
 
 		this->initializeOpenGLFunctions();
 		QOpenGLContext *context = QOpenGLContext::currentContext();
+		//qDebug() << "initializeGL" << QString::number(long long int(context->surface()), 16);
 		_app->setContext(context);
-
+		//glViewport(0, 0, this->width(), this->height());
 		_modelView = MakeAsset<mModelView>();
 		_commonView = MakeAsset<mCommonView>();
 
@@ -82,6 +83,8 @@ namespace MBaseRend
 			qDebug() << error;
 		}
 		_viewer->run();
+		//glClearColor(0, 0, 0, 1);
+		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		error = QOpenGLContext::currentContext()->functions()->glGetError();
 		if (error != 0)
 		{
@@ -95,6 +98,10 @@ namespace MBaseRend
 
 	void mBaseRend::resizeGL(int w, int h)
 	{
+		QOpenGLContext *context = QOpenGLContext::currentContext();
+		context->makeCurrent(context->surface());
+		//qDebug() << "resizeGL" << QString::number(long long int(context->surface()), 16);
+		//qDebug() << "resizeGL" << QString::number(long long int(context), 16);
 		glViewport(0, 0, w, h);
 		SCR_WIDTH = w;
 		SCR_HEIGHT = h;

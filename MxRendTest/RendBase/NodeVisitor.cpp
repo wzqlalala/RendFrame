@@ -67,9 +67,6 @@ namespace mxr
 	{
 		std::vector<DrawArraysIndirectCommand> arraycommands;
 		std::vector<DrawElementsIndirectCommand> elementcommands;
-		_drawbuffers.clear();
-		_arraystates.clear();
-		_elementstates.clear();
 
 		int firstVertex = 0;
 		int firstIndex = 0;
@@ -361,8 +358,9 @@ namespace mxr
 			}
 			isSetVAOFormat = true;
 		}
-
-
+		_drawbuffers.clear();
+		_arraystates.clear();
+		_elementstates.clear();
 		//先根据不同的stateSet分组,并且记录位置
 		std::map<asset_ref<StateSet>, std::vector<int> > locations;
 		for (int i = 0; i < _drawableattribute.size(); i++)
@@ -388,7 +386,7 @@ namespace mxr
 		}
 		else
 		{
-		
+
 			for (auto &item : locations)
 			{
 				for (int i = 0; i < item.second.size(); i++)
@@ -399,7 +397,8 @@ namespace mxr
 				asset_ref<DrawBuffer> _buffer = MakeAsset<DrawBuffer>(_size, _arraystates[item.first].data(), GL_DYNAMIC_STORAGE_BIT);
 				_drawbuffers[item.first] = _buffer;
 			}
-		}			
+		}
+
 	}
 
 
@@ -474,10 +473,15 @@ namespace mxr
 		{
 			return;
 		}
+		if (!_changeDrawBuffer)
+		{
+			return;
+		}
 		for (int i = 0; i < drawableattributes.size(); i++)
 		{
 			_vaoattributes[i].compile(drawableattributes[i]);			
 		}
+		_changeDrawBuffer = false;
 	}
 
 	void NodeVisitor::clear()
@@ -581,8 +585,9 @@ namespace mxr
 			}
 		}
 
-
+		
 		//做没有renderpass的部分
+		
 		for (int i = 0; i < noblendAttributes.size(); i++)
 		{
 			noblendAttributes[i]._state->Bind();
@@ -618,11 +623,19 @@ namespace mxr
 
 			blendAttributes[i]._state->UnBind();
 		}
+		
+		/*
+		for (int i = 0; i < _vaoattributes.size(); i++)
+		{
+			for (auto item : _vaoattributes[i]._arraystates)
+			{
+				item.first->Bind();
 
-
-
-
-
+				_vaoattributes[i].vao->DrawArrays(item.second, item.first->getDrawMode());
+				item.first->UnBind();
+			}
+		}
+		*/
 	}
 
 	void NodeVisitor::RemoveDrawableAttribute(Drawable * node)

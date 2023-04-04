@@ -30,6 +30,8 @@ namespace mxr
 		virtual bool   CompareForm(Array *other) = 0;
 		virtual void   SetBuffer(asset_ref<IBuffer> buffer) = 0;
 		virtual asset_ref<IBuffer>   getBuffer() = 0;
+		virtual void   getData(void* data) = 0;
+		virtual void   updata(const void* data) = 0;
 		virtual void   updata(int begin, int _size, const void* data) = 0;
 		virtual void   setBufferAttribute(BufferAttribute attribute) = 0;
 		virtual BufferAttribute getBufferAttribute() = 0;
@@ -96,22 +98,28 @@ namespace mxr
 		}
 		virtual void clear() { QVector<T>().swap(_data); }
 
+		virtual void getData(void* data)
+		{
+			if (_buffer)
+			{
+				//T *data;
+				//QVector<T> data(size());
+				_buffer->GetData(_attribute._start, size() * sizeof(T), data);
+			}
+		}
+
+		virtual void updata(const void* data)
+		{
+			if (_buffer)
+			{
+				_buffer->SetData(_attribute._start, size() * sizeof(T), data);
+			}
+		}
+
 		virtual void updata(int begin, int _size, const void* data)
 		{
 			if (_buffer)
 			{
-				//_buffer->SetData();
-				/*
-				if (_buffer->ID() == 8)
-				{
-					//_buffer->SetData(0, 96, data);
-				}
-				else if (_buffer->ID() == 15)
-				{
-					_buffer->SetData(0, 192, data);
-					//_buffer->SetData(96, 96, data);
-				}
-				*/
 				_buffer->SetData(_attribute._start + begin, _size, data);
 			}
 		}

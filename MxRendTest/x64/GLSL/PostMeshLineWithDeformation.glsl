@@ -6,7 +6,6 @@ layout (location = 1) in vec3 aMaterial;
 layout (location = 2) in float aIsColor;
 layout (location = 3) in float aValue;
 layout (location = 4) in vec3 aDisplacement;
-layout (location = 5) in float aHasValue;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -27,9 +26,9 @@ void main()
 	gl_Position = projection * view * model * vec4(deformationPos, 1.0);
 	
 	Value  = aValue;
-	isColor = int(aIsColor);
+	isColor = int(aIsColor) / 2;
 	material = aMaterial;
-	hasValue = int(aHasValue);
+	hasValue = int(aIsColor) % 2;
 
 	for(int i = 0;i < 8; ++i){
 		gl_ClipDistance[i] = dot(planes[i],vec4(deformationPos, 1.0f));	
