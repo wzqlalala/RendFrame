@@ -108,9 +108,11 @@
   <ItemGroup>
     <ClCompile Include="..\RendData\mPostRendStatus.cpp" />
     <ClCompile Include="mPostCuttingPlaneRender.cpp" />
+    <ClCompile Include="mQuadRender.cpp" />
     <ClCompile Include="tiny_obj_loader.cc" />
     <ClInclude Include="..\RendData\mPostRendStatus.h" />
     <ClInclude Include="mPostCuttingPlaneRender.h" />
+    <QtMoc Include="mQuadRender.h" />
     <ClInclude Include="tiny_obj_loader.h" />
     <QtMoc Include="mBackGroundRender.h" />
     <QtMoc Include="mBaseRend.h" />

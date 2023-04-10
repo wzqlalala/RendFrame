@@ -1,4 +1,5 @@
 #include "mPostRend.h"
+#include "mPostRender.h"
 
 ////MxRender
 #include <renderpch.h>
@@ -28,6 +29,9 @@ namespace MPostRend
 		//QOpenGLContext *context = QOpenGLContext::currentContext();
 		QOpenGLContext *context = _app->GLContext();
 		context->makeCurrent(context->surface());
+
+		shared_ptr<mPostRender> postRender = make_shared<mPostRender>(_app, _root);
+		this->addRender(postRender);
 		//glEnable(GL_FRAMEBUFFER_SRGB);
 
 		//this->initializeOpenGLFunctions();
@@ -92,5 +96,14 @@ namespace MPostRend
 	{
 
 		qDebug() << "Post Distruct";
+	}
+	shared_ptr<mPostRender> mPostRend::getPostRender()
+	{
+		shared_ptr<mBaseRender> baseRender = getFirstRender();
+		if (baseRender)
+		{
+			return dynamic_pointer_cast<mPostRender>(baseRender);
+		}
+		return nullptr;
 	}
 }

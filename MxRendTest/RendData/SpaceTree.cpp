@@ -22,7 +22,8 @@ namespace Space
 
 	AABB::AABB()
 	{
-		maxEdge = minEdge = QVector3D(0, 0, 0);
+		maxEdge = QVector3D(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+		minEdge = QVector3D(FLT_MAX, FLT_MAX, FLT_MAX);
 	}
 
 	bool AABB::ContainPoint(QVector3D p1)

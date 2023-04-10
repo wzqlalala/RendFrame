@@ -104,8 +104,8 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		{
 			return;
 		}
-		_postRender = make_shared<MPostRend::mPostRender>(_postRend->getApplication(), _postRend->getRoot());
-		
+		//_postRender = make_shared<MPostRend::mPostRender>(_postRend->getApplication(), _postRend->getRoot());
+		_postRender = _postRend->getPostRender();
 		shared_ptr<mDataPost1> dp = make_shared<mDataPost1>();
 		mPostOneFrameRendData *oneFrameRendData = new mPostOneFrameRendData(); 
 		//oneFrameRendData->setDeformationScale(QVector3D(10.0f, 10.0f, 10.0f));
@@ -324,6 +324,24 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 			return;
 		}
 		_postRender->deleteAnimation();
+	}
+	else if (event->key() == Qt::Key_Z)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		int id = int(_multuiplyPickMode);
+		if (_multuiplyPickMode == PolygonPick)
+		{
+			_multuiplyPickMode = QuadPick;
+		}
+		else
+		{
+			id++;
+			_multuiplyPickMode = MultiplyPickMode(id);
+		}
+		_postRend->setMultiplyPickMode(_multuiplyPickMode);
 	}
 	else if (event->key() == Qt::Key_Asterisk)
 	{

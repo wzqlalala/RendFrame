@@ -57,6 +57,10 @@ namespace MPostRend
 
 		void setPostData(shared_ptr<mDataPost1> dataPost) { _dataPost = dataPost; };
 
+		bool getIsDragSomething() override;
+
+		void startPick() override;
+
 		shared_ptr<mPostOneFrameRender> getOneFrameRender() { return  _oneFrameRender; };
 
 		//更新单个部件操作

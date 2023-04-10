@@ -1,5 +1,6 @@
 #include "mBaseRend.h"
 #include "mBackGroundRender.h"
+#include "mQuadRender.h"
 #include "mBaseRender.h"
 //工具类
 #include"mViewToolClass.h"
@@ -59,6 +60,7 @@ namespace MBaseRend
 		_viewer->setSceneData(_root);
 
 		_bgRend = MakeAsset<mBackGroundRender>(_app, _root);
+		_quadRender = MakeAsset<mQuadRender>(_app, _root);
 
 		/**/
 		//_app->GLContext()->functions()->glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
@@ -94,6 +96,7 @@ namespace MBaseRend
 		{
 			baseRender->updateUniform(_modelView, _commonView);
 		}
+		_quadRender->draw(_cameraMode, _pickMode, _multiplyPickMode, _polygonVertexs, SCR_WIDTH, SCR_HEIGHT);
 	}
 
 	void mBaseRend::resizeGL(int w, int h)
@@ -111,121 +114,49 @@ namespace MBaseRend
 	}
 	void mBaseRend::mousePressEvent(QMouseEvent *event)
 	{
-		if (event->button() == Qt::MiddleButton)
+		Posx_Firstmouse = event->pos().x();
+		Posy_Firstmouse = event->pos().y();
+		//left_up = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
+		//left_down = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
+		//right_down = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
+		//right_up = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
+		nowX = event->pos().x();
+		nowY = event->pos().y();
+		lastX = nowX;
+		lastY = nowY;
+		_mouseButton = event->button();
+		Qt::KeyboardModifiers keyModifiers = event->modifiers();
+		_cameraMode = this->getCameraMode(_mouseButton, keyModifiers);
+		if (_cameraMode == NoCameraOperate)
 		{
-			isFirstMouse = true;
-			isMiddleMousePress = true;
-
-			//设置鼠标移动缩放的参数
-			if (ifZoomByMouseMove == true)
+			_viewOperateMode = NoViewOperate;
+			_pickMode = this->getPickMode(_mouseButton, keyModifiers);
+			if (_pickMode != NoPick)
 			{
-				//第一次鼠标点击的像素坐标
-				Posx_Firstmouse = event->pos().x();
-				Posy_Firstmouse = event->pos().y();
-				_modelView->IfFirstMouse = true;
-			}
-			//设置绕着屏幕中心旋转(每次点击鼠标中键重新获取屏幕中心坐标)
-			if (ifRotateAtViewCenter == true)
-			{
-				//SetRotateCenterToViewCenter();
-			}
-
-			//_meshRend->TestFunction();
-
-			//发送信号
-			//mGlobalSignals::getInstance()->viewMiddleButtonPressSig();
-		}
-
-		else if (event->button() == Qt::LeftButton)
-		{
-			isFirstMouse = true;
-			isLeftMousePress = GL_TRUE;
-			Posx_Firstmouse = event->pos().x();
-			Posy_Firstmouse = event->pos().y();
-
-			//框选放大
-			if (ifZoomAtFrameCenter == true)
-			{
-				left_up = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-				left_down = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-				right_down = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-				right_up = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-				//mMeshStaticData::_pickSoloOrMutiply = NoPick;
-			}
-			else
-			{
-				//mMeshStaticData::SetPickFuntion(AddPick);
-				//mMeshStaticData::_pickSoloOrMutiply = NoPick;
-				//if ((mMeshStaticData::_pickFilter == PickAdjustNum))
+				_viewOperateMode = PickOperate;
+				if (_pickMode == SoloPick)
 				{
-
-				}
-				if (event->modifiers() == Qt::ControlModifier)//单选
-				{
-					//mMeshStaticData::_pickSoloOrMutiply = SoloPick;
-				}
-				else if (event->modifiers() == Qt::ShiftModifier)//矩形框选
-				{
-					//mMeshStaticData::_pickSoloOrMutiply = MultiplyPick;
-					//if (mMeshStaticData::_mutiplyPickStatus)
+					for (auto render : _renderArray)
 					{
-						left_up = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-						left_down = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-						right_down = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-						right_up = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
+						if (render->getIsDragSomething())
+						{
+							_pickMode = DragPick;
+							break;
+						}
 					}
 				}
-				else if (event->modifiers() == Qt::AltModifier)//圆形框选
+				if (_pickMode == MultiplyPick)
 				{
-					//mMeshStaticData::_pickSoloOrMutiply = RoundPick;
-					//if (mMeshStaticData::_mutiplyPickStatus)
-					{
-						//roundCenter = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-						//roundPoint = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-					}
+					_polygonVertexs.append(QVector2D(nowX, nowY));
 				}
 			}
-
-			//如果旋转中心为屏幕中心，那么每次投影变换后都要获取中心位置；
-			//if (ifRotateAtViewCenter == true && ifZoomAtFrameCenter == false && mMeshStaticData::_pickSoloOrMutiply == NoPick)
-			{
-				//SetRotateCenterToViewCenter();
-			}
-
-
 		}
-
-		else if (event->button() == Qt::RightButton)
+		else
 		{
-			isFirstMouse = true;
-			isRightMousePress = true;
-			Posx_Firstmouse = event->pos().x();
-			Posy_Firstmouse = event->pos().y();
-			//mMeshStaticData::SetPickFuntion(ReducePick);
-			//mMeshStaticData::_pickSoloOrMutiply = NoPick;
-			if (event->modifiers() == Qt::ControlModifier)//单选
+			_viewOperateMode = CameraOperate;
+			if (_cameraMode == Zoom)
 			{
-				//mMeshStaticData::_pickSoloOrMutiply = SoloPick;
-			}
-			else if (event->modifiers() == Qt::ShiftModifier)//框选
-			{
-				//mMeshStaticData::_pickSoloOrMutiply = MultiplyPick;
-				//if (mMeshStaticData::_mutiplyPickStatus)
-				{
-					left_up = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-					left_down = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-					right_down = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-					right_up = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-				}
-			}
-			else if (event->modifiers() == Qt::AltModifier)//圆形框选
-			{
-				//mMeshStaticData::_pickSoloOrMutiply = RoundPick;
-				//if (mMeshStaticData::_mutiplyPickStatus)
-				//{
-				//	roundCenter = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-				//	roundPoint = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-				//}
+				_polygonVertexs.append(QVector2D(nowX, nowY));
 			}
 		}
 
@@ -233,187 +164,29 @@ namespace MBaseRend
 	}
 	void mBaseRend::mouseReleaseEvent(QMouseEvent *event)
 	{
-		if (event->button() == Qt::MiddleButton)
+		if (_viewOperateMode == CameraOperate)
 		{
-			isMiddleMousePress = GL_FALSE;
-			isFirstMouse = GL_TRUE;
-
-		}
-
-		if (event->button() == Qt::LeftButton)
-		{
-			nowX = event->pos().x();
-			nowY = event->pos().y();
-			//if ((mMeshStaticData::_pickFilter == PickAdjustNum))
-			{
-				//if (_tempMeshRend->PickOnLineNum(0, event->pos()))//左键加
-				{
-					//mGlobalSignals::getInstance()->finishPickingAdjustNumSig(0);
-				}
-			}
-			//else if ((mMeshStaticData::_pickFilter == PickBiasNum))
-			{
-				//if (_tempMeshRend->PickOnLineNum(0, event->pos()))//左键加
-				{
-					//mGlobalSignals::getInstance()->finishPickingBiasNumSig(0);
-				}
-			}
-			//else if (mMeshStaticData::_pickSoloOrMutiply == SoloPick)
-			{
-				//float depth;
-				//makeCurrent();
-				//glReadPixels(event->pos().x(), SCR_HEIGHT - event->pos().y(), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-				//if (mMeshStaticData::_pickObject == Mesh)
-				{
-					//_meshRend->SoloPickOnModel(event->pos(), depth);
-				}
-				//else if (mMeshStaticData::_pickObject == Geometry)
-				{
-					//_geoRend->SoloPickOnModel(event->pos());
-				}
-			}
-			//else if (mMeshStaticData::_mutiplyPickStatus)
-			{
-				//if (mMeshStaticData::_pickSoloOrMutiply == MultiplyPick)
-				{
-					int Width = fabs(nowX - Posx_Firstmouse);
-					int Height = fabs(nowY - Posy_Firstmouse);
-					int PosX = 0.5*(nowX + Posx_Firstmouse);
-					int PosY = 0.5*(nowY + Posy_Firstmouse);
-					//if (mMeshStaticData::_pickObject == Mesh)
-					{
-						//_meshRend->MultiplyPickOnModel(PosX, PosY, Width, Height, _quadRend->pickQuad);
-					}
-					//else if (mMeshStaticData::_pickObject == Geometry)
-					{
-						//_geoRend->MultiplyPickOnModel(PosX, PosY, Width, Height, _quadRend->pickQuad);
-					}
-				}
-				//else if (mMeshStaticData::_pickSoloOrMutiply == RoundPick)
-				{
-					//if (mMeshStaticData::_pickObject == Mesh)
-					{
-						//_meshRend->RoundPickOnModel((nowX + Posx_Firstmouse) / 2.0, (nowY + Posy_Firstmouse) / 2.0, nowX, nowY);
-					}
-					//else if (mMeshStaticData::_pickObject == Geometry)
-					{
-						//_geoRend->RoundPickOnModel((nowX + Posx_Firstmouse) / 2.0, (nowY + Posy_Firstmouse) / 2.0, nowX, nowY);
-					}
-				}
-			}
-			//发送信号
-			//mGlobalSignals::getInstance()->finishPickingSig();
-			//根据矩形框中心进行缩放，鼠标释放后传递数据
-			if (ifZoomAtFrameCenter == true)
+			if (_cameraMode == Zoom)
 			{
 				_modelView->ZoomAtFrameCenter((Posx_Firstmouse + nowX) / 2, (Posy_Firstmouse + nowY) / 2);
-				//HideOrShowAllFont();
-				//_meshModelRulerRend->UpdateNum();
-				ifZoomAtFrameCenter = false;
 			}
-			//点击获取像素点坐标，重新设置旋转中心
-			if (ifGetRotateCenter == true)
-			{
-				int posx = event->pos().x(); //QT像素坐标原点左上角
-				int posy = event->pos().y();
-				float Depth = 0.0;
-				if (abs(BufDepth - 1.0) < 0.1)
-					Depth = 0;
-				else
-					Depth = (BufDepth - 0.5) * 2;//将深度值范围从0.1转换到-1.1
-				//添加点的模型坐标
-				QVector3D Center = mViewToolClass::PixelToModelPosition(posx, posy, _modelView->_projection, _modelView->_view, _modelView->_model, SCR_WIDTH, SCR_HEIGHT, Depth);
-				//获取最大旋转半径
-				float maxRadius = mViewToolClass::GetMaxRadius(_left, _right, _bottom, _top, _back, _front, Center);
-				_modelView->SetRotateCenterToPoint(Center, maxRadius);
-				_center_now = Center;
-				//mRenderData::GetInstance()->appendRotateCenterData("RotateCenter", Center);
-				ifGetRotateCenter = false;
-			}
-			else
-			{
-				//设置旋转中心隐藏
-				//mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", false);//隐藏
-			}
-
-
-			isFirstMouse = GL_TRUE;
-			isLeftMousePress = GL_FALSE;
 		}
-
-
-		if (event->button() == Qt::RightButton)
+		else if (_viewOperateMode == PickOperate)
 		{
-			nowX = event->pos().x();
-			nowY = event->pos().y();
-			//if ((mMeshStaticData::_pickFilter == PickAdjustNum))
+			if (_pickMode != NoPick)
 			{
-				//if (_tempMeshRend->PickOnLineNum(1, event->pos()))//右键减
+				for (auto render : _renderArray)
 				{
-					//mGlobalSignals::getInstance()->finishPickingAdjustNumSig(1);
+					render->setPickParameters(_pickMode, _multiplyPickMode, _polygonVertexs);
+					render->startPick();
 				}
 			}
-			//else if ((mMeshStaticData::_pickFilter == PickBiasNum))
-			{
-				//if (_tempMeshRend->PickOnLineNum(1, event->pos()))//左键加
-				{
-					//mGlobalSignals::getInstance()->finishPickingBiasNumSig(1);
-				}
-			}
-			//else if (mMeshStaticData::_pickSoloOrMutiply == SoloPick)
-			{
-				//QOpenGLContext *context = QOpenGLContext::currentContext();
-				//float depth;
-				//makeCurrent();
-				//glReadPixels(event->pos().x(), SCR_HEIGHT - event->pos().y(), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-				//if (mMeshStaticData::_pickObject == Mesh)
-				{
-					//_meshRend->SoloPickOnModel(event->pos(), depth);
-				}
-				//else if (mMeshStaticData::_pickObject == Geometry)
-				{
-					//_geoRend->SoloPickOnModel(event->pos());
-				}
-			}
-			//else if (mMeshStaticData::_mutiplyPickStatus)
-			{
-				//if (mMeshStaticData::_pickSoloOrMutiply == MultiplyPick)
-				{
-					int Width = fabs(nowX - Posx_Firstmouse);
-					int Height = fabs(nowY - Posy_Firstmouse);
-					int PosX = 0.5*(nowX + Posx_Firstmouse);
-					int PosY = 0.5*(nowY + Posy_Firstmouse);
-				//	if (mMeshStaticData::_pickObject == Mesh)
-				//	{
-				//		_meshRend->MultiplyPickOnModel(PosX, PosY, Width, Height, _quadRend->pickQuad);
-				//	}
-				//	else if (mMeshStaticData::_pickObject == Geometry)
-				//	{
-				//		_geoRend->MultiplyPickOnModel(PosX, PosY, Width, Height, _quadRend->pickQuad);
-				//	}
-				//}
-				//else if (mMeshStaticData::_pickSoloOrMutiply == RoundPick)
-				//{
-				//	if (mMeshStaticData::_pickObject == Mesh)
-				//	{
-				//		_meshRend->RoundPickOnModel((nowX + Posx_Firstmouse) / 2.0, (nowY + Posy_Firstmouse) / 2.0, nowX, nowY);
-				//	}
-				//	else if (mMeshStaticData::_pickObject == Geometry)
-				//	{
-				//		_geoRend->RoundPickOnModel((nowX + Posx_Firstmouse) / 2.0, (nowY + Posy_Firstmouse) / 2.0, nowX, nowY);
-				//	}
-				}
-			}
-			isFirstMouse = GL_TRUE;
-			isRightMousePress = false;
-			//mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", false);//隐藏
 		}
-		left_up = QVector2D(0, 0);
-		left_down = QVector2D(0, 0);
-		right_down = QVector2D(0, 0);
-		right_up = QVector2D(0, 0);
-		//roundCenter = QVector2D(0, 0);
-		//roundPoint = QVector2D(0, 0);
+		_polygonVertexs.clear();
+		_viewOperateMode = NoViewOperate;
+		_cameraMode = NoCameraOperate;
+		_pickMode = NoPick;
+
 		update();
 	}
 
@@ -423,103 +196,76 @@ namespace MBaseRend
 		nowX = event->pos().x();
 		nowY = event->pos().y();
 
-		//框选放大（传递矩形框参数）
-		if (isLeftMousePress && ifZoomAtFrameCenter == true)
+		//left_down = QVector2D(Posx_Firstmouse, nowY);
+		//right_down = QVector2D(nowX, nowY);
+		//right_up = QVector2D(nowX, Posy_Firstmouse);
+		//roundCenter = QVector2D((nowX + Posx_Firstmouse) / 2.0, (nowY + Posy_Firstmouse) / 2.0);
+		//roundPoint = QVector2D(nowX, nowY);
+		GLint xoffset = lastX - nowX;//计算X方向偏移量(移动像素)
+		GLint yoffset = nowY - lastY;// 计算Y方向偏移量
+		lastX = nowX;
+		lastY = nowY;
+
+		if (_viewOperateMode == CameraOperate)
 		{
-			left_down = QVector2D(Posx_Firstmouse, nowY);
-			right_down = QVector2D(nowX, nowY);
-			right_up = QVector2D(nowX, Posy_Firstmouse);
-		}
-
-		if (isLeftMousePress && ifZoomAtFrameCenter == false/* && mMeshStaticData::_pickSoloOrMutiply == NoPick*/)
-		{
-			if (isFirstMouse)
+			if (_cameraMode == Rotate)
 			{
-				lastX = nowX;
-				lastY = nowY;
-				isFirstMouse = GL_FALSE;
+				if (ifRotateAtXY == true && ifGetRotateCenter == false)
+				{
+					_modelView->Rotate(xoffset, yoffset, Rotate_XY);
+					_commonView->Rotate(xoffset, yoffset, Rotate_XY);
+				}
+				else if (ifRotateAtZ == true && ifGetRotateCenter == false)
+				{
+					_modelView->Rotate(xoffset, yoffset, Rotate_Z);
+					_commonView->Rotate(xoffset, yoffset, Rotate_Z);
+				}
 			}
-
-			GLint xoffset = lastX - nowX;//计算X方向偏移量(移动像素)
-			GLint yoffset = nowY - lastY;// 计算Y方向偏移量
-			lastX = nowX;
-			lastY = nowY;
-
-			if (ifRotateAtXY == true && ifGetRotateCenter == false)
+			else if (_cameraMode == Translate)
 			{
-				_modelView->Rotate(xoffset, yoffset, Rotate_XY);
-				_commonView->Rotate(xoffset, yoffset, Rotate_XY);
+				_modelView->Translate(xoffset, yoffset);			
 			}
-			else if (ifRotateAtZ == true && ifGetRotateCenter == false)
+			else if (_cameraMode == Zoom)
 			{
-				_modelView->Rotate(xoffset, yoffset, Rotate_Z);
-				_commonView->Rotate(xoffset, yoffset, Rotate_Z);
+				float distance = 0.0;
+				if (_polygonVertexs.size() > 0)
+				{
+					distance = _polygonVertexs.last().distanceToPoint(QVector2D(nowX, nowY));
+				}
+				if (distance > 20)
+				{
+					_polygonVertexs.append(QVector2D(nowX, nowY));
+				}
+				//_modelView->ZoomAtFrameCenter((Posx_Firstmouse + nowX) / 2, (Posy_Firstmouse + nowY) / 2);
+				//_modelView->ZoomAtViewCenter_ByMove(Posx_Firstmouse, Posy_Firstmouse, nowX, nowY);
 			}
-			else if (ifTranslateXY == true && ifGetRotateCenter == false)
-			{
-				_modelView->Translate(xoffset, yoffset);
-			}
-			else if (ifZoomByMouseMove == true && ifGetRotateCenter == false)
-			{
-				_modelView->ZoomAtViewCenter_ByMove(Posx_Firstmouse, Posy_Firstmouse, nowX, nowY);
-			}
-
-			//设置旋转中心是否显示
-			//if (ifTranslateXY == true || ifZoomByMouseMove == true)
+			//else if (ifZoomByMouseMove == true && ifGetRotateCenter == false)
 			//{
-			//	mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", false);//隐藏
-			//}
-			//if (ifRotateAtXY == true || ifRotateAtZ == true)
-			//{
-			//	mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", true);//显示
+			//	_modelView->ZoomAtViewCenter_ByMove(Posx_Firstmouse, Posy_Firstmouse, nowX, nowY);
 			//}
 		}
-		//else if ((isRightMousePress || isLeftMousePress)/* && mMeshStaticData::_pickSoloOrMutiply == MultiplyPick*/)
-		//{
-			//if (mMeshStaticData::_mutiplyPickStatus)
-			//{
-				//left_down = QVector2D(Posx_Firstmouse, nowY);
-				//right_down = QVector2D(nowX, nowY);
-				//right_up = QVector2D(nowX, Posy_Firstmouse);
-			//}
-		//}
-		//else if ((isRightMousePress || isLeftMousePress)/* && mMeshStaticData::_pickSoloOrMutiply == RoundPick*/)
-		//{
-			//if (mMeshStaticData::_mutiplyPickStatus)
-			//{
-				//left_down = QVector2D(Posx_Firstmouse, nowY);
-				//right_down = QVector2D(nowX, nowY);
-				//right_up = QVector2D(nowX, Posy_Firstmouse);
-				//roundCenter = QVector2D((nowX + Posx_Firstmouse) / 2.0, (nowY + Posy_Firstmouse) / 2.0);
-				//roundPoint = QVector2D(nowX, nowY);
-			//}
-		//}
-		//右键平移
-		else if (isRightMousePress/* && mMeshStaticData::_pickSoloOrMutiply == NoPick*/)
+		else if (_viewOperateMode == PickOperate)
 		{
-			if (isFirstMouse)
+			if (_pickMode == MultiplyPick)
 			{
-				lastX = nowX;
-				lastY = nowY;
-				isFirstMouse = GL_FALSE;
+				float distance = 0.0;
+				if (_polygonVertexs.size() > 0)
+				{
+					distance = _polygonVertexs.last().distanceToPoint(QVector2D(nowX, nowY));
+				}
+				//qDebug() << _polygonVertexs.last() << QVector2D(nowX, nowY) << distance;
+				if (_multiplyPickMode == PolygonPick)
+				{
+					if (distance > 20)
+					{
+						_polygonVertexs.append(QVector2D(nowX, nowY));
+					}
+				}
+				else
+				{
+					_polygonVertexs.append(QVector2D(nowX, nowY));
+				}
 			}
-
-			GLint xoffset = lastX - nowX;//计算X方向偏移量(移动像素)
-			GLint yoffset = nowY - lastY;// 计算Y方向偏移量
-			lastX = nowX;
-			lastY = nowY;
-			//设置旋转中心不显示
-			//mRenderData::GetInstance()->setRotateCenterShowState("RotateCenter", false);//隐藏
-
-			_modelView->Translate(xoffset, yoffset);
-
-		}
-		//else
-		{
-			// if (mMeshStaticData::_pickFilter != PickAdjustNum&& mMeshStaticData::_pickFilter != PickBiasNum)
-			// {
-			// 	_meshRend->MouseMoveOnModel(ShaderCommon, event->pos());
-			// }
 		}
 		update();
 
@@ -570,8 +316,165 @@ namespace MBaseRend
 		}
 		_renderArray.clear();
 	}
+	void mBaseRend::setMultiplyPickMode(MultiplyPickMode multiplyPickMode)
+	{
+		_multiplyPickMode = multiplyPickMode;
+	}
 	void mBaseRend::GetPointDepthAtMouse()
 	{
 		glReadPixels(nowX, SCR_HEIGHT - nowY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &BufDepth);//OpenGL像素坐标原点左下角 BufDepth范围（0,1）
 	}
+	CameraOperateMode mBaseRend::getCameraMode(Qt::MouseButton mouseButton, Qt::KeyboardModifiers modifiers)
+	{
+		if (_cameraKeys.contains({ mouseButton, modifiers }))
+		{
+			return _cameraKeys.value({ mouseButton, modifiers });
+		}
+		return NoCameraOperate;
+	}
+	PickMode mBaseRend::getPickMode(Qt::MouseButton mouseButton, Qt::KeyboardModifiers modifiers)
+	{
+		if (_pickKeys.contains({ mouseButton, modifiers }))
+		{
+			return _pickKeys.value({ mouseButton, modifiers });
+		}
+		return NoPick;
+	}
+
+	//设置视图*缩放*类型
+	void mBaseRend::SetZoomAtViewCenter_ByMove()
+	{
+		ifRotateAtXY = false;
+		ifRotateAtZ = false;
+		ifTranslateXY = false;
+		ifZoomByMouseMove = true;
+
+	}
+
+	//设置视图*旋转*类型
+	void mBaseRend::SetRotateType(RotateType rotateType)
+	{
+		if (rotateType == Rotate_XY)
+		{
+			ifRotateAtXY = true;
+			ifRotateAtZ = false;
+			ifTranslateXY = false;
+			ifZoomByMouseMove = false;
+		}
+		else if (rotateType == Rotate_Z)
+		{
+			ifRotateAtXY = false;
+			ifRotateAtZ = true;
+			ifTranslateXY = false;
+			ifZoomByMouseMove = false;
+		}
+	}
+	//设置视图*移动*类型
+	void mBaseRend::SetTranslateXY()
+	{
+
+		ifRotateAtXY = false;
+		ifRotateAtZ = false;
+		ifTranslateXY = true;
+		ifZoomByMouseMove = false;
+
+	}
+
+	void mBaseRend::SetZoomAtFrameCenter()
+	{
+		ifZoomAtFrameCenter = true;
+	}
+	void mBaseRend::SetZoomAtViewCenter_ByButton(ScaleDirection scaleDirection)
+	{
+		_modelView->ZoomAtViewCenter_ByBotton(scaleDirection);
+
+		update();
+	}
+	//设置视图*旋转中心*类型
+	void mBaseRend::SetRotateCenterToPoint()
+	{
+		ifGetRotateCenter = true;
+		ifRotateAtViewCenter = false;
+		//_lableRendController_common->deleteLableRendData<X_Point_Common>("RotateCenter");
+
+	}
+	void mBaseRend::SetRotateCenterToViewCenter()
+	{
+		ifGetRotateCenter = false;
+		ifRotateAtViewCenter = true;
+		//获取屏幕中心的坐标
+		QVector3D ViewCenter = mViewToolClass::NormToModelPosition(QVector3D(0, 0, 0), _modelView->_projection, _modelView->_view, _modelView->_model);
+		//找新的旋转半径
+		float maxRadius = mViewToolClass::GetMaxRadius(_left, _right, _bottom, _top, _back, _front, ViewCenter);
+		_modelView->SetRotateCenterToViewCenter(ViewCenter, maxRadius);
+		_center_now = ViewCenter;
+		//传递旋转中心数据
+		QVector3D centerPos = mViewToolClass::PixelToModelPosition(SCR_WIDTH / 2, SCR_HEIGHT / 2, _modelView->_projection, _modelView->_view, _modelView->_model, SCR_WIDTH, SCR_HEIGHT);
+		//_lableRendController_common->appendLableRendData<X_Point_Common>("RotateCenter", { centerPos });
+		update();
+
+
+	}
+	void mBaseRend::SetRotateCenterToModelCenter()
+	{
+		ifGetRotateCenter = false;
+		ifRotateAtViewCenter = false;
+		_modelView->SetRotateCenterToModelCenter(_center_model, _maxRadius_model);
+		_center_now = _center_model;
+		//传递旋转中心数据
+		//_lableRendController_common->appendLableRendData<X_Point_Common>("RotateCenter", { _center_model });
+		update();
+
+
+	}
+	void mBaseRend::slotSetRotate_ByButton(float angle)
+	{
+		SetRotate_ByButton(angle);
+	}
+	void mBaseRend::SetRotate_ByButton(float angle)
+	{
+		_modelView->Rotate_ByBotton(angle);
+		_commonView->Rotate_ByBotton(angle);
+		update();
+	}
+	//设置视图*视角*类型
+	void mBaseRend::SetPerspective(Perspective pers)
+	{
+		_modelView->SetPerspective(pers);
+		_commonView->SetPerspective(pers);
+		update();
+	}
+	void mBaseRend::SaveCurrentView()
+	{
+		_modelView->SaveCurrentView();
+		_commonView->SaveCurrentView();
+		update();
+
+	}
+	void mBaseRend::CallSavedView()
+	{
+		_modelView->CallSavedView();
+		_commonView->CallSavedView();
+		//_lableRendController_common->appendLableRendData<X_Point_Common>("RotateCenter", { _modelView->_Center_Saved });
+		update();
+	}
+	//设置视图大小自适应
+	void mBaseRend::FitView()
+	{
+		_modelView->FitView(_center_model);
+		update();
+	}
+
+	QHash<QPair<Qt::MouseButton, Qt::KeyboardModifiers>, CameraOperateMode> mBaseRend::_cameraKeys = //默认hypermesh
+	{ {QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::MiddleButton,Qt::ControlModifier), Zoom},
+	  {QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton,Qt::ControlModifier), Rotate},
+	  {QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::RightButton,Qt::ControlModifier), Translate}, };
+
+	QHash<QPair<Qt::MouseButton, Qt::KeyboardModifiers>, PickMode> mBaseRend::_pickKeys = 
+	{
+		{QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton,Qt::ShiftModifier), MultiplyPick},
+		{QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::RightButton,Qt::ShiftModifier), MultiplyPick},
+		{QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton,Qt::NoModifier), SoloPick},
+		{QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::RightButton,Qt::NoModifier), SoloPick},
+	};
 }

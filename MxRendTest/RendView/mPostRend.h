@@ -19,6 +19,7 @@ namespace mxr
 using namespace MBaseRend;
 namespace MPostRend
 {
+	class mPostRender;
 	class RENDVIEW_EXPORT mPostRend : public mBaseRend
 	{
 		Q_OBJECT
@@ -26,6 +27,8 @@ namespace MPostRend
 	public:
 		mPostRend(const QString& name);
 		~mPostRend();
+
+		shared_ptr<mPostRender> getPostRender() override;
 
 	public:
 		/*

@@ -40,7 +40,7 @@ namespace MPostRend
 		std::set<int> _pickElementTypeFilter;
 
 		//框选还是点选
-		MViewBasic::PickSoloOrMutiply _pickSoloOrMutiply;
+		//MViewBasic::PickSoloOrMutiply _pickSoloOrMutiply;
 
 		//渲染范围（0-全部部件范围（自定义）；1-渲染部件范围）
 		int _rangeType = 0;

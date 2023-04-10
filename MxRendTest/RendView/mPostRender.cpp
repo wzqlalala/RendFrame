@@ -302,6 +302,15 @@ namespace MPostRend
 
 		this->doneCurrent();
 	}
+	bool mPostRender::getIsDragSomething()
+	{
+		//判断是否有物体被拖拽
+		return false;
+	}
+	void mPostRender::startPick()
+	{
+
+	}
 	void mPostRender::updateOneModelOperate(QPair<MBasicFunction::PostModelOperateEnum, std::set<QString>> postModelOperates)
 	{
 		this->makeCurrent();

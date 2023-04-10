@@ -23,10 +23,16 @@ namespace mxr
 }
 using namespace std;
 using namespace MViewBasic;
+namespace MPostRend
+{
+	class mPostRender;
+}
 namespace MBaseRend
 {
 	class mBackGroundRender;
+	class mQuadRender;
 	class mBaseRender;
+	class mPostRender;
 	typedef QVector<shared_ptr<mBaseRender>> RenderArray;
 	class RENDVIEW_EXPORT mBaseRend : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
 	{
@@ -42,11 +48,22 @@ namespace MBaseRend
 
 		shared_ptr<mModelView> getCamera() {return _modelView;};
 
+		shared_ptr<mBaseRender> getFirstRender() { 
+			if (!_renderArray.empty()) {
+				return _renderArray.first();
+			}
+			return nullptr;
+		};
+
+		virtual shared_ptr<MPostRend::mPostRender> getPostRender() { return nullptr; };
+
 		void addRender(shared_ptr<mBaseRender> baseRender);
 
 		void removeRender(shared_ptr<mBaseRender> baseRender);
 
 		void clearRender();
+
+		void setMultiplyPickMode(MultiplyPickMode multiplyPickMode);
 
 	public:
 		/*
@@ -63,37 +80,43 @@ namespace MBaseRend
 	protected:
 		void GetPointDepthAtMouse();
 
+	private:
+		CameraOperateMode getCameraMode(Qt::MouseButton, Qt::KeyboardModifiers);
+
+
+		PickMode getPickMode(Qt::MouseButton, Qt::KeyboardModifiers);
+
 	public:
 		//框选放大
-		//void SetZoomAtFrameCenter();//设置绕着选取框中心进行缩放（不连续）
+		void SetZoomAtFrameCenter();//设置绕着选取框中心进行缩放（不连续）
 		//视图自适应
-		//void FitView();
+		void FitView();
 		//设置旋转中心为视图中心
-		//void SetRotateCenterToViewCenter();
+		void SetRotateCenterToViewCenter();
 		//设置旋转中心为视图上一点
-		//void SetRotateCenterToPoint();
+		void SetRotateCenterToPoint();
 		//设置旋转中心为几何中心
-		//void SetRotateCenterToModelCenter();
+		void SetRotateCenterToModelCenter();
 		//设置点击按钮绕着垂直屏幕轴旋转
-		//void SetRotate_ByButton(float angle);
+		void SetRotate_ByButton(float angle);
 		//设置屏幕中心缩放(按键进行缩放，不连续)
-		//void SetZoomAtViewCenter_ByButton(ScaleDirection);
+		void SetZoomAtViewCenter_ByButton(ScaleDirection);
 		//初始化视角槽函数
-		//void SetPerspective(Perspective);
+		void SetPerspective(Perspective);
 		//保存当前视角
-		//void SaveCurrentView();
+		void SaveCurrentView();
 		//调用保存的视角
-		//void CallSavedView();
+		void CallSavedView();
 
 		//设置屏幕中心缩放(鼠标移动进行缩放，连续)
-		//void SetZoomAtViewCenter_ByMove();
+		void SetZoomAtViewCenter_ByMove();
 		//设置点击鼠标中键进行旋转类型
-		//void SetRotateType(RotateType);
+		void SetRotateType(RotateType);
 		//设置点击鼠标中键进行平移
-		//void SetTranslateXY();
+		void SetTranslateXY();
 
 		//设置自定义角度旋转槽函数
-		//void slotSetRotate_ByButton(float angle);
+		void slotSetRotate_ByButton(float angle);
 
 		//显示隐藏更新视角
 		//void slotUpdateOrthoAndCamera();
@@ -115,6 +138,9 @@ namespace MBaseRend
 
 		RenderArray _renderArray;
 
+		//矩形框
+		std::shared_ptr<mQuadRender> _quadRender;
+
 		//窗口大小
 		int SCR_WIDTH = 800, SCR_HEIGHT = 600;
 		//鼠标在屏幕中的坐标
@@ -122,7 +148,12 @@ namespace MBaseRend
 		//第一次鼠标点击获取的像素坐标
 		GLint Posx_Firstmouse, Posy_Firstmouse;
 		//矩形框的坐标
-		QVector2D left_up, left_down, right_down, right_up;
+		//QVector2D left_up, left_down, right_down, right_up;
+		//圆形框的坐标点
+		//QVector2D roundCenter, roundPoint;
+		//多边形框的坐标点
+		QVector<QVector2D> _polygonVertexs;
+
 		//获取当前鼠标点的深度值（网格模型）//用于绕着某一点旋转
 		float BufDepth = 0.0; //BufDepth范围（0, 1）
 
@@ -135,20 +166,34 @@ namespace MBaseRend
 
 
 		//鼠标点击功能判断
-		bool isFirstMouse = true, isMiddleMousePress = false, isLeftMousePress = false, isRightMousePress = false;
+		//bool isFirstMouse = true;
+		Qt::MouseButton _mouseButton = Qt::NoButton;
 		//鼠标移动判断
 		bool isMouseMove = false;
 
 		//视角功能判断
 		bool ifGetRotateCenter = false; //是否获取旋转中心（当前鼠标的点击像素点坐标）
+
 		bool ifRotateAtViewCenter = false;//是否绕着视角中心旋转
 		bool ifRotateAtXY = true;//是否在XY平面旋转
 		bool ifRotateAtZ = false;//是否在绕Z轴旋转
+
 		bool ifTranslateXY = false; //是否在XY平面内移动
+
 		bool ifZoomByMouseMove = false; //是够根据鼠标移动进行缩放
 		bool ifZoomAtFrameCenter = false; //是够根据选取框中心进行缩放
 
+		ViewOperateMode _viewOperateMode = NoViewOperate;
 
+		CameraOperateMode _cameraMode = NoCameraOperate;
 
+		PickMode _pickMode = NoPick;//当前拾取模式
+
+		MultiplyPickMode _multiplyPickMode = QuadPick;//框选拾取模式
+
+		static QHash<QPair<Qt::MouseButton, Qt::KeyboardModifiers>, CameraOperateMode> _cameraKeys;
+
+		static QHash<QPair<Qt::MouseButton, Qt::KeyboardModifiers>, PickMode> _pickKeys;//操作键位
 	};
+
 }

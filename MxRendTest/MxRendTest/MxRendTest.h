@@ -73,5 +73,7 @@ private:
 	bool _isStartAnimation = false;
 	bool _isLinearAnimation = true;
 
+	//ʰȡ
+	MultiplyPickMode _multuiplyPickMode = QuadPick;
 
 };

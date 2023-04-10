@@ -97,6 +97,9 @@
     <ClCompile Include="mPostCuttingPlaneRender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mQuadRender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="mBackGroundRender.h">
@@ -115,6 +118,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="mPostRender.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="mQuadRender.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

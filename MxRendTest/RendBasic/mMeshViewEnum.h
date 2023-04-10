@@ -183,29 +183,68 @@ namespace MViewBasic
 		Other,
 	};
 
-	//单选还是框选拾取
-	enum PickSoloOrMutiply
+	enum ViewOperateMode
+	{
+		NoViewOperate,
+
+		CameraOperate,
+
+		PickOperate,
+	};
+
+	enum CameraOperateMode
+	{
+		NoCameraOperate,
+
+		Rotate,
+
+		Translate,
+
+		Zoom,
+
+	};
+
+	//拾取模式
+	enum PickMode
 	{
 		//不拾取
 		NoPick,
 
 		//拖拽
-		DragSphere,
+		DragPick,
 
 		//点选
 		SoloPick,
 
-		//矩形框选
+		//框选
 		MultiplyPick,
 
-		//圆形框选
-		RoundPick,
+
+
+		/***************点选模式*****************/
+		//
+
+
+		/***************拖拽模式*****************/
 
 		//拖拽最小值线条
-		DragMinLine,
+		//DragMinLine,
 
 		//拖拽最大值线条
-		DragMaxLine,
+		//DragMaxLine,
+	};
+
+	enum MultiplyPickMode
+	{
+		/**************框选模式***********/
+		//矩形框选（角点）
+		QuadPick,
+
+		//圆形框选(圆心和半径)
+		RoundPick,
+
+		//多边形框选（多段线）
+		PolygonPick,
 	};
 
 	/*

@@ -10,4 +10,5 @@ namespace MBaseRend
 	mBaseRender::~mBaseRender()
 	{
 	}
+
 }
