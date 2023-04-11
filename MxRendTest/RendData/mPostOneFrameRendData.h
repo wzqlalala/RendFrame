@@ -208,7 +208,6 @@ namespace MDataPost
 		* 删除变量变量数据和和矢量数据和位移数据
 		*/
 		void deleteValueAndDisplacementData();
-
 	private:
 		//颜色表对象
 		mPostColorTableData *_postColorTable;

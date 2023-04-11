@@ -11,6 +11,7 @@
 //Qt
 #include <QMouseEvent>
 #include <QGuiApplication>
+#include <QOpenGLFramebufferObject>
 
 ////MxRender
 #include <renderpch.h>
@@ -23,6 +24,13 @@ namespace MBaseRend
 	mBaseRend::mBaseRend(const QString& name): _name(name)
 	{
 		setMouseTracking(true);
+
+		_viewOperateMode = new ViewOperateMode; *_viewOperateMode = ViewOperateMode::NoViewOperate;
+		_cameraMode = new CameraOperateMode; *_cameraMode = CameraOperateMode::NoCameraOperate;
+		_pickMode = new PickMode;*_pickMode = PickMode::NoPick;//当前拾取模式
+		_multiplyPickMode = new MultiplyPickMode; *_multiplyPickMode = MultiplyPickMode::QuadPick;//框选拾取模式
+		_pickFilter = new PickFilter; *_pickFilter = PickFilter::PickAnyMesh;
+
 		//QOpenGLContext *context = QOpenGLContext::currentContext();
 		_app = MakeAsset<mxr::Application>();
 		//_app->setContext(context);
@@ -60,11 +68,11 @@ namespace MBaseRend
 		_viewer->setSceneData(_root);
 
 		_bgRend = MakeAsset<mBackGroundRender>(_app, _root);
-		_quadRender = MakeAsset<mQuadRender>(_app, _root);
+		_quadRender = MakeAsset<mQuadRender>(_app, _root, _cameraMode, _pickMode, _multiplyPickMode);
 
-		/**/
-		//_app->GLContext()->functions()->glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
-		//_app->GLContext()->functions()->glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
+		format.setSamples(0);
+		format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+		FBO = new QOpenGLFramebufferObject(size(), format);
 
 		glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
 		glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
@@ -96,7 +104,11 @@ namespace MBaseRend
 		{
 			baseRender->updateUniform(_modelView, _commonView);
 		}
-		_quadRender->draw(_cameraMode, _pickMode, _multiplyPickMode, _polygonVertexs, SCR_WIDTH, SCR_HEIGHT);
+		_quadRender->draw(_polygonVertexs, SCR_WIDTH, SCR_HEIGHT);
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, QOpenGLContext::currentContext()->defaultFramebufferObject());
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FBO->handle());
+		glBlitFramebuffer(0, 0, width(), height(), 0, 0, FBO->width(), FBO->height(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);		
 	}
 
 	void mBaseRend::resizeGL(int w, int h)
@@ -111,41 +123,39 @@ namespace MBaseRend
 
 		_modelView->SetOrthoByRatio(w, h);
 		_commonView->SetOrthoByRatio(w, h);
+
+		FBO = new QOpenGLFramebufferObject(size(), format);
 	}
 	void mBaseRend::mousePressEvent(QMouseEvent *event)
 	{
 		Posx_Firstmouse = event->pos().x();
 		Posy_Firstmouse = event->pos().y();
-		//left_up = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-		//left_down = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-		//right_down = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
-		//right_up = QVector2D(Posx_Firstmouse, Posy_Firstmouse);
 		nowX = event->pos().x();
 		nowY = event->pos().y();
 		lastX = nowX;
 		lastY = nowY;
 		_mouseButton = event->button();
 		Qt::KeyboardModifiers keyModifiers = event->modifiers();
-		_cameraMode = this->getCameraMode(_mouseButton, keyModifiers);
-		if (_cameraMode == NoCameraOperate)
+		*_cameraMode = this->getCameraMode(_mouseButton, keyModifiers);
+		if (*_cameraMode == CameraOperateMode::NoCameraOperate)
 		{
-			_viewOperateMode = NoViewOperate;
-			_pickMode = this->getPickMode(_mouseButton, keyModifiers);
-			if (_pickMode != NoPick)
+			*_viewOperateMode = ViewOperateMode::NoViewOperate;
+			*_pickMode = this->getPickMode(_mouseButton, keyModifiers);
+			if (*_pickMode != PickMode::NoPick)
 			{
-				_viewOperateMode = PickOperate;
-				if (_pickMode == SoloPick)
+				*_viewOperateMode = ViewOperateMode::PickOperate;
+				if (*_pickMode == PickMode::SoloPick)
 				{
 					for (auto render : _renderArray)
 					{
-						if (render->getIsDragSomething())
+						if (render->getIsDragSomething(QVector2D(nowX, nowY)))
 						{
-							_pickMode = DragPick;
+							*_pickMode = PickMode::DragPick;
 							break;
 						}
 					}
 				}
-				if (_pickMode == MultiplyPick)
+				else if (*_pickMode == PickMode::MultiplyPick)
 				{
 					_polygonVertexs.append(QVector2D(nowX, nowY));
 				}
@@ -153,8 +163,8 @@ namespace MBaseRend
 		}
 		else
 		{
-			_viewOperateMode = CameraOperate;
-			if (_cameraMode == Zoom)
+			*_viewOperateMode = ViewOperateMode::CameraOperate;
+			if (*_cameraMode == CameraOperateMode::Zoom)
 			{
 				_polygonVertexs.append(QVector2D(nowX, nowY));
 			}
@@ -164,28 +174,54 @@ namespace MBaseRend
 	}
 	void mBaseRend::mouseReleaseEvent(QMouseEvent *event)
 	{
-		if (_viewOperateMode == CameraOperate)
+		if (*_viewOperateMode == ViewOperateMode::CameraOperate)
 		{
-			if (_cameraMode == Zoom)
+			if (*_cameraMode == CameraOperateMode::Zoom)
 			{
 				_modelView->ZoomAtFrameCenter((Posx_Firstmouse + nowX) / 2, (Posy_Firstmouse + nowY) / 2);
 			}
 		}
-		else if (_viewOperateMode == PickOperate)
+		else if (*_viewOperateMode == ViewOperateMode::PickOperate)
 		{
-			if (_pickMode != NoPick)
+			if (*_pickMode == PickMode::SoloPick)
+			{
+				_polygonVertexs.append(QVector2D(nowX, nowY));
+				for (auto render : _renderArray)
+				{
+					makeCurrent();
+					/*
+					FBO->bind();
+					float depth = 0.0;
+					QOpenGLContext::currentContext()->functions()->glReadPixels(nowX, SCR_HEIGHT - nowY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+					if (depth != 0)
+					{
+						qDebug() << "depth" << depth;
+					}
+					GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
+					if (error != 0)
+					{
+						qDebug() << error;
+					}
+					render->startPick(_polygonVertexs);
+					FBO->release();
+					*/
+					FBO->bind();
+					render->startPick(_polygonVertexs);
+					FBO->release();
+				}
+			}
+			else if (*_pickMode == PickMode::MultiplyPick)
 			{
 				for (auto render : _renderArray)
 				{
-					render->setPickParameters(_pickMode, _multiplyPickMode, _polygonVertexs);
-					render->startPick();
+					render->startPick(_polygonVertexs);
 				}
 			}
 		}
 		_polygonVertexs.clear();
-		_viewOperateMode = NoViewOperate;
-		_cameraMode = NoCameraOperate;
-		_pickMode = NoPick;
+		*_viewOperateMode = ViewOperateMode::NoViewOperate;
+		*_cameraMode = CameraOperateMode::NoCameraOperate;
+		*_pickMode = PickMode::NoPick;
 
 		update();
 	}
@@ -195,20 +231,14 @@ namespace MBaseRend
 		isMouseMove = true;
 		nowX = event->pos().x();
 		nowY = event->pos().y();
-
-		//left_down = QVector2D(Posx_Firstmouse, nowY);
-		//right_down = QVector2D(nowX, nowY);
-		//right_up = QVector2D(nowX, Posy_Firstmouse);
-		//roundCenter = QVector2D((nowX + Posx_Firstmouse) / 2.0, (nowY + Posy_Firstmouse) / 2.0);
-		//roundPoint = QVector2D(nowX, nowY);
 		GLint xoffset = lastX - nowX;//计算X方向偏移量(移动像素)
 		GLint yoffset = nowY - lastY;// 计算Y方向偏移量
 		lastX = nowX;
 		lastY = nowY;
 
-		if (_viewOperateMode == CameraOperate)
+		if (*_viewOperateMode == ViewOperateMode::CameraOperate)
 		{
-			if (_cameraMode == Rotate)
+			if (*_cameraMode == CameraOperateMode::Rotate)
 			{
 				if (ifRotateAtXY == true && ifGetRotateCenter == false)
 				{
@@ -221,11 +251,11 @@ namespace MBaseRend
 					_commonView->Rotate(xoffset, yoffset, Rotate_Z);
 				}
 			}
-			else if (_cameraMode == Translate)
+			else if (*_cameraMode == CameraOperateMode::Translate)
 			{
 				_modelView->Translate(xoffset, yoffset);			
 			}
-			else if (_cameraMode == Zoom)
+			else if (*_cameraMode == CameraOperateMode::Zoom)
 			{
 				float distance = 0.0;
 				if (_polygonVertexs.size() > 0)
@@ -236,25 +266,25 @@ namespace MBaseRend
 				{
 					_polygonVertexs.append(QVector2D(nowX, nowY));
 				}
-				//_modelView->ZoomAtFrameCenter((Posx_Firstmouse + nowX) / 2, (Posy_Firstmouse + nowY) / 2);
-				//_modelView->ZoomAtViewCenter_ByMove(Posx_Firstmouse, Posy_Firstmouse, nowX, nowY);
 			}
-			//else if (ifZoomByMouseMove == true && ifGetRotateCenter == false)
-			//{
-			//	_modelView->ZoomAtViewCenter_ByMove(Posx_Firstmouse, Posy_Firstmouse, nowX, nowY);
-			//}
 		}
-		else if (_viewOperateMode == PickOperate)
+		else if (*_viewOperateMode == ViewOperateMode::PickOperate)
 		{
-			if (_pickMode == MultiplyPick)
+			if (*_pickMode == PickMode::DragPick)
+			{
+				for (auto render : _renderArray)
+				{
+					render->dragSomething(QVector2D(nowX, nowY));
+				}
+			}
+			else if (*_pickMode == PickMode::MultiplyPick)
 			{
 				float distance = 0.0;
 				if (_polygonVertexs.size() > 0)
 				{
 					distance = _polygonVertexs.last().distanceToPoint(QVector2D(nowX, nowY));
 				}
-				//qDebug() << _polygonVertexs.last() << QVector2D(nowX, nowY) << distance;
-				if (_multiplyPickMode == PolygonPick)
+				if (*_multiplyPickMode == MultiplyPickMode::PolygonPick)
 				{
 					if (distance > 20)
 					{
@@ -318,7 +348,11 @@ namespace MBaseRend
 	}
 	void mBaseRend::setMultiplyPickMode(MultiplyPickMode multiplyPickMode)
 	{
-		_multiplyPickMode = multiplyPickMode;
+		*_multiplyPickMode = multiplyPickMode;
+	}
+	void mBaseRend::setPickFilter(MViewBasic::PickFilter pickFilter)
+	{
+		*_pickFilter = pickFilter;
 	}
 	void mBaseRend::GetPointDepthAtMouse()
 	{
@@ -330,7 +364,7 @@ namespace MBaseRend
 		{
 			return _cameraKeys.value({ mouseButton, modifiers });
 		}
-		return NoCameraOperate;
+		return CameraOperateMode::NoCameraOperate;
 	}
 	PickMode mBaseRend::getPickMode(Qt::MouseButton mouseButton, Qt::KeyboardModifiers modifiers)
 	{
@@ -338,7 +372,7 @@ namespace MBaseRend
 		{
 			return _pickKeys.value({ mouseButton, modifiers });
 		}
-		return NoPick;
+		return PickMode::NoPick;
 	}
 
 	//设置视图*缩放*类型
@@ -466,15 +500,15 @@ namespace MBaseRend
 	}
 
 	QHash<QPair<Qt::MouseButton, Qt::KeyboardModifiers>, CameraOperateMode> mBaseRend::_cameraKeys = //默认hypermesh
-	{ {QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::MiddleButton,Qt::ControlModifier), Zoom},
-	  {QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton,Qt::ControlModifier), Rotate},
-	  {QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::RightButton,Qt::ControlModifier), Translate}, };
+	{ {QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::MiddleButton,Qt::ControlModifier), CameraOperateMode::Zoom},
+	  {QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton,Qt::ControlModifier), CameraOperateMode::Rotate},
+	  {QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::RightButton,Qt::ControlModifier), CameraOperateMode::Translate}, };
 
 	QHash<QPair<Qt::MouseButton, Qt::KeyboardModifiers>, PickMode> mBaseRend::_pickKeys = 
 	{
-		{QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton,Qt::ShiftModifier), MultiplyPick},
-		{QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::RightButton,Qt::ShiftModifier), MultiplyPick},
-		{QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton,Qt::NoModifier), SoloPick},
-		{QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::RightButton,Qt::NoModifier), SoloPick},
+		{QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton,Qt::ShiftModifier), PickMode::MultiplyPick},
+		{QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::RightButton,Qt::ShiftModifier), PickMode::MultiplyPick},
+		{QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton,Qt::NoModifier), PickMode::SoloPick},
+		{QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::RightButton,Qt::NoModifier), PickMode::SoloPick},
 	};
 }

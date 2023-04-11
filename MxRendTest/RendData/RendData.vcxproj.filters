@@ -65,6 +65,9 @@
     <ClInclude Include="mPostAnimationRendData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mPostMeshPickData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mDataPost1.cpp">
@@ -112,12 +115,21 @@
     <ClCompile Include="mPostAnimationRendData.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mPostMeshPickData.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mPostMeshPickThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="mPostMeshVisualControl.h">
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="mPostMeshVisualThread.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="mPostMeshPickThread.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

@@ -53,6 +53,9 @@
     <ClInclude Include="mBasicStruct.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mPickToolClass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mColor.cpp">
@@ -77,6 +80,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mViewToolClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mPickToolClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

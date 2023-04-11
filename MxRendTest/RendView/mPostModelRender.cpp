@@ -429,4 +429,8 @@ namespace MPostRend
 		}
 		return aabb;
 	}
+	Space::SpaceTree *mPostModelRender::getPartSpaceTree(QString partName)
+	{
+		return _partRenders.value(partName)->getPartSpaceTree();
+	}
 }

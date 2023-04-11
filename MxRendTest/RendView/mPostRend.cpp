@@ -30,7 +30,7 @@ namespace MPostRend
 		QOpenGLContext *context = _app->GLContext();
 		context->makeCurrent(context->surface());
 
-		shared_ptr<mPostRender> postRender = make_shared<mPostRender>(_app, _root);
+		shared_ptr<mPostRender> postRender = make_shared<mPostRender>(_app, _root, this);
 		this->addRender(postRender);
 		//glEnable(GL_FRAMEBUFFER_SRGB);
 

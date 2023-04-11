@@ -9,13 +9,14 @@ using namespace mxr;
 using namespace std;
 namespace MBaseRend
 {
-	mQuadRender::mQuadRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> root):_app(app),_parent(root)
+	mQuadRender::mQuadRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> root, CameraOperateMode *cameraMode, PickMode *pickMode, MultiplyPickMode *multiplyPickMode):
+		_app(app),_parent(root),_cameraMode(cameraMode),_pickMode(pickMode),_multiplyPickMode(multiplyPickMode)
 	{
 		this->makeCurrent();
 		_stateSet = MakeAsset<StateSet>();
 		shared_ptr<Shader> shader = mShaderManage::GetInstance()->GetShader("ScreenQuad");
 		_stateSet->setShader(shader);
-		_stateSet->setAttributeAndModes(MakeAsset<Depth>(), 0);
+		_stateSet->setAttributeAndModes(MakeAsset<Depth>(), 1);
 		_stateSet->setAttributeAndModes(MakeAsset<PolygonMode>(mxr::PolygonMode::FRONT_AND_BACK, mxr::PolygonMode::LINE), 1);
 		_stateSet->setUniform(MakeAsset<Uniform>("width", 0));
 		_stateSet->setUniform(MakeAsset<Uniform>("height", 0));
@@ -33,7 +34,7 @@ namespace MBaseRend
 		}
 	}
 
-	void mQuadRender::draw(CameraOperateMode cameraMode, PickMode pickMode, MultiplyPickMode multiplyPickMode, QVector<QVector2D> poses, int w, int h)
+	void mQuadRender::draw(QVector<QVector2D> poses, int w, int h)
 	{
 		_parent->removeChild(_drawable);
 		if (poses.size() < 2)
@@ -45,19 +46,19 @@ namespace MBaseRend
 		_stateSet->getUniform("width")->SetData(w);
 		_stateSet->getUniform("height")->SetData(h);
 		QVector<QVector2D> vertexs;
-		if (cameraMode == Zoom)//画多段开线
+		if (*_cameraMode == CameraOperateMode::Zoom)//画多段开线
 		{
 			vertexs = poses;
 			_stateSet->setDrawMode(GL_LINE_STRIP);
 		}
-		else if (pickMode == MultiplyPick)
+		else if (*_pickMode == PickMode::MultiplyPick)
 		{
-			if (multiplyPickMode == QuadPick)
+			if (*_multiplyPickMode == MultiplyPickMode::QuadPick)
 			{
 				vertexs = QVector<QVector2D>{ poses.first(), QVector2D(poses.first().x(), poses.last().y()), poses.last(), QVector2D(poses.last().x(), poses.first().y()) };
 				_stateSet->setDrawMode(GL_LINE_LOOP);
 			}
-			else if (multiplyPickMode == RoundPick)
+			else if (*_multiplyPickMode == MultiplyPickMode::RoundPick)
 			{
 				_stateSet->setDrawMode(GL_LINE_LOOP);
 				QVector2D roundPoint = poses.last(), roundCenter = (poses.last() + poses.first()) / 2.0;
@@ -67,7 +68,7 @@ namespace MBaseRend
 					vertexs.append(QVector2D(roundCenter.x() + distance * cos(2 * i * M_PI / 20.0), roundCenter.y() + distance * sin(2 * i * M_PI / 20.0)));
 				}
 			}
-			else if(multiplyPickMode == PolygonPick)//画多段开线
+			else if(*_multiplyPickMode == MultiplyPickMode::PolygonPick)//画多段开线
 			{
 				vertexs = poses;
 				_stateSet->setDrawMode(GL_LINE_STRIP);

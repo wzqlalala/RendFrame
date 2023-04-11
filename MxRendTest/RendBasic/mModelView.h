@@ -69,7 +69,9 @@ namespace MViewBasic
 		//通过屏幕长宽比还原正交投影
 		void ReturnOrthoByRatio();		
 		//设置PVM矩阵的值
-		void SetPVMValue();														
+		void SetPVMValue();	
+		//获取PVM值
+		QMatrix4x4 getPVMValue() { return _projection * _view * _model; };
 
 		//旋转 平移 缩放
 		void Translate(float xoffset, float yoffset);//平移

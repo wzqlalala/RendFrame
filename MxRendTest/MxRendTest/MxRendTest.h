@@ -74,6 +74,6 @@ private:
 	bool _isLinearAnimation = true;
 
 	//ʰȡ
-	MultiplyPickMode _multuiplyPickMode = QuadPick;
+	MultiplyPickMode _multuiplyPickMode = MultiplyPickMode::QuadPick;
 
 };

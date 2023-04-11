@@ -116,6 +116,7 @@
     <ClInclude Include="mFileConfiguration.h" />
     <QtMoc Include="mModelView.h" />
     <ClInclude Include="mMeshViewEnum.h" />
+    <ClInclude Include="mPickToolClass.h" />
     <ClInclude Include="mPostEnum.h" />
     <QtMoc Include="mViewToolClass.h" />
     <ClInclude Include="rendbasic_global.h" />
@@ -126,6 +127,7 @@
     <ClCompile Include="mContainers.cpp" />
     <ClCompile Include="mFileConfiguration.cpp" />
     <ClCompile Include="mModelView.cpp" />
+    <ClCompile Include="mPickToolClass.cpp" />
     <ClCompile Include="mViewToolClass.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

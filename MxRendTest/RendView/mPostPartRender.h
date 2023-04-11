@@ -215,11 +215,6 @@ namespace MPostRend
 		shared_ptr<mxr::Group> _parent;//父节点
 		std::shared_ptr<mxr::Geode> _geode;//当前总节点
 
-		//std::shared_ptr<mxr::StateSet> _faceStateSet;//渲染面的状态
-		//std::shared_ptr<mxr::StateSet> _faceTransparentStateSet;//渲染透明面的状态
-		//std::shared_ptr<mxr::StateSet> _facelineStateSet;//渲染面线的状态
-		//std::shared_ptr<mxr::StateSet> _edgelineStateSet;//渲染边界线的状态
-
 		std::shared_ptr<mPostPartFaceRender>  _facerend;//面
 		std::shared_ptr<mPostPartFaceTransparentNodeformationRender> _facetransparentnodeformationrend;//变形前透明的面
 		std::shared_ptr<mPostPartEdgeLineRender>  _edgelinerend;//边界线

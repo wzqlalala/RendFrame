@@ -20,7 +20,7 @@ namespace MViewBasic
 	/*
 	* 拾取筛选器:全部,节点,点,梁,三角形,四边形,四面体,三菱柱,六面体,不拾取,单元线,单元面，网格调整，网格偏置，四棱锥
 	*/
-	enum PickFilter
+	enum class PickFilter
 	{
 		//拾取任何网格（只针对网格和节点，不对网格线和网格面）
 		PickAny,
@@ -183,7 +183,7 @@ namespace MViewBasic
 		Other,
 	};
 
-	enum ViewOperateMode
+	enum class ViewOperateMode
 	{
 		NoViewOperate,
 
@@ -192,7 +192,7 @@ namespace MViewBasic
 		PickOperate,
 	};
 
-	enum CameraOperateMode
+	enum class CameraOperateMode
 	{
 		NoCameraOperate,
 
@@ -205,7 +205,7 @@ namespace MViewBasic
 	};
 
 	//拾取模式
-	enum PickMode
+	enum class PickMode
 	{
 		//不拾取
 		NoPick,
@@ -234,7 +234,7 @@ namespace MViewBasic
 		//DragMaxLine,
 	};
 
-	enum MultiplyPickMode
+	enum class MultiplyPickMode
 	{
 		/**************框选模式***********/
 		//矩形框选（角点）

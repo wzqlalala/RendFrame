@@ -638,7 +638,7 @@ namespace MIOFile
 		}
 
 		//更新数据库所有部件名称
-		//datapost->updateAllPostPartNames();
+		_dp->updateAllPostPartNames();
 
 		emit finishedImportAllMxDbFileSig();
 	}

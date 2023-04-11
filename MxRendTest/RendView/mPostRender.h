@@ -8,6 +8,8 @@
 #include "tiny_obj_loader.h"
 #include <QObject>
 #include <QTimer>
+#include <QThread>
+#include <QFutureWatcher>
 
 //MViewBasic
 #include "mMeshViewEnum.h"
@@ -37,6 +39,8 @@ namespace MDataPost
 	class mOneFrameData1;
 	class mPostOneFrameRendData;
 	class mPostAnimationRendData;
+	class mPostMeshPickThread;
+	class mPostMeshPickData;
 }
 using namespace MViewBasic;
 using namespace MDataPost;
@@ -45,6 +49,7 @@ using namespace MBaseRend;
 using namespace std;
 namespace MPostRend
 {
+	class mPostRend;
 	class mPostRendStatus;
 	class mPostOneFrameRender;
 	class mPostAnimationRender;
@@ -53,13 +58,15 @@ namespace MPostRend
 		Q_OBJECT
 	public:
 
-		mPostRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> parent);
+		mPostRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> parent, mPostRend *postRend);
 
-		void setPostData(shared_ptr<mDataPost1> dataPost) { _dataPost = dataPost; };
+		void setPostData(shared_ptr<mDataPost1> dataPost) { _dataPost = dataPost;};
 
-		bool getIsDragSomething() override;
+		bool getIsDragSomething(QVector2D pos) override;
 
-		void startPick() override;
+		void dragSomething(QVector2D pos) override;
+
+		void startPick(QVector<QVector2D> poses) override;
 
 		shared_ptr<mPostOneFrameRender> getOneFrameRender() { return  _oneFrameRender; };
 
@@ -158,13 +165,16 @@ namespace MPostRend
 		//更新切面的uniform值
 		void updateCuttingPlaneUniform();
 
+		//初始化线程
+		void initialPickThreads();
+
 		//
 	private slots:
 
 		//计时器更新	
 		void slot_aniTimer();
 
-	private:
+	protected:
 		shared_ptr<mDataPost1> _dataPost;
 
 		shared_ptr<mPostRendStatus> _rendStatus;
@@ -195,6 +205,12 @@ namespace MPostRend
 
 		//计时器
 		QTimer* _aniTimer;
+
+		//拾取线程
+		////前面的部件数量少
+		mPostMeshPickThread *_thread; QFutureWatcher<void> w;
+
+		mPostMeshPickData *_pickData;
 		
 	};
 }

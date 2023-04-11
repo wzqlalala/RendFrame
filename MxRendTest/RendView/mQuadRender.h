@@ -22,11 +22,11 @@ namespace MBaseRend
 	{
 		Q_OBJECT
 	public:
-		mQuadRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> root);
+		mQuadRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> root, CameraOperateMode *cameraMode, PickMode *pickMode, MultiplyPickMode *multiplyPickMode);
 
 		~mQuadRender();
 
-		void draw(CameraOperateMode cameraMode,PickMode pickMode, MultiplyPickMode multiplyPickMode, QVector<QVector2D> poses, int w, int h);
+		void draw(QVector<QVector2D> poses, int w, int h);
 
 	protected:
 		void makeCurrent() { _app->GLContext()->makeCurrent(_app->GLContext()->surface()); };
@@ -39,6 +39,10 @@ namespace MBaseRend
 
 		std::shared_ptr<mxr::Drawable> _drawable;
 		std::shared_ptr<mxr::StateSet> _stateSet;
+
+		CameraOperateMode *_cameraMode;//当前相机操作模式
+		PickMode *_pickMode;//当前拾取模式
+		MultiplyPickMode *_multiplyPickMode;//框选拾取模式
 
 
 	};

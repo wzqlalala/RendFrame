@@ -85,6 +85,8 @@ namespace MPostRend
 
 		Space::AABB getModelAABB();
 
+		Space::SpaceTree *getPartSpaceTree(QString partName);
+
 		//void append
 
 		//void updateOneModelOperate(QPair<MBasicFunction::PostModelOperateEnum, std::set<QString>> postModelOperates);

@@ -7,6 +7,7 @@
 #include <QOpenGLWidget>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLFunctions_4_5_Core>
+#include <QOpenGLFramebufferObject>
 
 #include"mMeshViewEnum.h"
 #include "app.h"
@@ -65,6 +66,14 @@ namespace MBaseRend
 
 		void setMultiplyPickMode(MultiplyPickMode multiplyPickMode);
 
+		void setPickFilter(MViewBasic::PickFilter pickFilter);
+
+		PickMode *getCurrentPickMode() { return _pickMode; };//当前拾取模式
+
+		MultiplyPickMode *getMultiplyPickMode() { return _multiplyPickMode; };//框选拾取模式
+
+		PickFilter *getPickFilter() { return _pickFilter; };//拾取过滤模式
+
 	public:
 		/*
 		* 重写父类函数
@@ -122,6 +131,9 @@ namespace MBaseRend
 		//void slotUpdateOrthoAndCamera();
 
 	protected:
+		QOpenGLFramebufferObjectFormat format;
+		QOpenGLFramebufferObject *FBO;
+
 		QString _name;
 
 		std::shared_ptr<mxr::Application> _app;
@@ -147,10 +159,6 @@ namespace MBaseRend
 		GLint lastX{}, lastY{}, nowX{}, nowY{};
 		//第一次鼠标点击获取的像素坐标
 		GLint Posx_Firstmouse, Posy_Firstmouse;
-		//矩形框的坐标
-		//QVector2D left_up, left_down, right_down, right_up;
-		//圆形框的坐标点
-		//QVector2D roundCenter, roundPoint;
 		//多边形框的坐标点
 		QVector<QVector2D> _polygonVertexs;
 
@@ -166,7 +174,6 @@ namespace MBaseRend
 
 
 		//鼠标点击功能判断
-		//bool isFirstMouse = true;
 		Qt::MouseButton _mouseButton = Qt::NoButton;
 		//鼠标移动判断
 		bool isMouseMove = false;
@@ -183,13 +190,15 @@ namespace MBaseRend
 		bool ifZoomByMouseMove = false; //是够根据鼠标移动进行缩放
 		bool ifZoomAtFrameCenter = false; //是够根据选取框中心进行缩放
 
-		ViewOperateMode _viewOperateMode = NoViewOperate;
+		ViewOperateMode *_viewOperateMode;
 
-		CameraOperateMode _cameraMode = NoCameraOperate;
+		CameraOperateMode *_cameraMode;
 
-		PickMode _pickMode = NoPick;//当前拾取模式
+		PickMode *_pickMode;//当前拾取模式
 
-		MultiplyPickMode _multiplyPickMode = QuadPick;//框选拾取模式
+		MultiplyPickMode *_multiplyPickMode;//框选拾取模式
+
+		PickFilter *_pickFilter;//当前拾取过滤模式
 
 		static QHash<QPair<Qt::MouseButton, Qt::KeyboardModifiers>, CameraOperateMode> _cameraKeys;
 

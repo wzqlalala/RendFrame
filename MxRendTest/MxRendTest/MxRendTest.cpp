@@ -332,9 +332,9 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 			return;
 		}
 		int id = int(_multuiplyPickMode);
-		if (_multuiplyPickMode == PolygonPick)
+		if (_multuiplyPickMode == MultiplyPickMode::PolygonPick)
 		{
-			_multuiplyPickMode = QuadPick;
+			_multuiplyPickMode = MultiplyPickMode::QuadPick;
 		}
 		else
 		{

@@ -1,4 +1,5 @@
 #include "mPostRender.h"
+#include "mPostRend.h"
 #include "mPostRendStatus.h"
 #include "mPostOneFrameRender.h"
 #include "mPostModelRender.h"
@@ -20,6 +21,7 @@
 #include <QFileInfo>
 #include <QApplication>
 #include <QtConcurrent/QtConcurrent>
+#include <QThread>
 
 //MDataPost
 #include "mDataPost1.h"
@@ -27,6 +29,8 @@
 #include "mPostOneFrameRendData.h"
 #include "mPostAnimationRendData.h"
 #include "mPostColorTableData.h"
+#include "mPostMeshPickThread.h"
+#include "mPostMeshPickData.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -35,7 +39,7 @@ using namespace mxr;
 using namespace std;
 namespace MPostRend
 {
-	mPostRender::mPostRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> parent):mBaseRender(app, parent)
+	mPostRender::mPostRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> parent, mPostRend *postRend):mBaseRender(app, parent, postRend)
 	{
 		this->makeCurrent();
 
@@ -302,13 +306,56 @@ namespace MPostRend
 
 		this->doneCurrent();
 	}
-	bool mPostRender::getIsDragSomething()
+	bool mPostRender::getIsDragSomething(QVector2D pos)
 	{
 		//判断是否有物体被拖拽
 		return false;
 	}
-	void mPostRender::startPick()
+	void mPostRender::dragSomething(QVector2D pos)
 	{
+		//拖拽物体并更新物体
+	}
+	void mPostRender::startPick(QVector<QVector2D> poses)
+	{
+		makeCurrent();
+		//开始拾取操作
+		if (!_oneFrameRender)
+		{
+			return;
+		}
+		_thread->setCurrentFrameRend(_oneFrameRender->getOneFrameData(), _oneFrameRender->getOneFrameRendData());
+		_thread->setMatrix(_baseRend->getCamera()->getPVMValue());
+		_thread->setWidget(_baseRend->getCamera()->SCR_WIDTH, _baseRend->getCamera()->SCR_HEIGHT);
+		_thread->setPickMode(*_baseRend->getCurrentPickMode(), *_baseRend->getMultiplyPickMode());
+		if (*_baseRend->getCurrentPickMode() == PickMode::SoloPick)
+		{		
+			//QOpenGLContext::currentContext()->functions()->glFlush();
+			//GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
+			//if (error != 0)
+			//{
+			//	qDebug() << error;
+			//}
+			//qDebug() << "startPick" << QString::number(long long int(QOpenGLContext::currentContext()), 16);
+			float depth;
+			QOpenGLContext::currentContext()->functions()->glReadPixels(poses.first().x(), _baseRend->getCamera()->SCR_HEIGHT - poses.first().y(), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+			_thread->setLocation(poses.first().toPoint(), depth);
+			//error = QOpenGLContext::currentContext()->functions()->glGetError();
+			//if (error != 0)
+			//{
+			//	qDebug() << error;
+			//}
+		}
+
+		QFuture<void> future; 
+		future = QtConcurrent::run(_thread, &mPostMeshPickThread::startPick);
+		QObject::connect(&w, &QFutureWatcher<void>::finished, [this] {
+			//this->
+			set<int> ids = _pickData->getPickNodeIDs();
+			qDebug() << "拾取完成";
+			QObject::disconnect(&w, 0, 0, 0);//断开信号
+			
+		});
+		w.setFuture(future);
 
 	}
 	void mPostRender::updateOneModelOperate(QPair<MBasicFunction::PostModelOperateEnum, std::set<QString>> postModelOperates)
@@ -394,6 +441,7 @@ namespace MPostRend
 		//_oneFrameRender->setTexture(_texture);
 		_oneFrameRender->updateAllModelOperate(ImportOperate);
 		this->setDispersed(true);
+		this->initialPickThreads();
 	}
 
 	void mPostRender::setShowFuntion(ShowFuntion showFuntion)
@@ -896,6 +944,24 @@ namespace MPostRend
 				_pointStateSet->setAttributeAndModes(MakeAsset<ClipDistance>(i), 0);
 			}
 		}
+	}
+
+	void mPostRender::initialPickThreads()
+	{
+		if (!_dataPost)
+		{
+			return;
+		}
+		_pickData = new mPostMeshPickData;
+
+		//初始化部件拾取多线程
+		set<QString> partNames = _dataPost->getAllPostPartNames();
+		_thread = new mPostMeshPickThread(_pickData);
+		_thread->setPickFilter(_baseRend->getPickFilter());
+		for (QString partName : partNames)
+		{
+			_thread->appendPartSpaceTree(partName, _oneFrameRender->getModelRender()->getPartSpaceTree(partName));
+		}	
 	}
 
 	void mPostRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
