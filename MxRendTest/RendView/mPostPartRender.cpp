@@ -1119,7 +1119,7 @@ namespace MPostRend
 			Space::destoryTree(_spaceTree);
 		}
 		_spaceTree = new Space::SpaceTree(aabb);
-		return;
+		//return;
 		Space::initSpaceTree(_spaceTree, 2);
 		meshDatas += _partData->getMeshDatas3();
 		for (auto item : meshDatas)

@@ -125,7 +125,7 @@ namespace MDataPost
 		//判断该部件是否存在碰撞
 		//判断点选是否在部件的包围盒内
 		QVector3D worldVertex = ScreenvertexToWorldvertex(QVector3D(_pos.x(), _pos.y(), _depth));
-		Space::AABB aabb = spaceTree->space;
+		Space::AABB aabb(spaceTree->space.maxEdge, spaceTree->space.minEdge);
 		if (!qFuzzyCompare(aabb.maxEdge.x(), aabb.minEdge.x()))
 		{
 			float f = (aabb.maxEdge.x() - aabb.minEdge.x()) * 1e-2;
@@ -2180,7 +2180,7 @@ namespace MDataPost
 			while (iter.hasNext())
 			{
 				iter.next();
-				QtConcurrent::run(this, &mPostMeshPickThread::doSoloPick, iter.key(),iter.value());
+				futures.append(QtConcurrent::run(this, &mPostMeshPickThread::doSoloPick, iter.key(),iter.value()));
 			}
 			while (!futures.empty())
 			{
@@ -2203,13 +2203,18 @@ namespace MDataPost
 				iter.next();
 				switch (_multiplyPickMode)
 				{
-				case MultiplyPickMode::QuadPick:QtConcurrent::run(this, &mPostMeshPickThread::doQuadPick, iter.key(), iter.value()); break;
-				case MultiplyPickMode::RoundPick:QtConcurrent::run(this, &mPostMeshPickThread::doRoundPick, iter.key(), iter.value()); break;
-				case MultiplyPickMode::PolygonPick:QtConcurrent::run(this, &mPostMeshPickThread::doPolygonPick, iter.key(), iter.value()); break;
+				case MultiplyPickMode::QuadPick:futures.append(QtConcurrent::run(this, &mPostMeshPickThread::doQuadPick, iter.key(), iter.value())); break;
+				case MultiplyPickMode::RoundPick:futures.append(QtConcurrent::run(this, &mPostMeshPickThread::doRoundPick, iter.key(), iter.value())); break;
+				case MultiplyPickMode::PolygonPick:futures.append(QtConcurrent::run(this, &mPostMeshPickThread::doPolygonPick, iter.key(), iter.value())); break;
 				default:
 					break;
 				}
 
+			}
+			while (!futures.empty())
+			{
+				futures.back().waitForFinished();
+				futures.takeLast();
 			}
 		}
 		

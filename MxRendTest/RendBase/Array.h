@@ -85,6 +85,12 @@ namespace mxr
 			_Size++; 
 		}
 
+		void append(const T &data)
+		{
+			_data.append(data);
+			_Size++;
+		}
+
 		void append(const QVector<T> &data) 
 		{ 
 			_data.append(data); 

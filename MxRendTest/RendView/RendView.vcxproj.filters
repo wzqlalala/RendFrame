@@ -50,6 +50,9 @@
     <ClInclude Include="mPostCuttingPlaneRender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mPostHighLightRender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mBackGroundRender.cpp">
@@ -98,6 +101,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mQuadRender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mPostHighLightRender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

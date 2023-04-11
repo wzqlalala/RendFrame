@@ -51,6 +51,7 @@ namespace MPostRend
 {
 	class mPostRend;
 	class mPostRendStatus;
+	class mPostHighLightRender;
 	class mPostOneFrameRender;
 	class mPostAnimationRender;
 	class RENDVIEW_EXPORT mPostRender :public mBaseRender
@@ -209,8 +210,8 @@ namespace MPostRend
 		//拾取线程
 		////前面的部件数量少
 		mPostMeshPickThread *_thread; QFutureWatcher<void> w;
-
 		mPostMeshPickData *_pickData;
+		shared_ptr<mPostHighLightRender> _highLightRender;
 		
 	};
 }

@@ -4,6 +4,7 @@
 #include "mPostOneFrameRender.h"
 #include "mPostModelRender.h"
 #include "mPostAnimationRender.h"
+#include "mPostHighLightRender.h"
 
 #include <renderpch.h>
 #include "texture.h"
@@ -304,6 +305,10 @@ namespace MPostRend
 		_aniTimer->setInterval(0);
 		connect(_aniTimer, SIGNAL(timeout()), this, SLOT(slot_aniTimer()));
 
+		//初始化高亮渲染
+		_pickData = new mPostMeshPickData;
+		_highLightRender = make_shared<mPostHighLightRender>(_pickData);
+
 		this->doneCurrent();
 	}
 	bool mPostRender::getIsDragSomething(QVector2D pos)
@@ -329,31 +334,23 @@ namespace MPostRend
 		_thread->setPickMode(*_baseRend->getCurrentPickMode(), *_baseRend->getMultiplyPickMode());
 		if (*_baseRend->getCurrentPickMode() == PickMode::SoloPick)
 		{		
-			//QOpenGLContext::currentContext()->functions()->glFlush();
-			//GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
-			//if (error != 0)
-			//{
-			//	qDebug() << error;
-			//}
-			//qDebug() << "startPick" << QString::number(long long int(QOpenGLContext::currentContext()), 16);
 			float depth;
 			QOpenGLContext::currentContext()->functions()->glReadPixels(poses.first().x(), _baseRend->getCamera()->SCR_HEIGHT - poses.first().y(), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
 			_thread->setLocation(poses.first().toPoint(), depth);
-			//error = QOpenGLContext::currentContext()->functions()->glGetError();
-			//if (error != 0)
-			//{
-			//	qDebug() << error;
-			//}
 		}
+		else
+		{
 
+		}
 		QFuture<void> future; 
 		future = QtConcurrent::run(_thread, &mPostMeshPickThread::startPick);
 		QObject::connect(&w, &QFutureWatcher<void>::finished, [this] {
+			_highLightRender->updateHighLightRender(_oneFrameRender->getOneFrameData(), _oneFrameRender->getOneFrameRendData());
 			//this->
-			set<int> ids = _pickData->getPickNodeIDs();
-			qDebug() << "拾取完成";
+			//set<int> ids = _pickData->getPickNodeIDs();
+			//qDebug() << "拾取完成";
 			QObject::disconnect(&w, 0, 0, 0);//断开信号
-			
+			emit update();
 		});
 		w.setFuture(future);
 
@@ -952,7 +949,6 @@ namespace MPostRend
 		{
 			return;
 		}
-		_pickData = new mPostMeshPickData;
 
 		//初始化部件拾取多线程
 		set<QString> partNames = _dataPost->getAllPostPartNames();
@@ -1050,5 +1046,7 @@ namespace MPostRend
 		{
 			_animationRender.value(_rendStatus->_aniCurrentFrame)->updateUniform(modelView, commonView);
 		}	
+
+		_highLightRender->updateUniform(modelView, commonView);
 	}
 }
