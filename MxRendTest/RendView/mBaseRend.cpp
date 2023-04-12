@@ -29,7 +29,7 @@ namespace MBaseRend
 		_cameraMode = new CameraOperateMode; *_cameraMode = CameraOperateMode::NoCameraOperate;
 		_pickMode = new PickMode;*_pickMode = PickMode::NoPick;//当前拾取模式
 		_multiplyPickMode = new MultiplyPickMode; *_multiplyPickMode = MultiplyPickMode::QuadPick;//框选拾取模式
-		_pickFilter = new PickFilter; *_pickFilter = PickFilter::PickAnyMesh;
+		_pickFilter = new PickFilter; *_pickFilter = PickFilter::PickNode;
 
 		//QOpenGLContext *context = QOpenGLContext::currentContext();
 		_app = MakeAsset<mxr::Application>();

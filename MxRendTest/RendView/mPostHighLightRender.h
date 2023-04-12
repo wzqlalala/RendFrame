@@ -76,7 +76,7 @@ namespace MPostRend
 	{
 	public:
 
-		mPostHighLightRender(mPostMeshPickData *meshPickData);
+		mPostHighLightRender(shared_ptr<mPostRendStatus> rendStatus, mPostMeshPickData *meshPickData);
 
 		~mPostHighLightRender();
 
@@ -94,6 +94,8 @@ namespace MPostRend
 		void initial();
 	private:
 		std::shared_ptr<mxr::Geode> _geode;//当前总节点
+
+		std::shared_ptr<mPostRendStatus> _rendStatus;
 
 		mOneFrameData1 *_oneFrameData;//模型数据
 		mPostOneFrameRendData *_oneFrameRendData;//当前帧变量数据

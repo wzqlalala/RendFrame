@@ -32,7 +32,7 @@ using namespace mxr;
 using namespace std;
 namespace MPostRend
 {
-	mPostHighLightRender::mPostHighLightRender(mPostMeshPickData *meshPickData):_meshPickData(meshPickData)
+	mPostHighLightRender::mPostHighLightRender(shared_ptr<mPostRendStatus> rendStatus, mPostMeshPickData *meshPickData):_rendStatus(rendStatus), _meshPickData(meshPickData)
 	{
 		_geode = MakeAsset<Geode>();
 		_viewer = nullptr;
@@ -430,6 +430,18 @@ namespace MPostRend
 		_pointStateSet->getUniform("projection")->SetData(modelView->_projection);
 		_pointStateSet->getUniform("view")->SetData(modelView->_view);
 		_pointStateSet->getUniform("model")->SetData(modelView->_model);
+
+		_pointStateSet->getUniform("viewPos")->SetData(modelView->_Eye);
+
+		if (_rendStatus->_lightIsDependOnCamera)
+		{
+			_pointStateSet->getUniform("light.position")->SetData(2 * modelView->_Eye - modelView->_Center);
+		}
+		else
+		{
+			_pointStateSet->getUniform("light.position")->SetData(_rendStatus->_postLight.lightPosition);
+		}
+
 		_viewer->noClearRun();
 	}
 
@@ -502,11 +514,11 @@ namespace MPostRend
 		_pointStateSet->setUniform(MakeAsset<Uniform>("projection", QMatrix4x4()));
 		_pointStateSet->setUniform(MakeAsset<Uniform>("lightIsOn", int(1)));
 		_pointStateSet->setUniform(MakeAsset<Uniform>("viewPos", QVector3D()));
-		//_pointStateSet->setUniform(MakeAsset<Uniform>("light.position", _rendStatus->_postLight.lightPosition));
-		//_pointStateSet->setUniform(MakeAsset<Uniform>("light.ambient", _rendStatus->_postLight.ambient));
-		//_pointStateSet->setUniform(MakeAsset<Uniform>("light.diffuse", _rendStatus->_postLight.diffuse));
-		//_pointStateSet->setUniform(MakeAsset<Uniform>("light.specular", _rendStatus->_postLight.specular));
-		//_pointStateSet->setUniform(MakeAsset<Uniform>("light.shiness", _rendStatus->_postLight.shiness));
+		_pointStateSet->setUniform(MakeAsset<Uniform>("light.position", _rendStatus->_postLight.lightPosition));
+		_pointStateSet->setUniform(MakeAsset<Uniform>("light.ambient", _rendStatus->_postLight.ambient));
+		_pointStateSet->setUniform(MakeAsset<Uniform>("light.diffuse", _rendStatus->_postLight.diffuse));
+		_pointStateSet->setUniform(MakeAsset<Uniform>("light.specular", _rendStatus->_postLight.specular));
+		_pointStateSet->setUniform(MakeAsset<Uniform>("light.shiness", _rendStatus->_postLight.shiness));
 		_pointStateSet->setUniform(MakeAsset<Uniform>("PointSize", 10));
 	}
 

@@ -307,7 +307,7 @@ namespace MPostRend
 
 		//≥ı ºªØ∏ﬂ¡¡‰÷»æ
 		_pickData = new mPostMeshPickData;
-		_highLightRender = make_shared<mPostHighLightRender>(_pickData);
+		_highLightRender = make_shared<mPostHighLightRender>(_rendStatus, _pickData);
 
 		this->doneCurrent();
 	}
