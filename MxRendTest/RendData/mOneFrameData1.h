@@ -172,6 +172,9 @@ namespace MDataPost
 		//根据单元类型获取个数
 		int getNumByElementType(MBasicFunction::ElementType elementType);
 
+		//获取网格的形心
+		QVector3D getMeshCenter(mPostMeshData1 *meshData);
+
 		//删除网格
 		//void deleteMesh(set<int> meshIDs);
 

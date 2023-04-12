@@ -328,6 +328,7 @@ namespace MPostRend
 		{
 			return;
 		}
+		_pickData->setMeshPickFunction(int(_baseRend->getPickFuntion()));
 		_thread->setCurrentFrameRend(_oneFrameRender->getOneFrameData(), _oneFrameRender->getOneFrameRendData());
 		_thread->setMatrix(_baseRend->getCamera()->getPVMValue());
 		_thread->setWidget(_baseRend->getCamera()->SCR_WIDTH, _baseRend->getCamera()->SCR_HEIGHT);
@@ -340,7 +341,14 @@ namespace MPostRend
 		}
 		else
 		{
-
+			if (*_baseRend->getMultiplyPickMode() == MultiplyPickMode::RoundPick)
+			{
+				
+			}
+			else
+			{
+				_thread->setLocation(poses);
+			}
 		}
 		QFuture<void> future; 
 		future = QtConcurrent::run(_thread, &mPostMeshPickThread::startPick);

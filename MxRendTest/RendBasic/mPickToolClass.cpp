@@ -236,10 +236,19 @@ namespace MViewBasic
 	{
 		for (int i = 0; i < Line1.size(); ++i)
 		{
-			if (fabs(Line1.at(i).x() - centerX) <= boxW / 2.0&&fabs(Line1.at(i).y() - centerY) <= boxH / 2.0)
+			if (fabs(Line1.at(i).x() - centerX) <= boxW && fabs(Line1.at(i).y() - centerY) <= boxH)
 			{
 				return true;
 			}
+		}
+		return false;
+	}
+
+	bool mPickToolClass::IsPointInQuad(QVector2D point, QVector2D boxCenter, QVector2D boxXY_2)
+	{
+		if (qAbs(point.x() - boxCenter.x()) < boxXY_2.x() && qAbs(point.y() - boxCenter.y()) < boxXY_2.y())
+		{
+			return true;
 		}
 		return false;
 	}

@@ -1222,6 +1222,36 @@ namespace MDataPost
 		return _eleNum.value(elementType);
 	}
 
+	QVector3D mOneFrameData1::getMeshCenter(mPostMeshData1 * meshData)
+	{
+		int nodeNum = 1;
+		switch (meshData->getMeshType())
+		{
+		case MeshPoint:nodeNum = 1;break;
+		case MeshBeam:nodeNum = 2;break;
+		case MeshTri:nodeNum = 3;break;
+		case MeshQuad:
+		case MeshTet:nodeNum = 4;break;
+		case MeshPyramid:nodeNum = 5; break;
+		case MeshWedge:nodeNum = 6; break;
+		case MeshHex:nodeNum = 8; break;
+		default:
+			break;
+		}
+		QVector<int> nodeID = meshData->getNodeIndex();
+		QVector3D nodePos;
+		for (int i = 0; i < nodeID.size(); ++i)
+		{
+			mPostMeshNodeData1 *meshNodeData = _nodeData1.value(nodeID[i]);
+			if (meshNodeData == nullptr)
+			{
+				return QVector3D();
+			}
+			nodePos += meshNodeData->getNodeVertex();
+		}
+		return nodePos / nodeNum;
+	}
+
 	void mOneFrameData1::createMeshFace(QVector<int> set, QVector<int> ve, mPostMeshData1* meshData, int order,
 		QString partName,  mPostMeshPartData1* partData, QHash<QVector<int>, mPostMeshFaceData1*> &_meshFace)
 	{

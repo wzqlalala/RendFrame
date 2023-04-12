@@ -5,7 +5,7 @@ namespace MViewBasic
 	/*
 	* 拾取模式,add,reduce,replace
 	*/
-	enum PickFuntion
+	enum class PickFuntion
 	{
 		//添加拾取
 		AddPick,

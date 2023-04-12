@@ -74,6 +74,13 @@ namespace MBaseRend
 
 		PickFilter *getPickFilter() { return _pickFilter; };//拾取过滤模式
 
+		PickFuntion getPickFuntion()
+		{
+			if (_mouseButton == Qt::LeftButton)
+				return PickFuntion::AddPick;
+			return PickFuntion::ReducePick;
+		};//拾取过滤的功能
+
 	public:
 		/*
 		* 重写父类函数

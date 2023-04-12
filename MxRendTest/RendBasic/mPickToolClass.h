@@ -30,6 +30,11 @@ namespace MViewBasic
 		static bool IsMeshPointInQuad(QVector<QVector2D> Line1, int centerX, int centerY, int boxW, int boxH);
 
 		/*
+		 * 判断点是否在拾取矩形框内部
+		 */
+		static bool IsPointInQuad(QVector2D point, QVector2D boxCenter, QVector2D boxXY_2);
+
+		/*
 		* 判断多边形是否和圆形选择框相交
 		*/
 		static bool IsLineIntersectionWithCircle(QVector<QVector2D> Line1, QVector2D circleCenter, double radius);

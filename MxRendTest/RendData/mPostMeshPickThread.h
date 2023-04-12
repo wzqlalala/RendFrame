@@ -83,14 +83,19 @@ namespace MDataPost
 		void setMatrix(QMatrix4x4 pvm);
 
 		/*
-		 * 设置位置
+		 * 设置单选位置
 		 */
 		void setLocation(const QPoint & pos, float depth);
 
 		/*
-		 * 设置位置
+		* 设置位置(矩形或者多边形框选)
+		*/
+		void setLocation(QVector<QVector2D> pickQuad);
+
+		/*
+		 * 设置圆形框选位置
 		 */
-		void setLocation(int lastX, int lastY, int nowX, int nowY, QVector<QVector2D> pickQuad);
+		void setLocation(QVector3D centerPoint, QVector3D centerDirection, double radius, QVector2D centerScreenPoint, double screenRadius);
 
 		/*
 		 * 设置窗口大小
@@ -167,6 +172,9 @@ namespace MDataPost
 		*/
 		bool isVertexCuttingByPlane(QVector<QVector3D> vertexs);
 
+		//获取形心
+		QVector3D getCenter(QVector<QVector3D> vertexs);
+
 
 	signals:
 		/*
@@ -236,12 +244,19 @@ namespace MDataPost
 		QVector<QVector2D> soloQuad;
 
 		//框选矩形
+
+		/*
+		 * 矩形和多边形框选位置
+		 */
 		QVector<QVector2D> multiQuad{};
 
 		/*
-		 * 框选位置
-		 */
-		int _centerX, _centerY, _boxW, _boxY;
+		* 圆形框选位置
+		*/
+		QVector3D _centerPoint; QVector3D _centerDirection; double _radius; QVector2D _centerScreenPoint; double _screenRadius;
+
+		//矩形框选中心和其半个宽度和半个高度
+		QVector2D _centerBox, _boxXY_2;
 
 		/*
 		 * 是否完成

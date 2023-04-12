@@ -29,7 +29,7 @@ namespace MBaseRend
 		_cameraMode = new CameraOperateMode; *_cameraMode = CameraOperateMode::NoCameraOperate;
 		_pickMode = new PickMode;*_pickMode = PickMode::NoPick;//当前拾取模式
 		_multiplyPickMode = new MultiplyPickMode; *_multiplyPickMode = MultiplyPickMode::QuadPick;//框选拾取模式
-		_pickFilter = new PickFilter; *_pickFilter = PickFilter::PickNode;
+		_pickFilter = new PickFilter; *_pickFilter = PickFilter::PickAnyMesh;
 
 		//QOpenGLContext *context = QOpenGLContext::currentContext();
 		_app = MakeAsset<mxr::Application>();
@@ -58,26 +58,41 @@ namespace MBaseRend
 		QOpenGLContext *context = QOpenGLContext::currentContext();
 		//qDebug() << "initializeGL" << QString::number(long long int(context->surface()), 16);
 		_app->setContext(context);
-		//glViewport(0, 0, this->width(), this->height());
+		glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
+		glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
 		_modelView = MakeAsset<mModelView>();
 		_commonView = MakeAsset<mCommonView>();
-
-		/**/
+		
 		mxr::Log::Init();
 		_viewer = MakeAsset<mxr::Viewer>();
 		_viewer->setSceneData(_root);
-
+		
 		_bgRend = MakeAsset<mBackGroundRender>(_app, _root);
 		_quadRender = MakeAsset<mQuadRender>(_app, _root, _cameraMode, _pickMode, _multiplyPickMode);
-
+		
+		makeCurrent();
+		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
+		if (error != GL_NO_ERROR) {
+			qDebug() << "OpenGL error:" << error;
+		}
 		format.setSamples(0);
-		format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);
+		format.setAttachment(QOpenGLFramebufferObject::CombinedDepthStencil);	
 		FBO = new QOpenGLFramebufferObject(size(), format);
-
-		glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
-		glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
+		if (!FBO->bind()) {
+			qDebug() << "Failed to bind FBO!";
+		}
+		error = QOpenGLContext::currentContext()->functions()->glCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (error != GL_FRAMEBUFFER_COMPLETE) {
+			qDebug() << "Framebuffer not complete!";
+		}
+		glBindFramebuffer(GL_FRAMEBUFFER, defaultFramebufferObject());
 		glEnable(GL_DEPTH_TEST);
-
+		error = QOpenGLContext::currentContext()->functions()->glGetError();
+		if (error != 0)
+		{
+			qDebug() << error;
+		}
+		
 		qDebug() << "Base Initial";
 	}
 
@@ -92,6 +107,7 @@ namespace MBaseRend
 		{
 			qDebug() << error;
 		}
+		
 		_viewer->run();
 		//glClearColor(0, 0, 0, 1);
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -108,7 +124,7 @@ namespace MBaseRend
 
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, QOpenGLContext::currentContext()->defaultFramebufferObject());
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FBO->handle());
-		glBlitFramebuffer(0, 0, width(), height(), 0, 0, FBO->width(), FBO->height(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);		
+		glBlitFramebuffer(0, 0, width(), height(), 0, 0, FBO->width(), FBO->height(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);	
 	}
 
 	void mBaseRend::resizeGL(int w, int h)
@@ -222,7 +238,7 @@ namespace MBaseRend
 		*_viewOperateMode = ViewOperateMode::NoViewOperate;
 		*_cameraMode = CameraOperateMode::NoCameraOperate;
 		*_pickMode = PickMode::NoPick;
-
+		
 		update();
 	}
 

@@ -94,12 +94,28 @@ namespace MDataPost
 		//_pickSoloOrMutiply = MViewBasic::SoloPick;
 	}
 
-	void mPostMeshPickThread::setLocation(int centerX, int centerY, int boxW, int boxY, QVector<QVector2D> pickQuad)
+	void mPostMeshPickThread::setLocation(QVector3D centerPoint, QVector3D centerDirection, double radius, QVector2D centerScreenPoint, double screenRadius)
 	{
-		_centerX = centerX;
-		_centerY = centerY;
-		_boxW = boxW;
-		_boxY = boxY;
+		_centerPoint = centerPoint;
+		_centerDirection = centerDirection;
+		_radius = radius;
+		_centerScreenPoint = centerScreenPoint;
+		_screenRadius = screenRadius;
+	}
+
+	void mPostMeshPickThread::setLocation(QVector<QVector2D> pickQuad)
+	{
+		if (pickQuad.size() < 1)
+		{
+			return;
+		}
+		multiQuad = QVector<QVector2D>{ pickQuad.first(), QVector2D(pickQuad.first().x(), pickQuad.last().y()), pickQuad.last(), QVector2D(pickQuad.last().x(), pickQuad.first().y()) };
+		_centerBox = (pickQuad.first() + pickQuad.last()) / 2.0;
+		_boxXY_2 = pickQuad.first() - _centerBox; _boxXY_2[0] = qAbs(_boxXY_2[0]); _boxXY_2[1] = qAbs(_boxXY_2[1]);	
+		//_centerX = centerX;
+		//_centerY = centerY;
+		//_boxW = boxW;
+		//_boxY = boxY;
 		multiQuad = pickQuad;
 		//_pickSoloOrMutiply = MViewBasic::MultiplyPick;
 	}
@@ -1424,17 +1440,17 @@ namespace MDataPost
 				return;
 			}
 
-			QVector3D p1 = ScreenvertexToWorldvertex(QVector3D(_centerX - _boxW / 2.0, _centerY + _boxY / 2.0, 0.0));
-			QVector3D p2 = ScreenvertexToWorldvertex(QVector3D(_centerX + _boxW / 2.0, _centerY + _boxY / 2.0, 0.0));
+			QVector3D p1 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
+			QVector3D p2 = ScreenvertexToWorldvertex(QVector3D(_centerBox + _boxXY_2, 0.0));
 
-			QVector3D p3 = ScreenvertexToWorldvertex(QVector3D(_centerX - _boxW / 2.0, _centerY - _boxY / 2.0, 0.0));
-			QVector3D p4 = ScreenvertexToWorldvertex(QVector3D(_centerX - _boxW / 2.0, _centerY + _boxY / 2.0, 0.0));
+			QVector3D p3 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
+			QVector3D p4 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
 
-			QVector3D p5 = ScreenvertexToWorldvertex(QVector3D(_centerX - _boxW / 2.0, _centerY - _boxY / 2.0, 0.0));
-			QVector3D p6 = ScreenvertexToWorldvertex(QVector3D(_centerX - _boxW / 2.0, _centerY - _boxY / 2.0, 1.0));
+			QVector3D p5 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
+			QVector3D p6 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 1.0));
 
 
-			QVector3D cen = ScreenvertexToWorldvertex(QVector3D(_centerX, _centerY, 0.5));
+			QVector3D cen = ScreenvertexToWorldvertex(QVector3D(_centerBox, 0.5));
 			QVector3D o_size = QVector3D(p2.distanceToPoint(p1), p4.distanceToPoint(p3), p6.distanceToPoint(p5));
 
 
@@ -1498,7 +1514,7 @@ namespace MDataPost
 						continue;
 					}
 					QVector2D ap1 = WorldvertexToScreenvertex(vertex0);
-					if (fabs(ap1.x() - _centerX) <= _boxW / 2.0 && fabs(ap1.y() - _centerY) <= _boxY / 2.0)
+					if (mPickToolClass::IsPointInQuad(ap1, _centerBox, _boxXY_2))
 					{
 						pickNodeDatas.insert(index.at(j));
 					}
@@ -1529,7 +1545,7 @@ namespace MDataPost
 					}
 
 					QVector2D ap1 = WorldvertexToScreenvertex(vertex0);
-					if (fabs(ap1.x() - _centerX) <= _boxW / 2.0 && fabs(ap1.y() - _centerY) <= _boxY / 2.0)
+					if (mPickToolClass::IsPointInQuad(ap1, _centerBox, _boxXY_2))
 					{
 						pickNodeDatas.insert(index.at(j));
 					}
@@ -1556,7 +1572,7 @@ namespace MDataPost
 					}
 
 					QVector2D ap1 = WorldvertexToScreenvertex(vertex0);
-					if (fabs(ap1.x() - _centerX) <= _boxW / 2.0 && fabs(ap1.y() - _centerY) <= _boxY / 2.0)
+					if (mPickToolClass::IsPointInQuad(ap1, _centerBox, _boxXY_2))
 					{
 						pickNodeDatas.insert(index.at(j));
 					}
@@ -1587,7 +1603,8 @@ namespace MDataPost
 					}
 
 					QVector2D ap1 = WorldvertexToScreenvertex(vertex0);
-					if (fabs(ap1.x() - _centerX) <= _boxW / 2.0 && fabs(ap1.y() - _centerY) <= _boxY / 2.0)
+					//    if (mPickToolClass::IsPointInQuad(ap1, _centerBox, _boxXY_2))
+					if (mPickToolClass::IsPointInQuad(ap1, _centerBox, _boxXY_2))
 					{
 						pickNodeDatas.insert(index.at(j));
 					}
@@ -1645,7 +1662,7 @@ namespace MDataPost
 					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
 					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
 					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
-					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
+					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerBox.x(), _centerBox.y(), _boxXY_2.x(), _boxXY_2.y()))
 					{
 						pickMeshDatas.insert(meshID);
 					}
@@ -1692,49 +1709,31 @@ namespace MDataPost
 				{
 					continue;
 				}
+				QVector<QVector3D> vertexs;
 				if (meshData->getMeshType() == MeshTri)
 				{
-					QVector<QVector3D> vertexs = {
+					vertexs = {
 						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
 						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
 						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2));
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshTri) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
-					{
-						pickMeshDatas.insert(meshID);
-					}
+				
 				}
 				else if (meshData->getMeshType() == MeshQuad)
 				{
-					QVector<QVector3D> vertexs = {
+					vertexs = {
 						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
 						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
 						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2));
-					QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3));
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4 };
-					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshQuad) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
-					{
-						pickMeshDatas.insert(meshID);
-					}
+						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };				
+				}
+				if (isVertexCuttingByPlane(vertexs))
+				{
+					continue;
+				}
+				QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
+				if (mPickToolClass::IsPointInQuad(center, _centerBox, _boxXY_2))
+				{
+					pickMeshDatas.insert(meshID);
 				}
 			}
 		}
@@ -1761,17 +1760,17 @@ namespace MDataPost
 				//continue;
 			}
 
-			QVector3D p1 = ScreenvertexToWorldvertex(QVector3D(_centerX - _boxW / 2.0, _centerY + _boxY / 2.0, 0.0));
-			QVector3D p2 = ScreenvertexToWorldvertex(QVector3D(_centerX + _boxW / 2.0, _centerY + _boxY / 2.0, 0.0));
+			QVector3D p1 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
+			QVector3D p2 = ScreenvertexToWorldvertex(QVector3D(_centerBox + _boxXY_2, 0.0));
 
-			QVector3D p3 = ScreenvertexToWorldvertex(QVector3D(_centerX - _boxW / 2.0, _centerY - _boxY / 2.0, 0.0));
-			QVector3D p4 = ScreenvertexToWorldvertex(QVector3D(_centerX - _boxW / 2.0, _centerY + _boxY / 2.0, 0.0));
+			QVector3D p3 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
+			QVector3D p4 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
 
-			QVector3D p5 = ScreenvertexToWorldvertex(QVector3D(_centerX - _boxW / 2.0, _centerY - _boxY / 2.0, 0.0));
-			QVector3D p6 = ScreenvertexToWorldvertex(QVector3D(_centerX - _boxW / 2.0, _centerY - _boxY / 2.0, 1.0));
+			QVector3D p5 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
+			QVector3D p6 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 1.0));
 
 
-			QVector3D cen = ScreenvertexToWorldvertex(QVector3D(_centerX, _centerY, 0.5));
+			QVector3D cen = ScreenvertexToWorldvertex(QVector3D(_centerBox, 0.5));
 			QVector3D o_size = QVector3D(p2.distanceToPoint(p1), p4.distanceToPoint(p3), p6.distanceToPoint(p5));
 
 
@@ -1829,30 +1828,15 @@ namespace MDataPost
 					continue;
 				}
 				QVector<int> index = meshData->getNodeIndex();
+				QVector<QVector3D> vertexs;
 				if (meshData->getMeshType() == MeshTet)
 				{
-					QVector<QVector3D> vertexs = {
+					vertexs = {
 						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
 						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
 						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
 						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2));
-					QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3));
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4 };
-					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshTet) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
-					{
-						pickMeshDatas.insert(meshID);
-					}
 				}
-
 				else if (meshData->getMeshType() == MeshPyramid)
 				{
 					QVector<QVector3D> vertexs = {
@@ -1860,57 +1844,24 @@ namespace MDataPost
 						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
 						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
 						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)),
-						_oneFrameData->getNodeDataByID(index.at(4))->getNodeVertex() + deformationScale * dis.value(index.at(4)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2));
-					QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3));
-					QVector2D ap5 = WorldvertexToScreenvertex(vertexs.at(4));
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4, ap5 };
-					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshPyramid) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
-					{
-						pickMeshDatas.insert(meshID);
-					}
+						_oneFrameData->getNodeDataByID(index.at(4))->getNodeVertex() + deformationScale * dis.value(index.at(4)) };				
 				}
 
 				else if (meshData->getMeshType() == MeshWedge)
 				{
-					QVector<QVector3D> vertexs = {
+					vertexs = {
 						   _oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
 						   _oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
 						   _oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
 						   _oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)),
 						   _oneFrameData->getNodeDataByID(index.at(4))->getNodeVertex() + deformationScale * dis.value(index.at(4)),
 						   _oneFrameData->getNodeDataByID(index.at(5))->getNodeVertex() + deformationScale * dis.value(index.at(5)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2));
-					QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3));
-					QVector2D ap5 = WorldvertexToScreenvertex(vertexs.at(4));
-					QVector2D ap6 = WorldvertexToScreenvertex(vertexs.at(5));
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4, ap5, ap6 };
-					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshWedge) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
-					{
-						pickMeshDatas.insert(meshID);
-					}
-
+	
 				}
 
 				else if (meshData->getMeshType() == MeshHex)
 				{
-					QVector<QVector3D> vertexs = {
+					vertexs = {
 						   _oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
 						   _oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
 						   _oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
@@ -1919,25 +1870,13 @@ namespace MDataPost
 						   _oneFrameData->getNodeDataByID(index.at(5))->getNodeVertex() + deformationScale * dis.value(index.at(5)),
 						   _oneFrameData->getNodeDataByID(index.at(6))->getNodeVertex() + deformationScale * dis.value(index.at(6)),
 						  _oneFrameData->getNodeDataByID(index.at(7))->getNodeVertex() + deformationScale * dis.value(index.at(7)) };
+					
+				}
 
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2));
-					QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3));
-					QVector2D ap5 = WorldvertexToScreenvertex(vertexs.at(4));
-					QVector2D ap6 = WorldvertexToScreenvertex(vertexs.at(5));
-					QVector2D ap7 = WorldvertexToScreenvertex(vertexs.at(6));
-					QVector2D ap8 = WorldvertexToScreenvertex(vertexs.at(7));
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4, ap5, ap6 , ap7, ap8 };
-					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshHex) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
-					{
-						pickMeshDatas.insert(meshID);
-					}
+				QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
+				if (mPickToolClass::IsPointInQuad(center, _centerBox, _boxXY_2))
+				{
+					pickMeshDatas.insert(meshID);
 				}
 			}
 
@@ -1954,6 +1893,7 @@ namespace MDataPost
 				{
 					continue;
 				}
+				QVector<QVector3D> vertexs;
 				QVector<int> index = meshData->getNodeIndex();
 				if (meshData->getMeshType() == MeshTri)
 				{
@@ -1962,19 +1902,6 @@ namespace MDataPost
 						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
 						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
 
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2));
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshTri) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
-					{
-						pickMeshDatas.insert(meshID);
-					}
 				}
 				else if (meshData->getMeshType() == MeshQuad)
 				{
@@ -1982,22 +1909,12 @@ namespace MDataPost
 						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
 						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
 						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2));
-					QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3));
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4 };
-					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshQuad) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
-					{
-						pickMeshDatas.insert(meshID);
-					}
+						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };				
+				}
+				QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
+				if (mPickToolClass::IsPointInQuad(center, _centerBox, _boxXY_2))
+				{
+					pickMeshDatas.insert(meshID);
 				}
 			}
 
@@ -2029,7 +1946,7 @@ namespace MDataPost
 					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
 					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
 					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
-					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
+					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerBox.x(), _centerBox.y(), _boxXY_2.x(), _boxXY_2.y()))
 					{
 						pickMeshDatas.insert(meshID);
 					}
@@ -2061,7 +1978,7 @@ namespace MDataPost
 					}
 
 					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
-					if (fabs(ap1.x() - _centerX) <= _boxW / 2.0 && fabs(ap1.y() - _centerY) <= _boxY / 2.0)
+					    if (mPickToolClass::IsPointInQuad(ap1, _centerBox, _boxXY_2))
 					{
 						pickMeshDatas.insert(meshID);
 					}
@@ -2101,51 +2018,28 @@ namespace MDataPost
 				}
 				if (meshFaceData->getVisual())//判断这个单元面是不是外表面
 				{
-					QVector<QVector2D> tempQVector2D;
+					QVector<QVector3D> vertexs;
 					QVector<int> index = meshFaceData->getNodeIndex();
 					if (index.size() == 3)
 					{
-						QVector<QVector3D> vertexs = {
+						vertexs = {
 						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
 						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
 						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
 
-						if (isVertexCuttingByPlane(vertexs))
-						{
-							continue;
-						}
-
-						QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
-						QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
-						QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2));
-						tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-						if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshTri) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
-						{
-							pickMeshFaceDatas.insert(meshFaceData->getMeshFaceID());
-						}
 					}
 					else if (index.size() == 4)
 					{
-						QVector<QVector3D> vertexs = {
+						vertexs = {
 						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
 						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
 						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
 						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
-
-						if (isVertexCuttingByPlane(vertexs))
-						{
-							continue;
-						}
-
-						QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
-						QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
-						QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2));
-						QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3));
-						tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4 };
-						if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshQuad) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
-						{
-							pickMeshFaceDatas.insert(meshFaceData->getMeshFaceID());
-						}
+					}
+					QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
+					if (mPickToolClass::IsPointInQuad(center, _centerBox, _boxXY_2))
+					{
+						pickMeshFaceDatas.insert(meshFaceData->getMeshFaceID());
 					}
 				}
 			}
@@ -2326,5 +2220,14 @@ namespace MDataPost
 		}
 		//全部没有被裁剪
 		return false;
+	}
+	QVector3D mPostMeshPickThread::getCenter(QVector<QVector3D> vertexs)
+	{
+		QVector3D nodePos;
+		for (auto node : vertexs)
+		{
+			nodePos += node;
+		}
+		return nodePos / vertexs.size();
 	}
 }

@@ -137,8 +137,10 @@ namespace MPostRend
 				_facelineRender->_vertex0->append(vertex0);
 				_facelineRender->_vertex0->append(vertex1);
 				_facelineRender->_vertex0->append(vertex2);
+				_facelineRender->_vertex0->append(vertex2);
 				_facelineRender->_vertex0->append(vertex3);
-				_facelineRender->_vertex1->append(QVector<float>(4, 0));
+				_facelineRender->_vertex0->append(vertex0);
+				_facelineRender->_vertex1->append(QVector<float>(6, 0));
 				break;
 			}
 			case MeshTet:
