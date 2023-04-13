@@ -235,6 +235,22 @@ namespace MDataPost
 
 	}
 
+	void mPostMeshPickThread::doAnglePick()
+	{
+		switch (*_pickFilter)
+		{
+		case PickFilter::PickNothing:break;
+		case PickFilter::PickNodeByLineAngle:SoloPickNodeByLineAngle(); break;
+		case PickFilter::PickNodeByFaceAngle:SoloPickNodeByFaceAngle(); break;
+		case PickFilter::Pick1DMeshByAngle:SoloPick1DMeshByAngle(); break;
+		case PickFilter::PickMeshLineByAngle:SoloPickMeshLineByAngle(); break;
+		case PickFilter::Pick2DMeshByAngle:SoloPick2DMeshByAngle(); break;
+		case PickFilter::PickMeshFaceByAngle:SoloPickMeshFaceByAngle(); break;
+		//case PickAnyPositionValue:SoloPickCuttingPlaneVertex(); break;
+		default:break;
+		}
+	}
+
 	void mPostMeshPickThread::SoloPickNode(QString partName)
 	{
 		int _picknodeid = 0;
@@ -250,72 +266,7 @@ namespace MDataPost
 			{
 				return;
 			}
-
-			//Space::SpaceTree*tree = partData->spaceTree;
-			//QVector3D sv = ScreenvertexToWorldvertex(QVector3D(_pos.x(), _pos.y(), pos_depth));
-			//QVector<mPostMeshData1*> meshDataAll;
-			//Space::SpaceTree* require = nullptr;
-			//Space::getPointToSpaceTree(tree, sv, require);
-			//if (require != nullptr)
-			//{
-			//	meshDataAll = require->meshs;
-			//}
-			//
-			//for (mPostMeshData1 *meshData : meshDataAll)
-			//{
-			//	if (meshData == nullptr)
-			//	{
-			//		continue;
-			//	}
-			//	if (!meshData->getMeshVisual())
-			//	{
-			//		continue;
-			//	}
-			//	QVector<int> index = meshData->getNodeIndex();
-			//	for (int j = 0; j < index.size(); ++j)
-			//	{
-			//		QVector3D vertex0 = _oneFrameData->getNodeDataByID(index.at(j))->getNodeVertex() + deformationScale * dis.value(index.at(j));
-			//		if (isVertexCuttingByPlane(vertex0))
-			//		{
-			//			continue;
-			//		}
-			//		QVector2D ap1 = WorldvertexToScreenvertex(vertex0, depth);
-			//		if (fabs(ap1.x() - _pos.x()) <= 5 && fabs(ap1.y() - _pos.y()) <= 5 && depth < _nodedepth)
-			//		{
-			//			_nodedepth = depth;
-			//			_picknodeid = index.at(j);
-			//		}
-			//	}
-			//}
-			/*
-			//三维网格的节点
-			set<int> meshIDs = partData->getMeshIDs3();
-			for (int meshID : meshIDs)
-			{
-				mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
-				if (meshData == nullptr)
-				{
-					continue;
-				}
-				if (!meshData->getMeshVisual())
-				{
-					continue;
-				}
-				for (int j = 0; j < index.size(); ++j)
-				{
-					QVector3D vertex0 = _oneFrameData->getNodeDataByID(index.at(j))->getNodeVertex() + deformationScale * dis.value(index.at(j));
-					if (isVertexCuttingByPlane(vertex0))
-					{
-						continue;
-					}
-					QVector2D ap1 = WorldvertexToScreenvertex(vertex0, depth);
-					if (fabs(ap1.x() - _pos.x()) <= 5 && fabs(ap1.y() - _pos.y()) <= 5 && depth < _nodedepth)
-					{
-						_nodedepth = depth;
-						_picknodeid = index.at(j);
-					}
-				}
-			}*/
+			
 			//获取所有的网格面ID
 			QVector<mPostMeshFaceData1*> meshFaceIDs = partData->getMeshFaceData();
 			for (mPostMeshFaceData1* meshFaceData : meshFaceIDs)
@@ -481,19 +432,14 @@ namespace MDataPost
 			QVector<int> index = meshData->getNodeIndex();
 			if ((meshData->getMeshType() == MeshBeam) && (_pickElementTypeFilter.find(meshData->getElementType()) != _pickElementTypeFilter.end()))
 			{
-				QVector<QVector3D> vertexs = {
-					_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-					_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)) };
-
+				QVector<QVector2D> tempQVector2D;
+				std::set<float> depthlist;
+				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
 				if (isVertexCuttingByPlane(vertexs))
 				{
 					continue;
 				}
-
-				QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-				QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-				QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
-				std::set<float> depthlist{ depth1,depth2 };
+				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
 				if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, soloQuad, MeshBeam) && *depthlist.begin() < _meshdepth)
 				{
 					_meshdepth = *depthlist.begin();
@@ -546,54 +492,20 @@ namespace MDataPost
 				{
 					continue;
 				}
-				if (meshData->getMeshType() == MeshTri)
+				QVector<QVector2D> tempQVector2D;
+				std::set<float> depthlist;
+				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+				if (isVertexCuttingByPlane(vertexs))
 				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-					std::set<float> depthlist{ depth1,depth2,depth3 };
-					if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshTri) && *depthlist.begin() < _meshdepth)
-					{
-						_meshdepth = *depthlist.begin();
-						_pickMeshid = meshID;
-					}
+					continue;
 				}
-				else if (meshData->getMeshType() == MeshQuad)
+				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+				if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
 				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-					QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3), depth4);
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4 };
-					std::set<float> depthlist{ depth1,depth2,depth3,depth4 };
-					if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshQuad) && *depthlist.begin() < _meshdepth)
-					{
-						_meshdepth = *depthlist.begin();
-						_pickMeshid = meshID;
-					}
+					_meshdepth = *depthlist.begin();
+					_pickMeshid = meshID;
 				}
+
 			}
 		}
 		if (_pickMeshid == 0)
@@ -666,52 +578,17 @@ namespace MDataPost
 				{
 					int meshID = _oneFrameData->MeshFaceIsSurface1(meshFaceData);
 					QVector<QVector2D> tempQVector2D;
-					QVector<int> index = meshFaceData->getNodeIndex();
-					if (index.size() == 3)
+					std::set<float> depthlist;
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshFaceVertexs(meshFaceData, dis, deformationScale);
+					if (isVertexCuttingByPlane(vertexs))
 					{
-						QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
-
-						if (isVertexCuttingByPlane(vertexs))
-						{
-							continue;
-						}
-						QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-						QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-						QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-						tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-						std::set<float> depthlist{ depth1,depth2,depth3 };
-						if (*depthlist.begin() < _meshdepth && mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshTri))
-						{
-							_meshdepth = *depthlist.begin();
-							_pickMeshid = meshID;
-						}
+						continue;
 					}
-					else if (meshFaceData->getNodeIndex().size() == 4)
+					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+					if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri:MeshQuad ) && *depthlist.begin() < _meshdepth)
 					{
-						QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
-
-						if (isVertexCuttingByPlane(vertexs))
-						{
-							continue;
-						}
-						QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-						QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-						QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-						QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3), depth4);
-						tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4 };
-						std::set<float> depthlist{ depth1,depth2,depth3, depth4 };
-						if (*depthlist.begin() < _meshdepth && mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshQuad))
-						{
-							_meshdepth = *depthlist.begin();
-							_pickMeshid = meshID;
-						}
+						_meshdepth = *depthlist.begin();
+						_pickMeshid = meshID;
 					}
 				}
 			}
@@ -729,55 +606,20 @@ namespace MDataPost
 				{
 					continue;
 				}
-				QVector<int> index = meshData->getNodeIndex();
-				if (meshData->getMeshType() == MeshTri)
+				QVector<QVector2D> tempQVector2D;
+				std::set<float> depthlist;
+				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+				if (isVertexCuttingByPlane(vertexs))
 				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-					std::set<float> depthlist{ depth1,depth2,depth3 };
-					if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshTri) && *depthlist.begin() < _meshdepth)
-					{
-						_meshdepth = *depthlist.begin();
-						_pickMeshid = meshID;
-					}
+					continue;
 				}
-				else if (meshData->getMeshType() == MeshQuad)
+				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+				if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
 				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-					QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3), depth4);
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4 };
-					std::set<float> depthlist{ depth1,depth2,depth3,depth4 };
-					if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshQuad) && *depthlist.begin() < _meshdepth)
-					{
-						_meshdepth = *depthlist.begin();
-						_pickMeshid = meshID;
-					}
+					_meshdepth = *depthlist.begin();
+					_pickMeshid = meshID;
 				}
+
 			}
 
 			//一维网格
@@ -796,19 +638,14 @@ namespace MDataPost
 				QVector<int> index = meshData->getNodeIndex();
 				if (meshData->getMeshType() == MeshBeam)
 				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)) };
-
+					QVector<QVector2D> tempQVector2D;
+					std::set<float> depthlist;
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
 					if (isVertexCuttingByPlane(vertexs))
 					{
 						continue;
 					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
-					std::set<float> depthlist{ depth1,depth2 };
+					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
 					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, soloQuad, MeshBeam) && *depthlist.begin() < _meshdepth)
 					{
 						_meshdepth = *depthlist.begin();
@@ -887,54 +724,17 @@ namespace MDataPost
 				if (meshFaceData->getVisual())//判断这个单元面是不是外表面
 				{
 					QVector<QVector2D> tempQVector2D;
-					QVector<int> index = meshFaceData->getNodeIndex();
-					if (index.size() == 3)
+					std::set<float> depthlist;
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshFaceVertexs(meshFaceData, dis, deformationScale);
+					if (isVertexCuttingByPlane(vertexs))
 					{
-						QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
-
-						if (isVertexCuttingByPlane(vertexs))
-						{
-							continue;
-						}
-
-						QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-						QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-						QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-						tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-						std::set<float> depthlist{ depth1,depth2,depth3 };
-						if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshTri))
-						{
-							_meshFacedepth = *depthlist.begin();
-							_pickMeshFaceid = meshFaceData->getMeshFaceID();
-						}
+						continue;
 					}
-					else if (meshFaceData->getNodeIndex().size() == 4)
+					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+					if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad) && *depthlist.begin() < _meshFacedepth)
 					{
-						QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
-
-						if (isVertexCuttingByPlane(vertexs))
-						{
-							continue;
-						}
-
-						QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-						QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-						QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-						QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3), depth4);
-						tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4 };
-						std::set<float> depthlist{ depth1,depth2,depth3, depth4 };
-						if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshQuad))
-						{
-							_meshFacedepth = *depthlist.begin();
-							_pickMeshFaceid = meshFaceData->getMeshFaceID();
-						}
+						_meshFacedepth = *depthlist.begin();
+						_pickMeshFaceid = meshFaceData->getMeshFaceID();
 					}
 				}
 			}
@@ -981,19 +781,14 @@ namespace MDataPost
 				QVector<int> index = meshData->getNodeIndex();
 				if ((meshData->getMeshType() == MeshBeam) && (_pickElementTypeFilter.find(meshData->getElementType()) != _pickElementTypeFilter.end()))
 				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)) };
-
+					QVector<QVector2D> tempQVector2D;
+					std::set<float> depthlist;
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
 					if (isVertexCuttingByPlane(vertexs))
 					{
 						continue;
 					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
-					std::set<float> depthlist{ depth1,depth2 };
+					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
 					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, soloQuad, MeshBeam) && *depthlist.begin() < _meshdepth)
 					{
 						_meshdepth = *depthlist.begin();
@@ -1045,57 +840,20 @@ namespace MDataPost
 				{
 					continue;
 				}
-				QVector<int> index = meshData->getNodeIndex();
-				if (meshData->getMeshType() == MeshTri)
+				QVector<QVector2D> tempQVector2D;
+				std::set<float> depthlist;
+				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+				if (isVertexCuttingByPlane(vertexs))
 				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-					std::set<float> depthlist{ depth1,depth2,depth3 };
-					if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshTri) && *depthlist.begin() < _meshdepth)
-					{
-						_meshdepth = *depthlist.begin();
-						_pickMeshid = meshID;
-						partName1 = partName;
-					}
+					continue;
 				}
-				else if (meshData->getMeshType() == MeshQuad)
+				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+				if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
 				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-					QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3), depth4);
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4 };
-					std::set<float> depthlist{ depth1,depth2,depth3,depth4 };
-					if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshQuad) && *depthlist.begin() < _meshdepth)
-					{
-						_meshdepth = *depthlist.begin();
-						_pickMeshid = meshID;
-						partName1 = partName;
-					}
-				}
+					_meshdepth = *depthlist.begin();
+					_pickMeshid = meshID;
+					partName1 = partName;
+				}				
 			}
 
 
@@ -1112,54 +870,19 @@ namespace MDataPost
 				if (meshFaceData->getVisual())//判断这个单元面是不是外表面
 				{
 					QVector<QVector2D> tempQVector2D;
-					QVector<int> index = meshFaceData->getNodeIndex();
-					if (index.size() == 3)
+					std::set<float> depthlist;
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshFaceVertexs(meshFaceData, dis, deformationScale);
+					if (isVertexCuttingByPlane(vertexs))
 					{
-						QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
-
-						if (isVertexCuttingByPlane(vertexs))
-						{
-							continue;
-						}
-						QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-						QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-						QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-						tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-						std::set<float> depthlist{ depth1,depth2,depth3 };
-						if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshTri))
-						{
-							_meshFacedepth = *depthlist.begin();
-							_pickMeshFaceid = meshFaceData->getMeshFaceID();
-							partName2 = partName;
-						}
+						continue;
 					}
-					else if (meshFaceData->getNodeIndex().size() == 4)
-					{
-						QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
+					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
 
-						if (isVertexCuttingByPlane(vertexs))
-						{
-							continue;
-						}
-						QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-						QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-						QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-						QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3), depth4);
-						tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4 };
-						std::set<float> depthlist{ depth1,depth2,depth3, depth4 };
-						if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshQuad))
-						{
-							_meshFacedepth = *depthlist.begin();
-							_pickMeshFaceid = meshFaceData->getMeshFaceID();
-							partName2 = partName;
-						}
+					if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad))
+					{
+						_meshFacedepth = *depthlist.begin();
+						_pickMeshFaceid = meshFaceData->getMeshFaceID();
+						partName2 = partName;
 					}
 				}
 			}
@@ -1211,19 +934,14 @@ namespace MDataPost
 				QVector<int> index = meshData->getNodeIndex();
 				if ((meshData->getMeshType() == MeshBeam) && (_pickElementTypeFilter.find(meshData->getElementType()) != _pickElementTypeFilter.end()))
 				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)) };
-
+					QVector<QVector2D> tempQVector2D;
+					std::set<float> depthlist;
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
 					if (isVertexCuttingByPlane(vertexs))
 					{
 						continue;
 					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
-					std::set<float> depthlist{ depth1,depth2 };
+					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
 					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, soloQuad, MeshBeam) && *depthlist.begin() < _meshdepth)
 					{
 						_meshdepth = *depthlist.begin();
@@ -1273,56 +991,19 @@ namespace MDataPost
 				{
 					continue;
 				}
-				QVector<int> index = meshData->getNodeIndex();
-				if (meshData->getMeshType() == MeshTri)
+				QVector<QVector2D> tempQVector2D;
+				std::set<float> depthlist;
+				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+				if (isVertexCuttingByPlane(vertexs))
 				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-					std::set<float> depthlist{ depth1,depth2,depth3 };
-					if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshTri) && *depthlist.begin() < _meshdepth)
-					{
-						_meshdepth = *depthlist.begin();
-						_pickMeshid = meshID;
-						//partName = _partName;
-					}
+					continue;
 				}
-				else if (meshData->getMeshType() == MeshQuad)
+				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+				if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
 				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-					QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-					QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3), depth4);
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4 };
-					std::set<float> depthlist{ depth1,depth2,depth3,depth4 };
-					if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshQuad) && *depthlist.begin() < _meshdepth)
-					{
-						_meshdepth = *depthlist.begin();
-						_pickMeshid = meshID;
-						//partName = _partName;
-					}
+					_meshdepth = *depthlist.begin();
+					_pickMeshid = meshID;
+					//partName = _partName;
 				}
 			}
 		}
@@ -1365,55 +1046,20 @@ namespace MDataPost
 				if (meshFaceData->getVisual())//判断这个单元面是不是外表面
 				{
 					QVector<QVector2D> tempQVector2D;
-					QVector<int> index = meshFaceData->getNodeIndex();
-					if (index.size() == 3)
+					std::set<float> depthlist;
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshFaceVertexs(meshFaceData, dis, deformationScale);
+					if (isVertexCuttingByPlane(vertexs))
 					{
-						QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
-
-						if (isVertexCuttingByPlane(vertexs))
-						{
-							continue;
-						}
-						QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-						QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-						QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-						tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-						std::set<float> depthlist{ depth1,depth2,depth3 };
-						if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshTri))
-						{
-							_meshFacedepth = *depthlist.begin();
-							_pickMeshFaceid = meshFaceData->getMeshFaceID();
-							//partName = _partName;
-						}
+						continue;
 					}
-					else if (meshFaceData->getNodeIndex().size() == 4)
+					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+
+					if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad))
 					{
-						QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
-
-						if (isVertexCuttingByPlane(vertexs))
-						{
-							continue;
-						}
-						QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0), depth1);
-						QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1), depth2);
-						QVector2D ap3 = WorldvertexToScreenvertex(vertexs.at(2), depth3);
-						QVector2D ap4 = WorldvertexToScreenvertex(vertexs.at(3), depth4);
-						tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3, ap4 };
-						std::set<float> depthlist{ depth1,depth2,depth3, depth4 };
-						if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MeshQuad))
-						{
-							_meshFacedepth = *depthlist.begin();
-							_pickMeshFaceid = meshFaceData->getMeshFaceID();
-							//partName = _partName;
-						}
-					}
+						_meshFacedepth = *depthlist.begin();
+						_pickMeshFaceid = meshFaceData->getMeshFaceID();
+						//partName = _partName;
+					}				
 				}
 			}
 		}
@@ -1440,7 +1086,7 @@ namespace MDataPost
 				return;
 			}
 
-			QVector3D p1 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
+			/*QVector3D p1 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
 			QVector3D p2 = ScreenvertexToWorldvertex(QVector3D(_centerBox + _boxXY_2, 0.0));
 
 			QVector3D p3 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
@@ -1455,48 +1101,47 @@ namespace MDataPost
 
 
 			Space::OBB obb;
-			obb.Set((p2 - p1).normalized(), (p3 - p4).normalized(), (p5 - p6).normalized(), cen, o_size);
+			obb.Set((p2 - p1).normalized(), (p3 - p4).normalized(), (p5 - p6).normalized(), cen, o_size);*/
 
 
 			//Space::SpaceTree* spaceTree /*= partData->spaceTree*/;
-			QVector<mPostMeshData1*> meshDataAll;
-			QVector<mPostMeshData1*> meshDataContain;
-			Space::getOBBToMeshData(spaceTree, obb, meshDataAll, meshDataContain);
-			for (int i = 0; i < meshDataContain.size(); i++)
-			{
-				if (meshDataContain[i]->getMeshVisual())
-				{
-					QVector<int> nodeIndex = meshDataContain[i]->getNodeIndex();
-					for (int j = 0; j < nodeIndex.size(); ++j)
-					{
-						pickNodeDatas.insert(nodeIndex[j]);
-					}
-				}
-			}
+			//QVector<mPostMeshData1*> meshDataAll;
+			//QVector<mPostMeshData1*> meshDataContain;
+			//Space::getOBBToMeshData(spaceTree, obb, meshDataAll, meshDataContain);
+			//for (int i = 0; i < meshDataContain.size(); i++)
+			//{
+			//	if (meshDataContain[i]->getMeshVisual())
+			//	{
+			//		QVector<int> nodeIndex = meshDataContain[i]->getNodeIndex();
+			//		for (int j = 0; j < nodeIndex.size(); ++j)
+			//		{
+			//			pickNodeDatas.insert(nodeIndex[j]);
+			//		}
+			//	}
+			//}
 
-			//测试裁剪
-			if (_postCuttingNormalVertex.size() != 0)
-			{
-				QVector<int> eraseNodeIDs;
-				for (int nodeID : pickNodeDatas)
-				{
-					QVector3D vertex = _oneFrameData->getNodeDataByID(nodeID)->getNodeVertex() + deformationScale * dis.value(nodeID);
-					if (isVertexCuttingByPlane(vertex))
-					{
-						eraseNodeIDs.append(nodeID);
-					}
-				}
-				for (int nodeID : eraseNodeIDs)
-				{
-					pickNodeDatas.erase(nodeID);
-				}
-			}
+			////测试裁剪
+			//if (_postCuttingNormalVertex.size() != 0)
+			//{
+			//	QVector<int> eraseNodeIDs;
+			//	for (int nodeID : pickNodeDatas)
+			//	{
+			//		QVector3D vertex = _oneFrameData->getNodeDataByID(nodeID)->getNodeVertex() + deformationScale * dis.value(nodeID);
+			//		if (isVertexCuttingByPlane(vertex))
+			//		{
+			//			eraseNodeIDs.append(nodeID);
+			//		}
+			//	}
+			//	for (int nodeID : eraseNodeIDs)
+			//	{
+			//		pickNodeDatas.erase(nodeID);
+			//	}
+			//}
 
 			//三维网格的节点
-			set<int> meshIDs = partData->getMeshIDs3();
-			for (mPostMeshData1 *meshData : meshDataAll)
+			QVector<mPostMeshData1*> meshDatas = partData->getMeshDatas0() + partData->getMeshDatas1() + partData->getMeshDatas2() + partData->getMeshDatas3();
+			for (mPostMeshData1 *meshData : meshDatas)
 			{
-
 				if (meshData == nullptr)
 				{
 					continue;
@@ -1514,96 +1159,6 @@ namespace MDataPost
 						continue;
 					}
 					QVector2D ap1 = WorldvertexToScreenvertex(vertex0);
-					if (mPickToolClass::IsPointInQuad(ap1, _centerBox, _boxXY_2))
-					{
-						pickNodeDatas.insert(index.at(j));
-					}
-				}
-			}
-
-			//一维网格的节点
-			meshIDs = partData->getMeshIDs1();
-			for (int meshID : meshIDs)
-			{
-				mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
-				if (meshData == nullptr)
-				{
-					continue;
-				}
-				if (!meshData->getMeshVisual())
-				{
-					continue;
-				}
-				QVector<int> index = meshData->getNodeIndex();
-				for (int j = 0; j < index.size(); ++j)
-				{
-					QVector3D vertex0 = _oneFrameData->getNodeDataByID(index.at(j))->getNodeVertex() + deformationScale * dis.value(index.at(j));
-
-					if (isVertexCuttingByPlane(vertex0))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertex0);
-					if (mPickToolClass::IsPointInQuad(ap1, _centerBox, _boxXY_2))
-					{
-						pickNodeDatas.insert(index.at(j));
-					}
-				}
-			}
-
-			//二维网格的节点
-			meshIDs = partData->getMeshIDs2();
-			for (int meshID : meshIDs)
-			{
-				mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
-				if (meshData == nullptr)
-				{
-					continue;
-				}
-				QVector<int> index = meshData->getNodeIndex();
-				for (int j = 0; j < index.size(); ++j)
-				{
-					QVector3D vertex0 = _oneFrameData->getNodeDataByID(index.at(j))->getNodeVertex() + deformationScale * dis.value(index.at(j));
-
-					if (isVertexCuttingByPlane(vertex0))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertex0);
-					if (mPickToolClass::IsPointInQuad(ap1, _centerBox, _boxXY_2))
-					{
-						pickNodeDatas.insert(index.at(j));
-					}
-				}
-			}
-
-			//0维网格的节点
-			meshIDs = partData->getMeshIDs0();
-			for (int meshID : meshIDs)
-			{
-				mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
-				if (meshData == nullptr)
-				{
-					continue;
-				}
-				if (!meshData->getMeshVisual())
-				{
-					continue;
-				}
-				QVector<int> index = meshData->getNodeIndex();
-				for (int j = 0; j < index.size(); ++j)
-				{
-					QVector3D vertex0 = _oneFrameData->getNodeDataByID(index.at(j))->getNodeVertex() + deformationScale * dis.value(index.at(j));
-
-					if (isVertexCuttingByPlane(vertex0))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertex0);
-					//    if (mPickToolClass::IsPointInQuad(ap1, _centerBox, _boxXY_2))
 					if (mPickToolClass::IsPointInQuad(ap1, _centerBox, _boxXY_2))
 					{
 						pickNodeDatas.insert(index.at(j));
@@ -1650,10 +1205,7 @@ namespace MDataPost
 				QVector<int> index = meshData->getNodeIndex();
 				if ((meshData->getMeshType() == MeshBeam) && (_pickElementTypeFilter.find(meshData->getElementType()) != _pickElementTypeFilter.end()))
 				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)) };
-
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
 					if (isVertexCuttingByPlane(vertexs))
 					{
 						continue;
@@ -1704,28 +1256,11 @@ namespace MDataPost
 				{
 					continue;
 				}
-				QVector<int> index = meshData->getNodeIndex();
 				if (_pickElementTypeFilter.find(meshData->getElementType()) == _pickElementTypeFilter.end())
 				{
 					continue;
 				}
-				QVector<QVector3D> vertexs;
-				if (meshData->getMeshType() == MeshTri)
-				{
-					vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
-				
-				}
-				else if (meshData->getMeshType() == MeshQuad)
-				{
-					vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };				
-				}
+				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
 				if (isVertexCuttingByPlane(vertexs))
 				{
 					continue;
@@ -1815,7 +1350,7 @@ namespace MDataPost
 			}
 
 			//三维网格
-			set<int> meshIDs = partData->getMeshIDs3();
+			//set<int> meshIDs = partData->getMeshIDs3();
 			for (mPostMeshData1 *meshData : meshDataAll)
 			{
 				int meshID = meshData->getMeshID();
@@ -1826,53 +1361,8 @@ namespace MDataPost
 				if (!meshData->getMeshVisual())
 				{
 					continue;
-				}
-				QVector<int> index = meshData->getNodeIndex();
-				QVector<QVector3D> vertexs;
-				if (meshData->getMeshType() == MeshTet)
-				{
-					vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
-				}
-				else if (meshData->getMeshType() == MeshPyramid)
-				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)),
-						_oneFrameData->getNodeDataByID(index.at(4))->getNodeVertex() + deformationScale * dis.value(index.at(4)) };				
-				}
-
-				else if (meshData->getMeshType() == MeshWedge)
-				{
-					vertexs = {
-						   _oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						   _oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						   _oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						   _oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)),
-						   _oneFrameData->getNodeDataByID(index.at(4))->getNodeVertex() + deformationScale * dis.value(index.at(4)),
-						   _oneFrameData->getNodeDataByID(index.at(5))->getNodeVertex() + deformationScale * dis.value(index.at(5)) };
-	
-				}
-
-				else if (meshData->getMeshType() == MeshHex)
-				{
-					vertexs = {
-						   _oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						   _oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						   _oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						   _oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)),
-						   _oneFrameData->getNodeDataByID(index.at(4))->getNodeVertex() + deformationScale * dis.value(index.at(4)),
-						   _oneFrameData->getNodeDataByID(index.at(5))->getNodeVertex() + deformationScale * dis.value(index.at(5)),
-						   _oneFrameData->getNodeDataByID(index.at(6))->getNodeVertex() + deformationScale * dis.value(index.at(6)),
-						  _oneFrameData->getNodeDataByID(index.at(7))->getNodeVertex() + deformationScale * dis.value(index.at(7)) };
-					
-				}
-
+				}				
+				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);		
 				QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
 				if (mPickToolClass::IsPointInQuad(center, _centerBox, _boxXY_2))
 				{
@@ -1880,11 +1370,10 @@ namespace MDataPost
 				}
 			}
 
-			//二维网格	
-			meshIDs = partData->getMeshIDs2();
-			for (int meshID : meshIDs)
-			{
-				mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
+			//二维网格和0维网格
+			QVector<mPostMeshData1*> meshDatas = partData->getMeshDatas2() + partData->getMeshDatas0();
+			for (auto meshData : meshDatas)
+			{			
 				if (meshData == nullptr)
 				{
 					continue;
@@ -1893,36 +1382,18 @@ namespace MDataPost
 				{
 					continue;
 				}
-				QVector<QVector3D> vertexs;
-				QVector<int> index = meshData->getNodeIndex();
-				if (meshData->getMeshType() == MeshTri)
-				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
-
-				}
-				else if (meshData->getMeshType() == MeshQuad)
-				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };				
-				}
+				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
 				QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
 				if (mPickToolClass::IsPointInQuad(center, _centerBox, _boxXY_2))
 				{
-					pickMeshDatas.insert(meshID);
+					pickMeshDatas.insert(meshData->getMeshID());
 				}
 			}
 
 			//一维网格
-			meshIDs = partData->getMeshIDs1();
-			for (int meshID : meshIDs)
+			meshDatas = partData->getMeshDatas1();
+			for (auto meshData : meshDatas)
 			{
-				mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
 				if (meshData == nullptr)
 				{
 					continue;
@@ -1934,9 +1405,7 @@ namespace MDataPost
 				QVector<int> index = meshData->getNodeIndex();
 				if (meshData->getMeshType() == MeshBeam)
 				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)) };
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
 
 					if (isVertexCuttingByPlane(vertexs))
 					{
@@ -1948,39 +1417,7 @@ namespace MDataPost
 					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
 					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerBox.x(), _centerBox.y(), _boxXY_2.x(), _boxXY_2.y()))
 					{
-						pickMeshDatas.insert(meshID);
-					}
-				}
-			}
-
-			meshIDs = partData->getMeshIDs0();
-			for (int meshID : meshIDs)
-			{
-				mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
-				if (meshData == nullptr)
-				{
-					continue;
-				}
-				if (!meshData->getMeshVisual())
-				{
-					continue;
-				}
-				QVector<int> index = meshData->getNodeIndex();
-				//0维网格
-				if (meshData->getMeshType() == MeshPoint)
-				{
-					QVector<QVector3D> vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)) };
-
-					if (isVertexCuttingByPlane(vertexs))
-					{
-						continue;
-					}
-
-					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
-					    if (mPickToolClass::IsPointInQuad(ap1, _centerBox, _boxXY_2))
-					{
-						pickMeshDatas.insert(meshID);
+						pickMeshDatas.insert(meshData->getMeshID());
 					}
 				}
 			}
@@ -2018,24 +1455,7 @@ namespace MDataPost
 				}
 				if (meshFaceData->getVisual())//判断这个单元面是不是外表面
 				{
-					QVector<QVector3D> vertexs;
-					QVector<int> index = meshFaceData->getNodeIndex();
-					if (index.size() == 3)
-					{
-						vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)) };
-
-					}
-					else if (index.size() == 4)
-					{
-						vertexs = {
-						_oneFrameData->getNodeDataByID(index.at(0))->getNodeVertex() + deformationScale * dis.value(index.at(0)),
-						_oneFrameData->getNodeDataByID(index.at(1))->getNodeVertex() + deformationScale * dis.value(index.at(1)),
-						_oneFrameData->getNodeDataByID(index.at(2))->getNodeVertex() + deformationScale * dis.value(index.at(2)),
-						_oneFrameData->getNodeDataByID(index.at(3))->getNodeVertex() + deformationScale * dis.value(index.at(3)) };
-					}
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshFaceVertexs(meshFaceData, dis, deformationScale);
 					QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
 					if (mPickToolClass::IsPointInQuad(center, _centerBox, _boxXY_2))
 					{
@@ -2052,6 +1472,1173 @@ namespace MDataPost
 		_postMeshPickData->setMultiplyPickMeshFaceData(pickMeshFaceDatas);
 		postPickMutex.unlock();
 
+	}
+
+	void mPostMeshPickThread::SoloPickNodeByLineAngle()
+	{
+		QPair<PickObjectType, QPair<QString, int>> pickObjectID = _postMeshPickData->getSoloPickNodeDataByLineAngle();
+		if (pickObjectID.first == PickObjectType::Mesh1D)
+		{
+			int meshID = pickObjectID.second.second;
+			if (meshID == 0)
+			{
+				return;
+			}
+			//拾取到的节点ID
+			std::set<int> pickNodeIDs;
+			//判断过的单元ID
+			std::set<int> judgeMeshIDs;
+			//存储相邻单元ID的队列
+			QQueue<int> queue;
+			//存储相邻单元的方向的队列
+			QQueue<QVector3D> queueDirection;
+			//方向
+			QVector3D direction, lastDirection;
+			//角度值
+			float angleValue;
+
+			mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
+			if (meshData != nullptr)
+			{
+				if (meshData->getMeshType() == MeshBeam)
+				{
+					QVector<int> nodeIDs = meshData->getNodeIndex();
+					if (nodeIDs.size() < 2)
+					{
+						return;
+					}
+					mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+					mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+
+					lastDirection = (nodeData2->getNodeVertex() - nodeData1->getNodeVertex()).normalized();
+					queue.enqueue(meshID);
+					queueDirection.enqueue(lastDirection);
+				}
+			}
+
+			while (!queue.isEmpty() && !queueDirection.isEmpty())
+			{
+				meshID = queue.dequeue();
+				lastDirection = queueDirection.dequeue();
+				if (!judgeMeshIDs.insert(meshID).second)
+				{
+					continue;
+				}
+
+				mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
+				if (meshData != nullptr && meshData->getMeshVisual())
+				{
+					if (meshData->getMeshType() == MeshBeam)
+					{
+						QVector<int> nodeIDs = meshData->getNodeIndex();
+						if (nodeIDs.size() < 2)
+						{
+							continue;
+						}
+						mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+						mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+
+						direction = (nodeData2->getNodeVertex() - nodeData1->getNodeVertex()).normalized();
+
+						float x = QVector3D::dotProduct(direction, lastDirection);
+
+						if (x > 1.0)
+						{
+							angleValue = 0;
+						}
+						else
+						{
+							angleValue = fabs(180 * acos(QVector3D::dotProduct(direction, lastDirection)) / 3.1415926);
+						}
+						if (_pickAngleValue > angleValue || _pickAngleValue > (180 - angleValue))
+						{
+							set<int> adjacentMeshIDs;
+							if (pickNodeIDs.insert(nodeIDs.at(0)).second)
+							{
+								std::set<int> ids = nodeData1->getNodeInMeshIDs();
+								adjacentMeshIDs.insert(ids.begin(), ids.end());
+							}
+							if (pickNodeIDs.insert(nodeIDs.at(1)).second)
+							{
+								std::set<int> ids = nodeData2->getNodeInMeshIDs();
+								adjacentMeshIDs.insert(ids.begin(), ids.end());
+							}
+							for (int i : adjacentMeshIDs)
+							{
+								queueDirection.enqueue(direction);
+								queue.enqueue(i);
+							}
+						}
+					}
+				}
+
+			}
+
+
+			_postMeshPickData->setMultiplyPickNodeData(pickNodeIDs);
+
+			return;
+		}
+		else
+		{
+			int meshLineID = pickObjectID.second.second;
+			if (meshLineID == 0)
+			{
+				return;
+			}
+			//拾取到的节点ID
+			std::set<int> pickNodeIDs;
+			//判断过的单元线ID
+			std::set<int> judgeMeshLineIDs;
+			//存储相邻单元线ID的队列
+			QQueue<int> queue;
+			//存储相邻单元的方向的队列
+			QQueue<QVector3D> queueDirection;
+			//方向
+			QVector3D direction, lastDirection;
+			//角度值
+			float angleValue;
+
+			mPostMeshLineData1 *meshLineData = _oneFrameData->getMeshLineDataByID(meshLineID);
+			if (meshLineData != nullptr)
+			{
+				int nodeID1 = meshLineData->getMeshLineNodeIndex1();
+				int nodeID2 = meshLineData->getMeshLineNodeIndex2();
+				mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeID1);
+				mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeID2);
+
+				lastDirection = (nodeData2->getNodeVertex() - nodeData1->getNodeVertex()).normalized();
+				queue.enqueue(meshLineID);
+				queueDirection.enqueue(lastDirection);
+			}
+
+			while (!queue.isEmpty() && !queueDirection.isEmpty())
+			{
+				meshLineID = queue.dequeue();
+				lastDirection = queueDirection.dequeue();
+				if (!judgeMeshLineIDs.insert(meshLineID).second)
+				{
+					continue;
+				}
+
+				mPostMeshLineData1 *meshLineData = _oneFrameData->getMeshLineDataByID(meshLineID);
+				if (meshLineData != nullptr)
+				{
+					mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshLineData->getMeshID());
+					if (meshData == nullptr || !meshData->getMeshVisual())
+					{
+						continue;
+					}
+					int nodeID1 = meshLineData->getMeshLineNodeIndex1();
+					int nodeID2 = meshLineData->getMeshLineNodeIndex2();
+					mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeID1);
+					mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeID2);
+
+					direction = (nodeData2->getNodeVertex() - nodeData1->getNodeVertex()).normalized();
+
+					float x = QVector3D::dotProduct(direction, lastDirection);
+
+					if (x > 1.0)
+					{
+						angleValue = 0;
+					}
+					else
+					{
+						angleValue = fabs(180 * acos(QVector3D::dotProduct(direction, lastDirection)) / 3.1415926);
+					}
+					if (_pickAngleValue > angleValue || _pickAngleValue > (180 - angleValue))
+					{
+						set<int> adjacentMeshLineIDs;
+						if (pickNodeIDs.insert(nodeID1).second)
+						{
+							std::set<int> ids = nodeData1->getNodeInMeshLineIDs();
+
+							adjacentMeshLineIDs.insert(ids.begin(), ids.end());
+						}
+						if (pickNodeIDs.insert(nodeID2).second)
+						{
+							std::set<int> ids = nodeData2->getNodeInMeshLineIDs();
+
+							adjacentMeshLineIDs.insert(ids.begin(), ids.end());
+						}
+						for (int i : adjacentMeshLineIDs)
+						{
+							queueDirection.enqueue(direction);
+							queue.enqueue(i);
+						}
+					}
+				}
+
+			}
+
+
+			_postMeshPickData->setMultiplyPickNodeData(pickNodeIDs);
+
+			return;
+		}
+		return;
+	}
+
+	void mPostMeshPickThread::SoloPickNodeByFaceAngle()
+	{
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+
+		QPair<PickObjectType, QPair<QString, int>> pickObjectID = _postMeshPickData->getSoloPickNodeDataByFaceAngle();
+		QString partName = pickObjectID.second.first;
+		if (pickObjectID.first == PickObjectType::Mesh2D)
+		{
+			int meshID = pickObjectID.second.second;
+			if (meshID == 0)
+			{
+				return;
+			}
+			//拾取到的节点ID
+			std::set<int> pickNodeIDs;
+			//判断过的单元ID
+			std::set<int> judgeMeshIDs;
+			//存储相邻单元ID的队列
+			QQueue<int> queue;
+			//存储相邻单元的方向的队列
+			QQueue<QVector3D> queueDirection;
+			//方向
+			QVector3D direction, lastDirection;
+			//角度值
+			float angleValue;
+
+			mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
+			if (meshData != nullptr)
+			{
+				if (meshData->getMeshType() == MeshQuad || meshData->getMeshType() == MeshTri)
+				{
+					QVector<int> nodeIDs = meshData->getNodeIndex();
+					if (nodeIDs.size() < 3)
+					{
+						return;
+					}
+					mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+					mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+					mPostMeshNodeData1* nodeData3 = _oneFrameData->getNodeDataByID(nodeIDs.at(2));
+
+					QVector<QVector3D> vertexs = {
+					nodeData1->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(0)),
+					nodeData2->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(1)),
+					nodeData3->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(2)) };
+
+					lastDirection = QVector3D::crossProduct((vertexs.at(1) - vertexs.at(0)).normalized(), (vertexs.at(2) - vertexs.at(1)).normalized()).normalized();
+					queue.enqueue(meshID);
+					queueDirection.enqueue(lastDirection);
+				}
+			}
+
+			while (!queue.isEmpty() && !queueDirection.isEmpty())
+			{
+				meshID = queue.dequeue();
+				lastDirection = queueDirection.dequeue();
+				if (!judgeMeshIDs.insert(meshID).second)
+				{
+					continue;
+				}
+
+				mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
+				if (meshData != nullptr && meshData->getMeshVisual())
+				{
+					if (meshData->getMeshType() == MeshTri)
+					{
+						QVector<int> nodeIDs = meshData->getNodeIndex();
+						if (nodeIDs.size() < 3)
+						{
+							continue;
+						}
+						mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+						mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+						mPostMeshNodeData1* nodeData3 = _oneFrameData->getNodeDataByID(nodeIDs.at(2));
+
+						QVector<QVector3D> vertexs = {
+						nodeData1->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(0)),
+						nodeData2->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(1)),
+						nodeData3->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(2)) };
+
+						direction = QVector3D::crossProduct((vertexs.at(1) - vertexs.at(0)).normalized(), (vertexs.at(2) - vertexs.at(1)).normalized()).normalized();
+
+						float x = QVector3D::dotProduct(direction, lastDirection);
+
+						if (x > 1.0)
+						{
+							angleValue = 0;
+						}
+						else
+						{
+							angleValue = fabs(180 * acos(x) / 3.1415926);
+						}
+						if (_pickAngleValue > angleValue)
+						{
+							set<int> adjacentMeshIDs;
+							if (!isVertexCuttingByPlane(vertexs.at(0)) && pickNodeIDs.insert(nodeIDs.at(0)).second)
+							{
+								std::set<int> ids = nodeData1->getNodeInMeshIDs();
+								adjacentMeshIDs.insert(ids.begin(), ids.end());
+							}
+							if (!isVertexCuttingByPlane(vertexs.at(1)) && pickNodeIDs.insert(nodeIDs.at(1)).second)
+							{
+
+								std::set<int> ids = nodeData2->getNodeInMeshIDs();
+								adjacentMeshIDs.insert(ids.begin(), ids.end());
+							}
+							if (!isVertexCuttingByPlane(vertexs.at(2)) && pickNodeIDs.insert(nodeIDs.at(2)).second)
+							{
+								std::set<int> ids = nodeData3->getNodeInMeshIDs();
+								adjacentMeshIDs.insert(ids.begin(), ids.end());
+							}
+							for (int i : adjacentMeshIDs)
+							{
+								queueDirection.enqueue(direction);
+								queue.enqueue(i);
+							}
+						}
+					}
+					else if (meshData->getMeshType() == MeshQuad)
+					{
+						QVector<int> nodeIDs = meshData->getNodeIndex();
+						if (nodeIDs.size() < 4)
+						{
+							continue;
+						}
+						mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+						mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+						mPostMeshNodeData1* nodeData3 = _oneFrameData->getNodeDataByID(nodeIDs.at(2));
+						mPostMeshNodeData1* nodeData4 = _oneFrameData->getNodeDataByID(nodeIDs.at(3));
+
+						QVector<QVector3D> vertexs = {
+						nodeData1->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(0)),
+						nodeData2->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(1)),
+						nodeData3->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(2)),
+						nodeData4->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(3)) };
+
+						direction = QVector3D::crossProduct((vertexs.at(1) - vertexs.at(0)).normalized(), (vertexs.at(2) - vertexs.at(1)).normalized()).normalized();
+
+						float x = QVector3D::dotProduct(direction, lastDirection);
+
+						if (x > 1.0)
+						{
+							angleValue = 0;
+						}
+						else
+						{
+							angleValue = fabs(180 * acos(x) / 3.1415926);
+						}
+						if (_pickAngleValue > angleValue)
+						{
+							set<int> adjacentMeshIDs;
+							if (!isVertexCuttingByPlane(vertexs.at(0)) && pickNodeIDs.insert(nodeIDs.at(0)).second)
+							{
+								std::set<int> ids = nodeData1->getNodeInMeshIDs();
+								adjacentMeshIDs.insert(ids.begin(), ids.end());
+							}
+							if (!isVertexCuttingByPlane(vertexs.at(1)) && pickNodeIDs.insert(nodeIDs.at(1)).second)
+							{
+								std::set<int> ids = nodeData2->getNodeInMeshIDs();
+								adjacentMeshIDs.insert(ids.begin(), ids.end());
+							}
+							if (!isVertexCuttingByPlane(vertexs.at(2)) && pickNodeIDs.insert(nodeIDs.at(2)).second)
+							{
+								std::set<int> ids = nodeData3->getNodeInMeshIDs();
+								adjacentMeshIDs.insert(ids.begin(), ids.end());
+							}
+							if (!isVertexCuttingByPlane(vertexs.at(3)) && pickNodeIDs.insert(nodeIDs.at(3)).second)
+							{
+								std::set<int> ids = nodeData4->getNodeInMeshIDs();
+								adjacentMeshIDs.insert(ids.begin(), ids.end());
+							}
+							for (int i : adjacentMeshIDs)
+							{
+								queueDirection.enqueue(direction);
+								queue.enqueue(i);
+							}
+						}
+					}
+				}
+
+			}
+
+
+			_postMeshPickData->setMultiplyPickNodeData(pickNodeIDs);
+
+			return;
+		}
+		else
+		{
+			int meshFaceID = pickObjectID.second.second;
+			if (meshFaceID == 0)
+			{
+				return;
+			}
+			//拾取到的节点ID
+			std::set<int> pickNodeIDs;
+			//判断过的单元面ID
+			std::set<int> judgeMeshFaceIDs;
+			//判断过的单元ID
+			std::set<int> judgeMeshIDs;
+			//存储相邻单元线ID的队列
+			QQueue<int> queue;
+			//存储相邻单元的方向的队列
+			QQueue<QVector3D> queueDirection;
+			//方向
+			QVector3D direction, lastDirection;
+			//角度值
+			float angleValue;
+
+			mPostMeshFaceData1 *meshFaceData = _oneFrameData->getMeshFaceDataByID(meshFaceID);
+			if (meshFaceData != nullptr)
+			{
+				QVector<int> nodeIDs = meshFaceData->getNodeIndex();
+				int meshID = meshFaceData->getMeshID1();
+				if (nodeIDs.size() < 3)
+				{
+					return;
+				}
+				mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+				mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+				mPostMeshNodeData1* nodeData3 = _oneFrameData->getNodeDataByID(nodeIDs.at(2));
+
+				QVector<QVector3D> vertexs = {
+					nodeData1->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(0)),
+					nodeData2->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(1)),
+					nodeData3->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(2)) };
+
+				lastDirection = QVector3D::crossProduct((vertexs.at(1) - vertexs.at(0)).normalized(), (vertexs.at(2) - vertexs.at(1)).normalized()).normalized();
+				if (!_oneFrameData->getMeshDataByID(meshID)->getMeshVisual())
+				{
+					lastDirection = -lastDirection;
+				}
+
+				queue.enqueue(meshFaceID);
+				queueDirection.enqueue(lastDirection);
+
+			}
+
+			while (!queue.isEmpty() && !queueDirection.isEmpty())
+			{
+				meshFaceID = queue.dequeue();
+				lastDirection = queueDirection.dequeue();
+				if (!judgeMeshFaceIDs.insert(meshFaceID).second)
+				{
+					continue;
+				}
+
+				mPostMeshFaceData1 *meshFaceData = _oneFrameData->getMeshFaceDataByID(meshFaceID);
+				if (meshFaceData != nullptr)
+				{
+					//获取单元面所在的单元
+					int meshID = meshFaceData->getMeshID1();
+					QVector<int> nodeIDs = meshFaceData->getNodeIndex(meshID);
+					if (nodeIDs.size() < 3)
+					{
+						continue;
+					}
+					if (partName != _oneFrameData->getMeshDataByID(meshID)->getPartName())
+					{
+						meshID = meshFaceData->getMeshID2();
+						if (meshID <= 0)
+						{
+							continue;
+						}
+					}
+
+					mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+					mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+					mPostMeshNodeData1* nodeData3 = _oneFrameData->getNodeDataByID(nodeIDs.at(2));
+
+					QVector<QVector3D> vertexs = {
+					nodeData1->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(0)),
+					nodeData2->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(1)),
+					nodeData3->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(2)) };
+
+					direction = QVector3D::crossProduct((vertexs.at(1) - vertexs.at(0)).normalized(), (vertexs.at(2) - vertexs.at(1)).normalized()).normalized();
+					if (!_oneFrameData->getMeshDataByID(meshID)->getMeshVisual())
+					{
+						direction = -direction;
+					}
+					float x = QVector3D::dotProduct(direction, lastDirection);
+
+					if (x > 1.0)
+					{
+						angleValue = 0;
+					}
+					else
+					{
+						angleValue = fabs(180 * acos(x) / 3.1415926);
+					}
+					if (_pickAngleValue > angleValue)
+					{
+
+						set<int> adjacentMeshIDs;
+						if (!isVertexCuttingByPlane(vertexs.at(0)) && pickNodeIDs.insert(nodeIDs.at(0)).second)
+						{
+							std::set<int> ids = nodeData1->getNodeInMeshIDs();
+							adjacentMeshIDs.insert(ids.begin(), ids.end());
+						}
+						if (!isVertexCuttingByPlane(vertexs.at(1)) && pickNodeIDs.insert(nodeIDs.at(1)).second)
+						{
+							std::set<int> ids = nodeData2->getNodeInMeshIDs();
+							adjacentMeshIDs.insert(ids.begin(), ids.end());
+						}
+						if (!isVertexCuttingByPlane(vertexs.at(2)) && pickNodeIDs.insert(nodeIDs.at(2)).second)
+						{
+							std::set<int> ids = nodeData3->getNodeInMeshIDs();
+							adjacentMeshIDs.insert(ids.begin(), ids.end());
+						}
+						if (nodeIDs.size() == 4)
+						{
+							mPostMeshNodeData1* nodeData4 = _oneFrameData->getNodeDataByID(nodeIDs.at(3));
+
+							if (!isVertexCuttingByPlane(nodeData4->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(3))) && pickNodeIDs.insert(nodeIDs.at(3)).second)
+							{
+								std::set<int> ids = nodeData4->getNodeInMeshIDs();
+								adjacentMeshIDs.insert(ids.begin(), ids.end());
+							}
+						}
+						adjacentMeshIDs.erase(meshID);
+						for (int mID : adjacentMeshIDs)
+						{
+							if (!judgeMeshIDs.insert(mID).second)
+							{
+								continue;
+							}
+							mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(mID);
+							if (meshData == nullptr || !meshData->getMeshVisual())
+							{
+								continue;
+							}
+							QVector<int> meshFaceIDs = meshData->getMeshFaces();
+							for (int meshFaceID : meshFaceIDs)
+							{
+								mPostMeshFaceData1 *meshFaceData = _oneFrameData->getMeshFaceDataByID(meshFaceID);
+								if (meshFaceData != nullptr && meshFaceData->getVisual())
+								{
+									QVector<int> nodeIDs1 = meshFaceData->getNodeIndex();
+									bool isIn{ false };
+									for (int i = 0; i < 3; i++)
+									{
+										if (nodeIDs1.contains(nodeIDs[i]))
+										{
+											queueDirection.enqueue(direction);
+											queue.enqueue(meshFaceID);
+											isIn = true;
+											break;
+										}
+									}
+									if (!isIn && nodeIDs.size() >= 4)
+									{
+										if (nodeIDs1.contains(nodeIDs[3]))
+										{
+											queueDirection.enqueue(direction);
+											queue.enqueue(meshFaceID);
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+
+			}
+
+
+			_postMeshPickData->setMultiplyPickNodeData(pickNodeIDs);
+
+
+		}
+		return;
+	}
+
+	void mPostMeshPickThread::SoloPick1DMeshByAngle()
+	{
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+
+		QPair<QString, int> partNameMeshID = _postMeshPickData->getSoloPickMeshDataByAngle();
+		mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partNameMeshID.first);
+		int meshID = partNameMeshID.second;
+		if (partData == nullptr || meshID == 0)
+		{
+			return;
+		}
+
+		//拾取到的单元ID
+		std::set<int> pickMeshIDs;
+		//判断过的单元ID
+		std::set<int> judgeMeshIDs;
+		//存储相邻单元ID的队列
+		QQueue<int> queue;
+		//存储相邻单元的方向的队列
+		QQueue<QVector3D> queueDirection;
+		//方向
+		QVector3D direction, lastDirection;
+		//角度值
+		float angleValue;
+
+		mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
+		if (meshData != nullptr)
+		{
+			if (meshData->getMeshType() == MeshBeam)
+			{
+				QVector<int> nodeIDs = meshData->getNodeIndex();
+				if (nodeIDs.size() < 2)
+				{
+					return;
+				}
+				mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+				mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+
+				QVector<QVector3D> vertexs = {
+					nodeData1->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(0)),
+					nodeData2->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(1)) };
+
+				lastDirection = (vertexs.at(1) - vertexs.at(0)).normalized();
+				queue.enqueue(meshID);
+				queueDirection.enqueue(lastDirection);
+			}
+		}
+
+		while (!queue.isEmpty() && !queueDirection.isEmpty())
+		{
+			meshID = queue.dequeue();
+			lastDirection = queueDirection.dequeue();
+			if (!judgeMeshIDs.insert(meshID).second)
+			{
+				continue;
+			}
+
+			mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
+			if (meshData != nullptr && meshData->getMeshVisual())
+			{
+				if (meshData->getMeshType() == MeshBeam)
+				{
+					QVector<int> nodeIDs = meshData->getNodeIndex();
+					if (nodeIDs.size() < 2)
+					{
+						continue;
+					}
+					mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+					mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+
+					QVector<QVector3D> vertexs = {
+					nodeData1->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(0)),
+					nodeData2->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(1)) };
+
+					direction = (vertexs.at(1) - vertexs.at(0)).normalized();
+
+					float x = QVector3D::dotProduct(direction, lastDirection);
+
+					if (x > 1.0)
+					{
+						angleValue = 0;
+					}
+					else
+					{
+						angleValue = fabs(180 * acos(QVector3D::dotProduct(direction, lastDirection)) / 3.1415926);
+					}
+					if (_pickAngleValue > angleValue || _pickAngleValue > (180 - angleValue))
+					{
+						if (isVertexCuttingByPlane(vertexs))
+						{
+							continue;
+						}
+						if (pickMeshIDs.insert(meshID).second)
+						{
+							set<int> adjacentMeshIDs;
+							set<int> id1 = nodeData1->getNodeInMeshIDs();
+							set<int> id2 = nodeData2->getNodeInMeshIDs();
+							adjacentMeshIDs.insert(id1.begin(), id1.end());
+							adjacentMeshIDs.insert(id2.begin(), id2.end());
+							for (int i : adjacentMeshIDs)
+							{
+								queueDirection.enqueue(direction);
+								queue.enqueue(i);
+							}
+						}
+					}
+				}
+			}
+
+		}
+
+
+		_postMeshPickData->setMultiplyPickMeshData(pickMeshIDs);
+
+		return;
+	}
+
+	void mPostMeshPickThread::SoloPickMeshLineByAngle()
+	{
+		QPair<QString, int> partNameMeshLineID = _postMeshPickData->getSoloPickMeshLineDataByAngle();
+		int meshLineID = partNameMeshLineID.second;
+		if (meshLineID == 0)
+		{
+			return;
+		}
+		//拾取到的节点ID
+		std::set<int> pickMeshLineIDs;
+		//判断过的单元线ID
+		std::set<int> judgeMeshLineIDs;
+		//存储相邻单元线ID的队列
+		QQueue<int> queue;
+		//存储相邻单元的方向的队列
+		QQueue<QVector3D> queueDirection;
+		//方向
+		QVector3D direction, lastDirection;
+		//角度值
+		float angleValue;
+
+		mPostMeshLineData1 *meshLineData = _oneFrameData->getMeshLineDataByID(meshLineID);
+		if (meshLineData != nullptr)
+		{
+			int nodeID1 = meshLineData->getMeshLineNodeIndex1();
+			int nodeID2 = meshLineData->getMeshLineNodeIndex2();
+			mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeID1);
+			mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeID2);
+
+			lastDirection = (nodeData2->getNodeVertex() - nodeData1->getNodeVertex()).normalized();
+			queue.enqueue(meshLineID);
+			queueDirection.enqueue(lastDirection);
+		}
+
+		while (!queue.isEmpty() && !queueDirection.isEmpty())
+		{
+			meshLineID = queue.dequeue();
+			lastDirection = queueDirection.dequeue();
+			if (!judgeMeshLineIDs.insert(meshLineID).second)
+			{
+				continue;
+			}
+
+			mPostMeshLineData1 *meshLineData = _oneFrameData->getMeshLineDataByID(meshLineID);
+			if (meshLineData != nullptr)
+			{
+				mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshLineData->getMeshID());
+				if (meshData == nullptr || !meshData->getMeshVisual())
+				{
+					continue;
+				}
+				int nodeID1 = meshLineData->getMeshLineNodeIndex1();
+				int nodeID2 = meshLineData->getMeshLineNodeIndex2();
+				mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeID1);
+				mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeID2);
+
+				direction = (nodeData2->getNodeVertex() - nodeData1->getNodeVertex()).normalized();
+
+				float x = QVector3D::dotProduct(direction, lastDirection);
+
+				if (x > 1.0)
+				{
+					angleValue = 0;
+				}
+				else
+				{
+					angleValue = fabs(180 * acos(QVector3D::dotProduct(direction, lastDirection)) / 3.1415926);
+				}
+				if (_pickAngleValue > angleValue || _pickAngleValue > (180 - angleValue))
+				{
+					if (pickMeshLineIDs.insert(meshLineID).second)
+					{
+						set<int> adjacentMeshLineIDs;
+						std::set<int> id1 = nodeData1->getNodeInMeshLineIDs();
+						std::set<int> id2 = nodeData2->getNodeInMeshLineIDs();
+						adjacentMeshLineIDs.insert(id1.begin(), id1.end());
+						adjacentMeshLineIDs.insert(id2.begin(), id2.end());
+						for (int i : adjacentMeshLineIDs)
+						{
+							queueDirection.enqueue(direction);
+							queue.enqueue(i);
+						}
+					}
+
+				}
+			}
+
+		}
+
+
+		//_postMeshPickData->setMultiplyPickMeshLineData(pickMeshLineIDs);
+
+		return;
+	}
+
+	void mPostMeshPickThread::SoloPick2DMeshByAngle()
+	{
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+
+		QPair<QString, int> partNameMeshID = _postMeshPickData->getSoloPickMeshDataByAngle();
+		mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partNameMeshID.first);
+		int meshID = partNameMeshID.second;
+		if (partData == nullptr || meshID == 0)
+		{
+			return;
+		}
+
+		//拾取到的单元ID
+		std::set<int> pickMeshIDs;
+		//判断过的单元ID
+		std::set<int> judgeMeshIDs;
+		//存储相邻单元ID的队列
+		QQueue<int> queue;
+		//存储相邻单元的方向的队列
+		QQueue<QVector3D> queueDirection;
+		//方向
+		QVector3D direction, lastDirection;
+		//角度值
+		float angleValue;
+
+		mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
+		if (meshData != nullptr)
+		{
+			if (meshData->getMeshType() == MeshQuad || meshData->getMeshType() == MeshTri)
+			{
+				QVector<int> nodeIDs = meshData->getNodeIndex();
+				if (nodeIDs.size() < 3)
+				{
+					return;
+				}
+				mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+				mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+				mPostMeshNodeData1* nodeData3 = _oneFrameData->getNodeDataByID(nodeIDs.at(2));
+
+				QVector<QVector3D> vertexs = {
+					nodeData1->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(0)),
+					nodeData2->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(1)),
+					nodeData3->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(2)) };
+
+				lastDirection = QVector3D::crossProduct((vertexs.at(1) - vertexs.at(0)).normalized(), (vertexs.at(2) - vertexs.at(1)).normalized()).normalized();
+				queue.enqueue(meshID);
+				queueDirection.enqueue(lastDirection);
+			}
+		}
+
+		while (!queue.isEmpty() && !queueDirection.isEmpty())
+		{
+			meshID = queue.dequeue();
+			lastDirection = queueDirection.dequeue();
+			if (!judgeMeshIDs.insert(meshID).second)
+			{
+				continue;
+			}
+
+			mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
+			if (meshData != nullptr && meshData->getMeshVisual())
+			{
+				if (meshData->getMeshType() == MeshTri)
+				{
+					QVector<int> nodeIDs = meshData->getNodeIndex();
+					if (nodeIDs.size() < 3)
+					{
+						continue;
+					}
+					mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+					mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+					mPostMeshNodeData1* nodeData3 = _oneFrameData->getNodeDataByID(nodeIDs.at(2));
+
+					QVector<QVector3D> vertexs = {
+					nodeData1->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(0)),
+					nodeData2->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(1)),
+					nodeData3->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(2)) };
+
+					direction = QVector3D::crossProduct((vertexs.at(1) - vertexs.at(0)).normalized(), (vertexs.at(2) - vertexs.at(1)).normalized()).normalized();
+
+					float x = QVector3D::dotProduct(direction, lastDirection);
+
+					if (x > 1.0)
+					{
+						angleValue = 0;
+					}
+					else
+					{
+						angleValue = fabs(180 * acos(x) / 3.1415926);
+					}
+					if (_pickAngleValue > angleValue)
+					{
+						if (isVertexCuttingByPlane(vertexs))
+						{
+							continue;
+						}
+						if (pickMeshIDs.insert(meshID).second)
+						{
+							set<int> adjacentMeshIDs;
+
+							set<int> id1 = nodeData1->getNodeInMeshIDs();
+							set<int> id2 = nodeData2->getNodeInMeshIDs();
+							set<int> id3 = nodeData3->getNodeInMeshIDs();
+
+							adjacentMeshIDs.insert(id1.begin(), id1.end());
+							adjacentMeshIDs.insert(id2.begin(), id2.end());
+							adjacentMeshIDs.insert(id3.begin(), id3.end());
+							for (int i : adjacentMeshIDs)
+							{
+								queueDirection.enqueue(direction);
+								queue.enqueue(i);
+							}
+						}
+					}
+				}
+				else if (meshData->getMeshType() == MeshQuad)
+				{
+					QVector<int> nodeIDs = meshData->getNodeIndex();
+					if (nodeIDs.size() < 4)
+					{
+						continue;
+					}
+					mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+					mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+					mPostMeshNodeData1* nodeData3 = _oneFrameData->getNodeDataByID(nodeIDs.at(2));
+					mPostMeshNodeData1* nodeData4 = _oneFrameData->getNodeDataByID(nodeIDs.at(3));
+
+					QVector<QVector3D> vertexs = {
+						nodeData1->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(0)),
+						nodeData2->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(1)),
+						nodeData3->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(2)),
+						nodeData4->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(3)) };
+
+					direction = QVector3D::crossProduct((vertexs.at(1) - vertexs.at(0)).normalized(), (vertexs.at(2) - vertexs.at(1)).normalized()).normalized();
+
+					float x = QVector3D::dotProduct(direction, lastDirection);
+					if (x > 1.0)
+					{
+						angleValue = 0;
+					}
+					else
+					{
+						angleValue = fabs(180 * acos(x) / 3.1415926);
+					}
+					if (_pickAngleValue > angleValue)
+					{
+						if (isVertexCuttingByPlane(vertexs))
+						{
+							continue;
+						}
+						if (pickMeshIDs.insert(meshID).second)
+						{
+							set<int> adjacentMeshIDs;
+
+							set<int> id1 = nodeData1->getNodeInMeshIDs();
+							set<int> id2 = nodeData2->getNodeInMeshIDs();
+							set<int> id3 = nodeData3->getNodeInMeshIDs();
+							set<int> id4 = nodeData4->getNodeInMeshIDs();
+
+							adjacentMeshIDs.insert(id1.begin(), id1.end());
+							adjacentMeshIDs.insert(id2.begin(), id2.end());
+							adjacentMeshIDs.insert(id3.begin(), id3.end());
+							adjacentMeshIDs.insert(id4.begin(), id4.end());
+
+
+							for (int i : adjacentMeshIDs)
+							{
+								queueDirection.enqueue(direction);
+								queue.enqueue(i);
+							}
+						}
+					}
+				}
+			}
+
+		}
+
+
+		_postMeshPickData->setMultiplyPickMeshData(pickMeshIDs);
+
+		return;
+	}
+
+	void mPostMeshPickThread::SoloPickMeshFaceByAngle()
+	{
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+
+		QPair<QString, int> partNameMeshID = _postMeshPickData->getSoloPickMeshFaceDataByAngle();
+		mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partNameMeshID.first);
+		int meshFaceID = partNameMeshID.second;
+		if (partData == nullptr || meshFaceID == 0)
+		{
+			return;
+		}
+
+		//拾取到的单元面ID
+		std::set<int> pickMeshFaceIDs;
+		//判断过的单元面ID
+		std::set<int> judgeMeshFaceIDs;
+		//判断过的单元ID
+		std::set<int> judgeMeshIDs;
+		//存储相邻单元面ID的队列
+		QQueue<int> queue;
+		//存储相邻单元的方向的队列
+		QQueue<QVector3D> queueDirection;
+		//方向
+		QVector3D direction, lastDirection;
+		//角度值
+		float angleValue;
+
+		mPostMeshFaceData1 *meshFaceData = _oneFrameData->getMeshFaceDataByID(meshFaceID);
+		if (meshFaceData != nullptr)
+		{
+			QVector<int> nodeIDs = meshFaceData->getNodeIndex();
+			int meshID = meshFaceData->getMeshID1();
+			if (nodeIDs.size() < 3)
+			{
+				return;
+			}
+			mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+			mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+			mPostMeshNodeData1* nodeData3 = _oneFrameData->getNodeDataByID(nodeIDs.at(2));
+			QVector<QVector3D> vertexs = {
+					nodeData1->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(0)),
+					nodeData2->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(1)),
+					nodeData3->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(2)) };
+
+			lastDirection = QVector3D::crossProduct((vertexs.at(1) - vertexs.at(0)).normalized(), (vertexs.at(2) - vertexs.at(1)).normalized()).normalized();
+			if (!_oneFrameData->getMeshDataByID(meshID)->getMeshVisual())
+			{
+				lastDirection = -lastDirection;
+			}
+
+			queue.enqueue(meshFaceID);
+			queueDirection.enqueue(lastDirection);
+
+		}
+
+		while (!queue.isEmpty() && !queueDirection.isEmpty())
+		{
+			meshFaceID = queue.dequeue();
+			lastDirection = queueDirection.dequeue();
+			if (!judgeMeshFaceIDs.insert(meshFaceID).second)
+			{
+				continue;
+			}
+
+			mPostMeshFaceData1 *meshFaceData = _oneFrameData->getMeshFaceDataByID(meshFaceID);
+			if (meshFaceData != nullptr)
+			{
+				//获取单元面所在的单元
+				int meshID = meshFaceData->getMeshID1();
+				if (partNameMeshID.first != _oneFrameData->getMeshDataByID(meshID)->getPartName())
+				{
+					meshID = meshFaceData->getMeshID2();
+					if (meshID <= 0)
+					{
+						continue;
+					}
+				}
+				QVector<int> nodeIDs = meshFaceData->getNodeIndex();
+				if (nodeIDs.size() < 3)
+				{
+					continue;
+				}
+				mPostMeshNodeData1* nodeData1 = _oneFrameData->getNodeDataByID(nodeIDs.at(0));
+				mPostMeshNodeData1* nodeData2 = _oneFrameData->getNodeDataByID(nodeIDs.at(1));
+				mPostMeshNodeData1* nodeData3 = _oneFrameData->getNodeDataByID(nodeIDs.at(2));
+
+				QVector<QVector3D> vertexs = {
+				nodeData1->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(0)),
+				nodeData2->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(1)),
+				nodeData3->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(2)) };
+
+				direction = QVector3D::crossProduct((vertexs.at(1) - vertexs.at(0)).normalized(), (vertexs.at(2) - vertexs.at(1)).normalized()).normalized();
+				if (!_oneFrameData->getMeshDataByID(meshID)->getMeshVisual())
+				{
+					direction = -direction;
+				}
+				float x = QVector3D::dotProduct(direction, lastDirection);
+
+				if (x > 1.0)
+				{
+					angleValue = 0;
+				}
+				else
+				{
+					angleValue = fabs(180 * acos(x) / 3.1415926);
+				}
+				if (_pickAngleValue > angleValue)
+				{
+					mPostMeshNodeData1* nodeData4;
+					if (nodeIDs.size() == 4)
+					{
+						nodeData4 = _oneFrameData->getNodeDataByID(nodeIDs.at(3));
+						vertexs.append(nodeData4->getNodeVertex() + deformationScale * dis.value(nodeIDs.at(3)));
+					}
+					if (isVertexCuttingByPlane(vertexs))
+					{
+						continue;
+					}
+					if (pickMeshFaceIDs.insert(meshFaceID).second)
+					{
+						set<int> adjacentMeshIDs;
+						set<int> id1 = nodeData1->getNodeInMeshIDs();
+						set<int> id2 = nodeData2->getNodeInMeshIDs();
+						set<int> id3 = nodeData3->getNodeInMeshIDs();
+
+						adjacentMeshIDs.insert(id1.begin(), id1.end());
+						adjacentMeshIDs.insert(id2.begin(), id2.end());
+						adjacentMeshIDs.insert(id3.begin(), id3.end());
+
+						if (nodeIDs.size() == 4)
+						{
+							//mPostMeshNodeData1* nodeData4 = _oneFrameData->getNodeDataByID(nodeIDs.at(3));
+							set<int> id4 = nodeData4->getNodeInMeshIDs();
+							adjacentMeshIDs.insert(id4.begin(), id4.end());
+
+						}
+						adjacentMeshIDs.erase(meshID);
+						for (int mID : adjacentMeshIDs)
+						{
+							if (!judgeMeshIDs.insert(mID).second)
+							{
+								continue;
+							}
+							mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(mID);
+							if (meshData == nullptr || !meshData->getMeshVisual())
+							{
+								continue;
+							}
+							QVector<int> meshFaceIDs = meshData->getMeshFaces();
+							for (int meshFaceID : meshFaceIDs)
+							{
+								mPostMeshFaceData1 *meshFaceData = _oneFrameData->getMeshFaceDataByID(meshFaceID);
+								if (meshFaceData != nullptr && meshFaceData->getVisual())
+								{
+									QVector<int> nodeIDs1 = meshFaceData->getNodeIndex();
+									bool isIn{ false };
+									for (int i = 0; i < 3; i++)
+									{
+										if (nodeIDs1.contains(nodeIDs[i]))
+										{
+											queueDirection.enqueue(direction);
+											queue.enqueue(meshFaceID);
+											isIn = true;
+											break;
+										}
+									}
+									if (!isIn && nodeIDs.size() >= 4)
+									{
+										if (nodeIDs1.contains(nodeIDs[3]))
+										{
+											queueDirection.enqueue(direction);
+											queue.enqueue(meshFaceID);
+										}
+									}
+								}
+							}
+
+						}
+					}
+				}
+
+			}
+
+		}
+
+
+		_postMeshPickData->setMultiplyPickMeshFaceData(pickMeshFaceIDs);
+
+		return;
 	}
 
 	bool mPostMeshPickThread::IsSoloPickMeshPart(MDataPost::mPostMeshPartData1 * meshPartData, float &depth)
@@ -2083,10 +2670,11 @@ namespace MDataPost
 			}
 
 			_postMeshPickData->setSoloPickData();
-			if (*_pickFilter == PickFilter::PickNodeByLineAngle || *_pickFilter == PickFilter::PickNodeByFaceAngle)
+			if (*_pickFilter == PickFilter::PickNodeByLineAngle || *_pickFilter == PickFilter::PickNodeByFaceAngle || *_pickFilter == PickFilter::Pick2DMeshByAngle || *_pickFilter == PickFilter::Pick1DMeshByAngle
+				|| *_pickFilter == PickFilter::PickMeshLineByAngle || *_pickFilter == PickFilter::PickMeshFaceByAngle)
 			{
 				//做后续的拾取
-
+				QtConcurrent::run(this, &mPostMeshPickThread::doAnglePick).waitForFinished();
 			}
 		}
 		else
@@ -2183,6 +2771,16 @@ namespace MDataPost
 		QVector4D res = _pvm * QVector4D(Worldvertex, 1.0);
 		depth = res.z();
 		return QVector2D(((res.x() / res.w()) / 2.0 + 0.5)*_Win_WIDTH, _Win_HEIGHT - (res.y() / res.w() / 2.0 + 0.5)*_Win_HEIGHT);
+	}
+
+	void mPostMeshPickThread::WorldvertexToScreenvertex(QVector<QVector3D> Worldvertexs, QVector<QVector2D> &Screenvertexs, set<float>& depths)
+	{
+		for (auto Worldvertex : Worldvertexs)
+		{
+			float depth;
+			Screenvertexs.append(WorldvertexToScreenvertex(Worldvertex, depth));
+			depths.insert(depth);
+		}
 	}
 
 	bool mPostMeshPickThread::isVertexCuttingByPlane(QVector3D vertex)

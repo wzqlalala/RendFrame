@@ -83,6 +83,11 @@ namespace MDataPost
 		void setMatrix(QMatrix4x4 pvm);
 
 		/*
+		* 设置通过角度拾取的角度
+		*/
+		void setPickAngleValue(double angle) { _pickAngleValue = angle; };
+
+		/*
 		 * 设置单选位置
 		 */
 		void setLocation(const QPoint & pos, float depth);
@@ -117,6 +122,7 @@ namespace MDataPost
 		void doQuadPick(QString partName, Space::SpaceTree* spaceTree);
 		void doRoundPick(QString partName, Space::SpaceTree* spaceTree);
 		void doPolygonPick(QString partName, Space::SpaceTree* spaceTree);
+		void doAnglePick();
 
 		/*
 		 * 单选
@@ -141,26 +147,37 @@ namespace MDataPost
 		void MultiplyPickAnyMesh(QString partName, Space::SpaceTree* spaceTree);
 		void MultiplyPickMeshFace(QString partName, Space::SpaceTree* spaceTree);
 
-		/*
-		 * 判断单选是否拾取到该部件,并且返回他的深度值
-		 */
+		
+		//通过角度拾取
+		void SoloPickNodeByLineAngle();		
+		void SoloPickNodeByFaceAngle();
+		void SoloPick1DMeshByAngle();
+		void SoloPickMeshLineByAngle();
+		void SoloPick2DMeshByAngle();
+		void SoloPickMeshFaceByAngle();
+
+		
+		//判断单选是否拾取到该部件,并且返回他的深度值
+		
 		bool IsSoloPickMeshPart(MDataPost::mPostMeshPartData1 *meshPartData, float &depth);
 
-		/*
-		 * 判断框选是否拾取到该部件
-		 */
+		
+		//判断框选是否拾取到该部件
 		bool isMultiplyPickMeshPart(MDataPost::mPostMeshPartData1 *meshPartData);
 
-		/*
-		 * 将世界坐标转化为屏幕坐标
-		 */
+		
+		//将世界坐标转化为屏幕坐标
 		QVector2D WorldvertexToScreenvertex(QVector3D Worldvertex);
 
 		QVector3D ScreenvertexToWorldvertex(QVector3D vertex);
+		
+		//将世界坐标转化为屏幕坐标并且返回他的深度值
+		QVector2D WorldvertexToScreenvertex(QVector3D Worldvertex, float &depth);
+
 		/*
 		 * 将世界坐标转化为屏幕坐标并且返回他的深度值
 		 */
-		QVector2D WorldvertexToScreenvertex(QVector3D Worldvertex, float &depth);
+		void WorldvertexToScreenvertex(QVector<QVector3D> Worldvertexs, QVector<QVector2D> &Screenvertexs, std::set<float> &depths);
 
 		/*
 		* 判断节点是否被平面裁剪,即不能拾取,true代表被裁减了，不能拾取；false代表没有被裁剪，可以拾取
@@ -201,6 +218,9 @@ namespace MDataPost
 
 		//拾取的单元类型过滤器
 		std::set<int> _pickElementTypeFilter;
+
+		//拾取角度
+		float _pickAngleValue = 60;
 
 		//窗口大小
 		int _Win_WIDTH, _Win_HEIGHT;

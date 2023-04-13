@@ -16,6 +16,7 @@
 #include "mPostMeshLineData1.h"
 #include "mPostMeshNodeData1.h"
 #include "mPostOneFrameRendData.h"
+#include "mPostMeshPickData.h"
 
 
 #include <QFileDialog>
@@ -342,6 +343,32 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 			_multuiplyPickMode = MultiplyPickMode(id);
 		}
 		_postRend->setMultiplyPickMode(_multuiplyPickMode);
+	}
+	else if (event->key() == Qt::Key_X)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		if (_pickfilterID == (_pickfilters.size() - 1))
+		{
+			_pickfilterID = 0;
+		}
+		else
+		{
+			_pickfilterID++;
+		}
+		_postRend->setPickFilter(_pickfilters.at(_pickfilterID));
+	}
+	else if (event->key() == Qt::Key_C)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+
+		_postRender->getMeshPickData()->clearAllPickData();
+		_postRender->updateHighLightRender();
 	}
 	else if (event->key() == Qt::Key_Asterisk)
 	{

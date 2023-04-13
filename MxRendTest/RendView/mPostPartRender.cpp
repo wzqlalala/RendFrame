@@ -1121,7 +1121,7 @@ namespace MPostRend
 		_spaceTree = new Space::SpaceTree(aabb);
 		//return;
 		Space::initSpaceTree(_spaceTree, 2);
-		meshDatas += _partData->getMeshDatas3();
+		meshDatas = _partData->getMeshDatas3();
 		for (auto item : meshDatas)
 		{
 			//mPostMeshData1 *mesh = _oneFrameData->getMeshDataByID(item);

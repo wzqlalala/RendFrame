@@ -71,6 +71,11 @@ namespace MPostRend
 
 		shared_ptr<mPostOneFrameRender> getOneFrameRender() { return  _oneFrameRender; };
 
+		mPostMeshPickData *getMeshPickData() { return _pickData; };
+
+		//更新高亮渲染
+		void updateHighLightRender();
+
 		//更新单个部件操作
 		void updateOneModelOperate(QPair<MBasicFunction::PostModelOperateEnum, std::set<QString>> postModelOperates);
 		//更新全部部件操作

@@ -363,6 +363,13 @@ namespace MPostRend
 		w.setFuture(future);
 
 	}
+
+	void mPostRender::updateHighLightRender()
+	{
+		this->makeCurrent();
+		if (_highLightRender)
+			_highLightRender->updateHighLightRender(_oneFrameRender->getOneFrameData(), _oneFrameRender->getOneFrameRendData());
+	}
 	void mPostRender::updateOneModelOperate(QPair<MBasicFunction::PostModelOperateEnum, std::set<QString>> postModelOperates)
 	{
 		this->makeCurrent();

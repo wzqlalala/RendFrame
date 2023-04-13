@@ -55,3 +55,4 @@ __pycache__/
 /MxRendTest/GLSL/.idea
 /MxRendTest/GLSL/.vs
 /MxRendTest/GLSL
+/MxRendTest/MxRendTest/*.dat

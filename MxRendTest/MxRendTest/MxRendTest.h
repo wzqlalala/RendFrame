@@ -75,5 +75,7 @@ private:
 
 	//ʰȡ
 	MultiplyPickMode _multuiplyPickMode = MultiplyPickMode::QuadPick;
+	QVector<PickFilter> _pickfilters{ PickFilter::PickNode, PickFilter::PickAnyMesh, PickFilter::PickMeshFace, PickFilter::Pick1DMesh, PickFilter::Pick2DMesh, PickFilter::PickNodeByLineAngle, PickFilter::PickNodeByFaceAngle, PickFilter::Pick1DMeshByAngle, PickFilter::Pick2DMeshByAngle, PickFilter::PickMeshFaceByAngle };
+	int _pickfilterID = 0;
 
 };

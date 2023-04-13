@@ -23,6 +23,7 @@ namespace MDataPost
 	class mPostMeshData1;
 	class mPostMeshLineData1;
 	class mPostMeshFaceData1;
+	class mPostOneFrameRendData;
 	class RENDDATA_EXPORT mOneFrameData1
 	{
 
@@ -173,7 +174,10 @@ namespace MDataPost
 		int getNumByElementType(MBasicFunction::ElementType elementType);
 
 		//获取网格的形心
-		QVector3D getMeshCenter(mPostMeshData1 *meshData);
+		QVector3D getMeshCenter(mPostMeshData1 *meshData, const QHash<int, QVector3D> &dis, QVector3D deformationScale);
+
+		//获取网格的节点（不包括高阶节点）
+		QVector<QVector3D> getMeshVertexs(mPostMeshData1 *meshData, const QHash<int, QVector3D> &dis, QVector3D deformationScale);
 
 		//删除网格
 		//void deleteMesh(set<int> meshIDs);
@@ -216,6 +220,9 @@ namespace MDataPost
 
 		//判断单元面是否渲染
 		void judgeMeshFaceIsShow(set<int> meshIDs);
+
+		//获取单元面的节点（不包括高阶节点）
+		QVector<QVector3D> getMeshFaceVertexs(mPostMeshFaceData1 *meshData, const QHash<int, QVector3D> &dis, QVector3D deformationScale);
 
 		/*
 		 * 单元线操作

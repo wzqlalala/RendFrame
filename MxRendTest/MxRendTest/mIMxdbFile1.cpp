@@ -3028,6 +3028,6 @@ namespace MIOFile
 		//输出信息
 		//mGlobalSignals::getInstance()->outputMessageSig(0, QString("边界线生成成功！"));
 
-		//QtConcurrent::run(fd, &mOneFrameData1::calculatePointCell);
+		QtConcurrent::run(fd, &mOneFrameData1::calculatePointCell);
 	}
 }
