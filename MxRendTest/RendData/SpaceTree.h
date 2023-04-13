@@ -24,8 +24,6 @@ namespace Space
 
 
 
-
-
 	struct RENDDATA_EXPORT AABB
 	{
 		QVector3D maxEdge;
@@ -196,9 +194,35 @@ namespace Space
 
 		static bool AABBInOtherobb(AABB b, OBB a)
 		{
+			
 			OBB _b;
 			_b.Set(QVector3D(1, 0, 0), QVector3D(0, 1, 0), QVector3D(0, 0, 1), (b.maxEdge + b.minEdge)*0.5, QVector3D(b.maxEdge - b.minEdge));
 			return obbInOtherobb(_b, a);
+			/*
+			QVector<QVector3D> obbAxes{ a._axisX, a._axisY,a._axisZ };
+			for (int i = 0; i < 3; ++i) {
+				// 计算当前轴在 OBB 上的投影区间
+				float obbMin = INFINITY, obbMax = -INFINITY;
+				for (int j = 0; j < 8; ++j) {
+					float projection = QVector3D::dotProduct(a._vertexs[j], obbAxes[i]);
+					if (projection < obbMin)
+						obbMin = projection;
+					if (projection > obbMax)
+						obbMax = projection;
+				}
+
+				// 计算当前轴在 AABB 上的投影区间
+				float aabbProjectionMin = QVector3D::dotProduct(b.minEdge, obbAxes[i]);
+				float aabbProjectionMax = QVector3D::dotProduct(b.maxEdge, obbAxes[i]);
+
+				// 检查投影区间是否重叠，如果不重叠则返回 false
+				if (aabbProjectionMax < obbMin || aabbProjectionMin > obbMax)
+					return false;
+			}
+
+			// 如果所有投影区间都重叠，则返回 true
+			return true;
+			*/
 		}
 	};
 

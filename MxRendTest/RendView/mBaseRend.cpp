@@ -37,6 +37,7 @@ namespace MBaseRend
 		mxr::ApplicationInstance::GetInstance().appendApplication(name, _app);
 	
 		_root = MakeAsset<mxr::Group>();
+		_afterroot = MakeAsset<mxr::Group>();
 
 		//QSurfaceFormat format;
 		//format.setMajorVersion(4);
@@ -66,9 +67,11 @@ namespace MBaseRend
 		mxr::Log::Init();
 		_viewer = MakeAsset<mxr::Viewer>();
 		_viewer->setSceneData(_root);
-		
 		_bgRend = MakeAsset<mBackGroundRender>(_app, _root);
-		_quadRender = MakeAsset<mQuadRender>(_app, _root, _cameraMode, _pickMode, _multiplyPickMode);
+
+		_afterviewer = MakeAsset<mxr::Viewer>();
+		_afterviewer->setSceneData(_afterroot);
+		_quadRender = MakeAsset<mQuadRender>(_app, _afterroot, _cameraMode, _pickMode, _multiplyPickMode);
 		
 		makeCurrent();
 		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
@@ -121,7 +124,7 @@ namespace MBaseRend
 			baseRender->updateUniform(_modelView, _commonView);
 		}
 		_quadRender->draw(_polygonVertexs, SCR_WIDTH, SCR_HEIGHT);
-
+		_afterviewer->noClearRun();
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, QOpenGLContext::currentContext()->defaultFramebufferObject());
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FBO->handle());
 		glBlitFramebuffer(0, 0, width(), height(), 0, 0, FBO->width(), FBO->height(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);	

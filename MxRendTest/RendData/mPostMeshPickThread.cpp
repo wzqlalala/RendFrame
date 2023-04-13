@@ -207,7 +207,33 @@ namespace MDataPost
 
 	void mPostMeshPickThread::doQuadPick(QString partName, Space::SpaceTree * spaceTree)
 	{
-		//判断该部件是否存在碰撞	
+		//判断该部件是否存在碰撞
+		//判断框选的矩形框和部件的包围盒是否相交（主要是将部件的包围盒投影到了屏幕空间下）	
+		QVector<QVector2D> ap;
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.minEdge.x(), spaceTree->space.minEdge.y(), spaceTree->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.minEdge.x(), spaceTree->space.minEdge.y(), spaceTree->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.minEdge.x(), spaceTree->space.maxEdge.y(), spaceTree->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.minEdge.x(), spaceTree->space.maxEdge.y(), spaceTree->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.maxEdge.x(), spaceTree->space.minEdge.y(), spaceTree->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.maxEdge.x(), spaceTree->space.minEdge.y(), spaceTree->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.maxEdge.x(), spaceTree->space.maxEdge.y(), spaceTree->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.maxEdge.x(), spaceTree->space.maxEdge.y(), spaceTree->space.minEdge.z())));
+		if (!mPickToolClass::IsLineIntersectionWithQuad(ap, multiQuad, MeshHex) && !mPickToolClass::IsPointInQuad(ap, _centerBox, _boxXY_2))
+		{
+			bool isIn = false;
+			for (int i = 0; i < 4; i++)
+			{
+				if (mPickToolClass::IsQuadPointInMesh(multiQuad.at(i).toPoint(), ap, MeshHex))
+				{
+					isIn = true;
+					break;
+				}
+			}
+			if (!isIn)
+			{
+				return;
+			}
+		}
 		switch (*_pickFilter)
 		{
 		case PickFilter::PickNothing: break;
@@ -227,7 +253,22 @@ namespace MDataPost
 
 	void mPostMeshPickThread::doRoundPick(QString partName, Space::SpaceTree * spaceTree)
 	{
-
+		//判断该部件是否存在碰撞	
+		switch (*_pickFilter)
+		{
+		case PickFilter::PickNothing: break;
+			//case PickAny:MultiplyPickAny(); break;
+			//case PickPoint:MultiplyPickPoint(); break;
+		case PickFilter::Pick1DMesh:MultiplyPick1DMesh(partName, spaceTree); break;
+		case PickFilter::Pick2DMesh:MultiplyPick2DMesh(partName, spaceTree); break;
+		case PickFilter::PickNode:MultiplyPickNode(partName, spaceTree); break;
+		case PickFilter::PickAnyMesh:MultiplyPickAnyMesh(partName, spaceTree); break;
+		case PickFilter::PickMeshFace:MultiplyPickMeshFace(partName, spaceTree); break;
+			//case PickMeshPart:MultiplyPickMeshPart(); break;
+			//case PickNodeByPart:MultiplyPickNodeByPart(); break;
+			//case PickAnyMeshByPart:MultiplyPickAnyMeshByPart(); break;
+		default:break;
+		}
 	}
 
 	void mPostMeshPickThread::doPolygonPick(QString partName, Space::SpaceTree * spaceTree)
@@ -1086,39 +1127,44 @@ namespace MDataPost
 				return;
 			}
 
-			QVector3D p1 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
-			QVector3D p2 = ScreenvertexToWorldvertex(QVector3D(_centerBox + _boxXY_2, 0.0));
-
-			QVector3D p3 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
-			QVector3D p4 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
-
-			QVector3D p5 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
-			QVector3D p6 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 1.0));
-
-
-			QVector3D cen = ScreenvertexToWorldvertex(QVector3D(_centerBox, 0.5));
-			QVector3D o_size = QVector3D(p2.distanceToPoint(p1), p4.distanceToPoint(p3), p6.distanceToPoint(p5));
-
-
-			Space::OBB obb;
-			obb.Set((p2 - p1).normalized(), (p3 - p4).normalized(), (p5 - p6).normalized(), cen, o_size);
-
 			QVector<mPostMeshData1*> meshDataAll;
 			QVector<mPostMeshData1*> meshDataContain;
-			Space::getOBBToMeshData(spaceTree, obb, meshDataAll, meshDataContain);
+			getAABBAndQuadToMeshData(spaceTree, meshDataAll, meshDataContain);
+
+			//QVector3D p1 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
+			//QVector3D p2 = ScreenvertexToWorldvertex(QVector3D(_centerBox + _boxXY_2, 0.0));
+
+			//QVector3D p3 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
+			//QVector3D p4 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
+
+			//QVector3D p5 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
+			//QVector3D p6 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 1.0));
+
+
+			//QVector3D cen = ScreenvertexToWorldvertex(QVector3D(_centerBox, 0.5));
+			//QVector3D o_size = QVector3D(p2.distanceToPoint(p1), p4.distanceToPoint(p3), p6.distanceToPoint(p5));
+
+
+			//Space::OBB obb;
+			//obb.Set((p2 - p1).normalized(), (p3 - p4).normalized(), (p5 - p6).normalized(), cen, o_size);
+
+			//QVector<mPostMeshData1*> meshDataAll;
+			//QVector<mPostMeshData1*> meshDataContain;
+			//Space::getOBBToMeshData(spaceTree, obb, meshDataAll, meshDataContain);
 
 			meshDataAll += meshDataContain;
-			//for (int i = 0; i < meshDataContain.size(); i++)
-			//{
-			//	if (meshDataContain[i]->getMeshVisual())
-			//	{
-			//		QVector<int> nodeIndex = meshDataContain[i]->getNodeIndex();
-			//		for (int j = 0; j < nodeIndex.size(); ++j)
-			//		{
-			//			pickNodeDatas.insert(nodeIndex[j]);
-			//		}
-			//	}
-			//}
+			/*
+			for (int i = 0; i < meshDataContain.size(); i++)
+			{
+				if (meshDataContain[i]->getMeshVisual())
+				{
+					QVector<int> nodeIndex = meshDataContain[i]->getNodeIndex();
+					for (int j = 0; j < nodeIndex.size(); ++j)
+					{
+						pickNodeDatas.insert(nodeIndex[j]);
+					}
+				}
+			}
 
 			//测试裁剪
 			if (_postCuttingNormalVertex.size() != 0)
@@ -1137,7 +1183,7 @@ namespace MDataPost
 					pickNodeDatas.erase(nodeID);
 				}
 			}
-
+			*/
 			//三维网格的节点
 			QVector<mPostMeshData1*> meshDatas = partData->getMeshDatas0() + partData->getMeshDatas1() + partData->getMeshDatas2() + meshDataAll;
 			for (mPostMeshData1 *meshData : meshDatas)
@@ -1295,28 +1341,32 @@ namespace MDataPost
 				//continue;
 			}
 
-			QVector3D p1 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
-			QVector3D p2 = ScreenvertexToWorldvertex(QVector3D(_centerBox + _boxXY_2, 0.0));
+			//QVector3D p1 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
+			//QVector3D p2 = ScreenvertexToWorldvertex(QVector3D(_centerBox + _boxXY_2, 0.0));
 
-			QVector3D p3 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
-			QVector3D p4 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
+			//QVector3D p3 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
+			//QVector3D p4 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
 
-			QVector3D p5 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
-			QVector3D p6 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 1.0));
-
-
-			QVector3D cen = ScreenvertexToWorldvertex(QVector3D(_centerBox, 0.5));
-			QVector3D o_size = QVector3D(p2.distanceToPoint(p1), p4.distanceToPoint(p3), p6.distanceToPoint(p5));
+			//QVector3D p5 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
+			//QVector3D p6 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 1.0));
 
 
-			Space::OBB obb;
-			obb.Set((p2 - p1).normalized(), (p3 - p4).normalized(), (p5 - p6).normalized(), cen, o_size);
+			//QVector3D cen = ScreenvertexToWorldvertex(QVector3D(_centerBox, 0.5));
+			//QVector3D o_size = QVector3D(p2.distanceToPoint(p1), p4.distanceToPoint(p3), p6.distanceToPoint(p5));
+
+
+			//Space::OBB obb;
+			//obb.Set((p2 - p1).normalized(), (p3 - p4).normalized(), (p5 - p6).normalized(), cen, o_size);
 
 
 			//Space::SpaceTree* spaceTree /*= partData->spaceTree*/;
+			//QVector<mPostMeshData1*> meshDataAll;
+			//QVector<mPostMeshData1*> meshDataContain;
+			//Space::getOBBToMeshData(spaceTree, obb, meshDataAll, meshDataContain);
+
 			QVector<mPostMeshData1*> meshDataAll;
 			QVector<mPostMeshData1*> meshDataContain;
-			Space::getOBBToMeshData(spaceTree, obb, meshDataAll, meshDataContain);
+			getAABBAndQuadToMeshData(spaceTree, meshDataAll, meshDataContain);
 
 			//测试裁剪
 			if (_postCuttingNormalVertex.size() != 0)
@@ -2639,6 +2689,61 @@ namespace MDataPost
 		_postMeshPickData->setMultiplyPickMeshFaceData(pickMeshFaceIDs);
 
 		return;
+	}
+
+	void mPostMeshPickThread::getAABBAndQuadToMeshData(Space::SpaceTree * root, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain)
+	{
+		if (root == nullptr)
+		{
+			return;
+		}
+		QVector<QVector2D> ap;
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.minEdge.x(), root->space.minEdge.y(), root->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.minEdge.x(), root->space.minEdge.y(), root->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.minEdge.x(), root->space.maxEdge.y(), root->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.minEdge.x(), root->space.maxEdge.y(), root->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.maxEdge.x(), root->space.minEdge.y(), root->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.maxEdge.x(), root->space.minEdge.y(), root->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.maxEdge.x(), root->space.maxEdge.y(), root->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.maxEdge.x(), root->space.maxEdge.y(), root->space.minEdge.z())));
+		if (isIntersectionAABBAndQuad(ap))//相交
+		{
+			if (root->depth != 0)
+			{
+				getAABBAndQuadToMeshData(root->topFrontLeft, meshAll, meshContain);
+				getAABBAndQuadToMeshData(root->topFrontRight, meshAll, meshContain);
+				getAABBAndQuadToMeshData(root->topBackLeft, meshAll, meshContain);
+				getAABBAndQuadToMeshData(root->topBackRight, meshAll, meshContain);
+				getAABBAndQuadToMeshData(root->bottomFrontLeft, meshAll, meshContain);
+				getAABBAndQuadToMeshData(root->bottomFrontRight, meshAll, meshContain);
+				getAABBAndQuadToMeshData(root->bottomBackLeft, meshAll, meshContain);
+				getAABBAndQuadToMeshData(root->bottomBackRight, meshAll, meshContain);
+			}
+			else if (mPickToolClass::IsAllPointInQuad(ap, _centerBox, _boxXY_2))//包含
+			{
+				meshContain.append(root->meshs);
+			}
+			else
+			{
+				meshAll.append(root->meshs);
+			}
+		}
+	}
+
+	bool mPostMeshPickThread::isIntersectionAABBAndQuad(QVector<QVector2D> ap)
+	{
+		if (!mPickToolClass::IsLineIntersectionWithQuad(ap, multiQuad, MeshHex) && !mPickToolClass::IsPointInQuad(ap, _centerBox, _boxXY_2))
+		{
+			for (int i = 0; i < multiQuad.size(); i++)
+			{
+				if (mPickToolClass::IsQuadPointInMesh(multiQuad.at(i).toPoint(), ap, MeshHex))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
 	}
 
 	bool mPostMeshPickThread::IsSoloPickMeshPart(MDataPost::mPostMeshPartData1 * meshPartData, float &depth)

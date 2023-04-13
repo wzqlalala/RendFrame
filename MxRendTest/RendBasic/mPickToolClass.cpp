@@ -253,6 +253,30 @@ namespace MViewBasic
 		return false;
 	}
 
+	bool mPickToolClass::IsPointInQuad(QVector<QVector2D> Line1, QVector2D boxCenter, QVector2D boxXY_2)
+	{
+		for (int i = 0; i < Line1.size(); ++i)
+		{
+			if (qAbs(Line1.at(i).x() - boxCenter.x()) < boxXY_2.x() && qAbs(Line1.at(i).y() - boxCenter.y()) < boxXY_2.y())
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool mPickToolClass::IsAllPointInQuad(QVector<QVector2D> Line1, QVector2D boxCenter, QVector2D boxXY_2)
+	{
+		for (int i = 0; i < Line1.size(); ++i)
+		{
+			if (qAbs(Line1.at(i).x() - boxCenter.x()) > boxXY_2.x() || qAbs(Line1.at(i).y() - boxCenter.y()) > boxXY_2.y())
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	bool mPickToolClass::IsLineIntersectionWithCircle(QVector<QVector2D> Line1, QVector2D circleCenter, double radius)
 	{
 		bool isintersection{ false };

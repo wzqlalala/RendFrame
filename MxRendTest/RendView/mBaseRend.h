@@ -146,8 +146,10 @@ namespace MBaseRend
 		std::shared_ptr<mxr::Application> _app;
 
 		std::shared_ptr<mxr::Group> _root;
-
 		std::shared_ptr<mxr::Viewer> _viewer;
+
+		std::shared_ptr<mxr::Group> _afterroot;
+		std::shared_ptr<mxr::Viewer> _afterviewer;
 
 		std::shared_ptr< mBackGroundRender> _bgRend;
 

@@ -139,13 +139,22 @@ namespace MDataPost
 		void SoloPickMeshFaceByAngle(QString partName);
 
 		/*
-		* 框选
+		* 矩形框选
 		*/
 		void MultiplyPickNode(QString partName, Space::SpaceTree* spaceTree);
 		void MultiplyPick1DMesh(QString partName, Space::SpaceTree* spaceTree);
 		void MultiplyPick2DMesh(QString partName, Space::SpaceTree* spaceTree);
 		void MultiplyPickAnyMesh(QString partName, Space::SpaceTree* spaceTree);
 		void MultiplyPickMeshFace(QString partName, Space::SpaceTree* spaceTree);
+
+		/*
+		* 圆形框选
+		*/
+		void RoundPickNode(QString partName, Space::SpaceTree* spaceTree);
+		void RoundPick1DMesh(QString partName, Space::SpaceTree* spaceTree);
+		void RoundPick2DMesh(QString partName, Space::SpaceTree* spaceTree);
+		void RoundPickAnyMesh(QString partName, Space::SpaceTree* spaceTree);
+		void RoundPickMeshFace(QString partName, Space::SpaceTree* spaceTree);
 
 		
 		//通过角度拾取
@@ -155,6 +164,11 @@ namespace MDataPost
 		void SoloPickMeshLineByAngle();
 		void SoloPick2DMeshByAngle();
 		void SoloPickMeshFaceByAngle();
+
+		//判断一个包围盒和一个多边形框组成的是否相交
+		void getAABBAndQuadToMeshData(Space::SpaceTree *root, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain);
+		//判断是否相交
+		bool isIntersectionAABBAndQuad(QVector<QVector2D> ap);
 
 		
 		//判断单选是否拾取到该部件,并且返回他的深度值

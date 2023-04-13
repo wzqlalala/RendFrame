@@ -16,7 +16,7 @@ namespace MBaseRend
 		_stateSet = MakeAsset<StateSet>();
 		shared_ptr<Shader> shader = mShaderManage::GetInstance()->GetShader("ScreenQuad");
 		_stateSet->setShader(shader);
-		_stateSet->setAttributeAndModes(MakeAsset<Depth>(), 1);
+		_stateSet->setAttributeAndModes(MakeAsset<Depth>(), 0);
 		_stateSet->setAttributeAndModes(MakeAsset<PolygonMode>(mxr::PolygonMode::FRONT_AND_BACK, mxr::PolygonMode::LINE), 1);
 		_stateSet->setUniform(MakeAsset<Uniform>("width", 0));
 		_stateSet->setUniform(MakeAsset<Uniform>("height", 0));

@@ -33,6 +33,8 @@ namespace MViewBasic
 		 * 判断点是否在拾取矩形框内部
 		 */
 		static bool IsPointInQuad(QVector2D point, QVector2D boxCenter, QVector2D boxXY_2);
+		static bool IsPointInQuad(QVector<QVector2D> Line1, QVector2D boxCenter, QVector2D boxXY_2);//部分在内部即可
+		static bool IsAllPointInQuad(QVector<QVector2D> Line1, QVector2D boxCenter, QVector2D boxXY_2);//全部在内部
 
 		/*
 		* 判断多边形是否和圆形选择框相交
