@@ -341,14 +341,7 @@ namespace MPostRend
 		}
 		else
 		{
-			if (*_baseRend->getMultiplyPickMode() == MultiplyPickMode::RoundPick)
-			{
-				
-			}
-			else
-			{
-				_thread->setLocation(poses);
-			}
+			_thread->setLocation(poses, (_baseRend->getCamera()->_Center - _baseRend->getCamera()->_Eye).normalized());
 		}
 		QFuture<void> future; 
 		future = QtConcurrent::run(_thread, &mPostMeshPickThread::startPick);

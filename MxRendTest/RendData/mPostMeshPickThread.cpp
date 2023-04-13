@@ -94,16 +94,7 @@ namespace MDataPost
 		//_pickSoloOrMutiply = MViewBasic::SoloPick;
 	}
 
-	void mPostMeshPickThread::setLocation(QVector3D centerPoint, QVector3D centerDirection, double radius, QVector2D centerScreenPoint, double screenRadius)
-	{
-		_centerPoint = centerPoint;
-		_centerDirection = centerDirection;
-		_radius = radius;
-		_centerScreenPoint = centerScreenPoint;
-		_screenRadius = screenRadius;
-	}
-
-	void mPostMeshPickThread::setLocation(QVector<QVector2D> pickQuad)
+	void mPostMeshPickThread::setLocation(QVector<QVector2D> pickQuad, QVector3D direction)
 	{
 		if (pickQuad.size() < 1)
 		{
@@ -117,6 +108,15 @@ namespace MDataPost
 		//_boxW = boxW;
 		//_boxY = boxY;
 		multiQuad = pickQuad;
+		if (_multiplyPickMode == MultiplyPickMode::RoundPick)
+		{
+			_centerScreenPoint = _centerBox;
+			QVector3D centerPoint = (_pvm.inverted() * QVector4D(2 * pickQuad.last().x() / _Win_WIDTH - 1, 1 - 2 * pickQuad.last().y() / _Win_HEIGHT, 0.0, 1.0)).toVector3D();//算出圆心射线坐标
+			_centerPoint = (_pvm.inverted() * QVector4D(2 * _centerScreenPoint.x() / _Win_WIDTH - 1, 1 - 2 * _centerScreenPoint.y() / _Win_HEIGHT, 0.0, 1.0)).toVector3D();//算出圆上一点的坐标
+			_radius = _centerPoint.distanceToPoint(centerPoint);
+			_screenRadius = _centerBox.distanceToPoint(pickQuad.first());
+			_centerDirection = direction;
+		}
 		//_pickSoloOrMutiply = MViewBasic::MultiplyPick;
 	}
 
@@ -259,11 +259,11 @@ namespace MDataPost
 		case PickFilter::PickNothing: break;
 			//case PickAny:MultiplyPickAny(); break;
 			//case PickPoint:MultiplyPickPoint(); break;
-		case PickFilter::Pick1DMesh:MultiplyPick1DMesh(partName, spaceTree); break;
-		case PickFilter::Pick2DMesh:MultiplyPick2DMesh(partName, spaceTree); break;
-		case PickFilter::PickNode:MultiplyPickNode(partName, spaceTree); break;
-		case PickFilter::PickAnyMesh:MultiplyPickAnyMesh(partName, spaceTree); break;
-		case PickFilter::PickMeshFace:MultiplyPickMeshFace(partName, spaceTree); break;
+		case PickFilter::Pick1DMesh:RoundPick1DMesh(partName, spaceTree); break;
+		case PickFilter::Pick2DMesh:RoundPick2DMesh(partName, spaceTree); break;
+		case PickFilter::PickNode:RoundPickNode(partName, spaceTree); break;
+		case PickFilter::PickAnyMesh:RoundPickAnyMesh(partName, spaceTree); break;
+		case PickFilter::PickMeshFace:RoundPickMeshFace(partName, spaceTree); break;
 			//case PickMeshPart:MultiplyPickMeshPart(); break;
 			//case PickNodeByPart:MultiplyPickNodeByPart(); break;
 			//case PickAnyMeshByPart:MultiplyPickAnyMeshByPart(); break;
@@ -1236,10 +1236,9 @@ namespace MDataPost
 			}
 
 			//一维网格
-			set<int> meshIDs = partData->getMeshIDs1();
-			for (int meshID : meshIDs)
+			QVector<mPostMeshData1*> meshDatas = partData->getMeshDatas1();
+			for (auto meshData : meshDatas)
 			{
-				mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
 				if (meshData == nullptr)
 				{
 					continue;
@@ -1262,7 +1261,7 @@ namespace MDataPost
 					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
 					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerBox.x(), _centerBox.y(), _boxXY_2.x(), _boxXY_2.y()))
 					{
-						pickMeshDatas.insert(meshID);
+						pickMeshDatas.insert(meshData->getMeshID());
 					}
 				}
 			}
@@ -1290,10 +1289,9 @@ namespace MDataPost
 				return;
 			}
 
-			set<int> meshIDs = partData->getMeshIDs2();
-			for (int meshID : meshIDs)
+			QVector<mPostMeshData1*> meshDatas = partData->getMeshDatas2();
+			for (auto meshData : meshDatas)
 			{
-				mPostMeshData1 *meshData = _oneFrameData->getMeshDataByID(meshID);
 				if (meshData == nullptr)
 				{
 					continue;
@@ -1314,7 +1312,7 @@ namespace MDataPost
 				QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
 				if (mPickToolClass::IsPointInQuad(center, _centerBox, _boxXY_2))
 				{
-					pickMeshDatas.insert(meshID);
+					pickMeshDatas.insert(meshData->getMeshID());
 				}
 			}
 		}
@@ -1375,12 +1373,7 @@ namespace MDataPost
 				{
 					if (meshData != nullptr && meshData->getMeshVisual())
 					{
-						QVector<int> index = meshData->getNodeIndex();
-						QVector<QVector3D> vertexs;
-						for (int nodeID : index)
-						{
-							vertexs.append(_oneFrameData->getNodeDataByID(nodeID)->getNodeVertex() + deformationScale * dis.value(nodeID));
-						}
+						QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
 						if (!isVertexCuttingByPlane(vertexs))
 						{
 							pickMeshDatas.insert(meshData->getMeshID());
@@ -1400,29 +1393,9 @@ namespace MDataPost
 			}
 
 			//三维网格
-			//set<int> meshIDs = partData->getMeshIDs3();
-			for (mPostMeshData1 *meshData : meshDataAll)
-			{
-				int meshID = meshData->getMeshID();
-				if (meshData == nullptr)
-				{
-					continue;
-				}
-				if (!meshData->getMeshVisual())
-				{
-					continue;
-				}				
-				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);		
-				QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
-				if (mPickToolClass::IsPointInQuad(center, _centerBox, _boxXY_2))
-				{
-					pickMeshDatas.insert(meshID);
-				}
-			}
-
 			//二维网格和0维网格
-			QVector<mPostMeshData1*> meshDatas = partData->getMeshDatas2() + partData->getMeshDatas0();
-			for (auto meshData : meshDatas)
+			meshDataAll += partData->getMeshDatas2() + partData->getMeshDatas0();
+			for (auto meshData : meshDataAll)
 			{			
 				if (meshData == nullptr)
 				{
@@ -1433,6 +1406,10 @@ namespace MDataPost
 					continue;
 				}
 				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+				if (isVertexCuttingByPlane(vertexs))
+				{
+					continue;
+				}
 				QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
 				if (mPickToolClass::IsPointInQuad(center, _centerBox, _boxXY_2))
 				{
@@ -1441,8 +1418,8 @@ namespace MDataPost
 			}
 
 			//一维网格
-			meshDatas = partData->getMeshDatas1();
-			for (auto meshData : meshDatas)
+			meshDataAll = partData->getMeshDatas1();
+			for (auto meshData : meshDataAll)
 			{
 				if (meshData == nullptr)
 				{
@@ -1506,6 +1483,10 @@ namespace MDataPost
 				if (meshFaceData->getVisual())//判断这个单元面是不是外表面
 				{
 					QVector<QVector3D> vertexs = _oneFrameData->getMeshFaceVertexs(meshFaceData, dis, deformationScale);
+					if (isVertexCuttingByPlane(vertexs))
+					{
+						continue;
+					}
 					QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
 					if (mPickToolClass::IsPointInQuad(center, _centerBox, _boxXY_2))
 					{
@@ -1522,6 +1503,319 @@ namespace MDataPost
 		_postMeshPickData->setMultiplyPickMeshFaceData(pickMeshFaceDatas);
 		postPickMutex.unlock();
 
+	}
+
+	void mPostMeshPickThread::RoundPickNode(QString partName, Space::SpaceTree * spaceTree)
+	{
+		std::set<int> pickNodeDatas;
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+		//for (QString _partName : _partNames)
+		{
+			mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partName);
+			if (partData == nullptr || !partData->getPartVisual())
+			{
+				return;
+			}
+
+			QVector<mPostMeshData1*> meshDataAll;
+			QVector<mPostMeshData1*> meshDataContain;
+			getAABBAndRoundToMeshData(spaceTree, meshDataAll, meshDataContain);
+
+			meshDataAll += meshDataContain;
+			//三维网格的节点
+			meshDataAll += partData->getMeshDatas0() + partData->getMeshDatas1() + partData->getMeshDatas2();
+			for (mPostMeshData1 *meshData : meshDataAll)
+			{
+				if (meshData == nullptr)
+				{
+					continue;
+				}
+				if (!meshData->getMeshVisual())
+				{
+					continue;
+				}
+				QVector<int> index = meshData->getNodeIndex();
+				for (int j = 0; j < index.size(); ++j)
+				{
+					QVector3D vertex0 = _oneFrameData->getNodeDataByID(index.at(j))->getNodeVertex() + deformationScale * dis.value(index.at(j));
+					if (isVertexCuttingByPlane(vertex0))
+					{
+						continue;
+					}
+					if (mPickToolClass::IsPointInRound(vertex0, _centerPoint, _centerDirection, _radius))
+					{
+						pickNodeDatas.insert(index.at(j));
+					}
+				}
+			}
+		}
+		if (pickNodeDatas.size() == 0)
+		{
+			return;
+		}
+		postPickMutex.lock();
+		_postMeshPickData->setMultiplyPickNodeData(pickNodeDatas);
+		postPickMutex.unlock();
+	}
+
+	void mPostMeshPickThread::RoundPick1DMesh(QString partName, Space::SpaceTree * spaceTree)
+	{
+		std::set<int> pickMeshDatas;
+
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+		//for (QString _partName : _partNames)
+		{
+			mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partName);
+			if (partData == nullptr || !partData->getPartVisual())
+			{
+				return;
+			}
+
+			//一维网格
+			QVector<mPostMeshData1*> meshDatas = partData->getMeshDatas1();
+			for (auto meshData : meshDatas)
+			{
+				if (meshData == nullptr)
+				{
+					continue;
+				}
+				if (!meshData->getMeshVisual())
+				{
+					continue;
+				}
+				QVector<int> index = meshData->getNodeIndex();
+				if ((meshData->getMeshType() == MeshBeam) && (_pickElementTypeFilter.find(meshData->getElementType()) != _pickElementTypeFilter.end()))
+				{
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+					if (isVertexCuttingByPlane(vertexs))
+					{
+						continue;
+					}
+
+					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
+					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
+					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
+					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerBox.x(), _centerBox.y(), _boxXY_2.x(), _boxXY_2.y()))
+					{
+						pickMeshDatas.insert(meshData->getMeshID());
+					}
+				}
+			}
+		}
+		if (pickMeshDatas.size() == 0)
+		{
+			return;
+		}
+		postPickMutex.lock();
+		_postMeshPickData->setMultiplyPickMeshData(pickMeshDatas);
+		postPickMutex.unlock();
+	}
+
+	void mPostMeshPickThread::RoundPick2DMesh(QString partName, Space::SpaceTree * spaceTree)
+	{
+		std::set<int> pickMeshDatas;
+
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+		//for (QString _partName : _partNames)
+		{
+			mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partName);
+			if (partData == nullptr || !partData->getPartVisual())
+			{
+				return;
+			}
+
+			QVector<mPostMeshData1*> meshDatas = partData->getMeshDatas1();
+			for (auto meshData : meshDatas)
+			{
+				if (meshData == nullptr)
+				{
+					continue;
+				}
+				if (!meshData->getMeshVisual())
+				{
+					continue;
+				}
+				//if (_pickElementTypeFilter.find(meshData->getElementType()) == _pickElementTypeFilter.end())
+				//{
+				//	continue;
+				//}
+				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+				if (isVertexCuttingByPlane(vertexs))
+				{
+					continue;
+				}
+				QVector3D center = getCenter(vertexs);
+				if (mPickToolClass::IsPointInRound(center, _centerPoint, _centerDirection, _radius))
+				{
+					pickMeshDatas.insert(meshData->getMeshID());
+				}
+			}
+		}
+		if (pickMeshDatas.size() == 0)
+		{
+			return;
+		}
+		postPickMutex.lock();
+		_postMeshPickData->setMultiplyPickMeshData(pickMeshDatas);
+		postPickMutex.unlock();
+	}
+
+	void mPostMeshPickThread::RoundPickAnyMesh(QString partName, Space::SpaceTree * spaceTree)
+	{
+		std::set<int> pickMeshDatas;
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+		//for (QString _partName : _partNames)
+		{
+			mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partName);
+			if (partData == nullptr || !partData->getPartVisual())
+			{
+				return;
+			}
+
+			QVector<mPostMeshData1*> meshDataAll;
+			QVector<mPostMeshData1*> meshDataContain;
+			getAABBAndRoundToMeshData(spaceTree, meshDataAll, meshDataContain);
+
+			//测试裁剪
+			if (_postCuttingNormalVertex.size() != 0)
+			{
+				for (mPostMeshData1 *meshData : meshDataContain)
+				{
+					if (meshData != nullptr && meshData->getMeshVisual())
+					{
+						QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+						if (!isVertexCuttingByPlane(vertexs))
+						{
+							pickMeshDatas.insert(meshData->getMeshID());
+						}
+					}
+				}
+			}
+			else
+			{
+				for (int i = 0; i < meshDataContain.size(); i++)
+				{
+					if (meshDataContain[i]->getMeshVisual())
+					{
+						pickMeshDatas.insert(meshDataContain[i]->getMeshID());
+					}
+				}
+			}
+
+			//三维网格
+			//二维网格和0维网格
+			meshDataAll += partData->getMeshDatas2() + partData->getMeshDatas0();
+			for (auto meshData : meshDataAll)
+			{
+				if (meshData == nullptr)
+				{
+					continue;
+				}
+				if (!meshData->getMeshVisual())
+				{
+					continue;
+				}
+				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+				if (isVertexCuttingByPlane(vertexs))
+				{
+					continue;
+				}
+				QVector3D center = getCenter(vertexs);
+				if (mPickToolClass::IsPointInRound(center, _centerPoint, _centerDirection, _radius))
+				{
+					pickMeshDatas.insert(meshData->getMeshID());
+				}
+			}
+
+			//一维网格
+			meshDataAll = partData->getMeshDatas1();
+			for (auto meshData : meshDataAll)
+			{
+				if (meshData == nullptr)
+				{
+					continue;
+				}
+				if (!meshData->getMeshVisual())
+				{
+					continue;
+				}
+				QVector<int> index = meshData->getNodeIndex();
+				if (meshData->getMeshType() == MeshBeam)
+				{
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+
+					if (isVertexCuttingByPlane(vertexs))
+					{
+						continue;
+					}
+
+					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
+					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
+					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
+					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerBox.x(), _centerBox.y(), _boxXY_2.x(), _boxXY_2.y()))
+					{
+						pickMeshDatas.insert(meshData->getMeshID());
+					}
+				}
+			}
+		}
+
+		if (pickMeshDatas.size() == 0)
+		{
+			return;
+		}
+		postPickMutex.lock();
+		_postMeshPickData->setMultiplyPickMeshData(pickMeshDatas);
+		postPickMutex.unlock();
+	}
+
+	void mPostMeshPickThread::RoundPickMeshFace(QString partName, Space::SpaceTree * spaceTree)
+	{
+		std::set<int> pickMeshFaceDatas;
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+		//for (QString _partName : _partNames)
+		{
+			mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partName);
+			if (partData == nullptr || !partData->getPartVisual())
+			{
+				return;
+			}
+
+			//获取所有的网格面ID
+			QVector<mPostMeshFaceData1*> meshFaceIDs = partData->getMeshFaceData();
+			for (mPostMeshFaceData1* meshFaceData : meshFaceIDs)
+			{
+				if (meshFaceData == nullptr)
+				{
+					continue;
+				}
+				if (meshFaceData->getVisual())//判断这个单元面是不是外表面
+				{
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshFaceVertexs(meshFaceData, dis, deformationScale);
+					if (isVertexCuttingByPlane(vertexs))
+					{
+						continue;
+					}
+					QVector3D center = getCenter(vertexs);
+					if (mPickToolClass::IsPointInRound(center, _centerPoint, _centerDirection, _radius))
+					{
+						pickMeshFaceDatas.insert(meshFaceData->getMeshFaceID());
+					}
+				}
+			}
+		}
+		if (pickMeshFaceDatas.size() == 0)
+		{
+			return;
+		}
+		postPickMutex.lock();
+		_postMeshPickData->setMultiplyPickMeshFaceData(pickMeshFaceDatas);
+		postPickMutex.unlock();
 	}
 
 	void mPostMeshPickThread::SoloPickNodeByLineAngle()
@@ -2744,6 +3038,54 @@ namespace MDataPost
 			return false;
 		}
 		return true;
+	}
+
+	void mPostMeshPickThread::getAABBAndRoundToMeshData(Space::SpaceTree * root, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain)
+	{
+		if (root == nullptr)
+		{
+			return;
+		}
+		QVector<QVector2D> ap;
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.minEdge.x(), root->space.minEdge.y(), root->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.minEdge.x(), root->space.minEdge.y(), root->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.minEdge.x(), root->space.maxEdge.y(), root->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.minEdge.x(), root->space.maxEdge.y(), root->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.maxEdge.x(), root->space.minEdge.y(), root->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.maxEdge.x(), root->space.minEdge.y(), root->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.maxEdge.x(), root->space.maxEdge.y(), root->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.maxEdge.x(), root->space.maxEdge.y(), root->space.minEdge.z())));
+		if (isIntersectionAABBAndRound(ap))//相交
+		{
+			if (root->depth != 0)
+			{
+				getAABBAndRoundToMeshData(root->topFrontLeft, meshAll, meshContain);
+				getAABBAndRoundToMeshData(root->topFrontRight, meshAll, meshContain);
+				getAABBAndRoundToMeshData(root->topBackLeft, meshAll, meshContain);
+				getAABBAndRoundToMeshData(root->topBackRight, meshAll, meshContain);
+				getAABBAndRoundToMeshData(root->bottomFrontLeft, meshAll, meshContain);
+				getAABBAndRoundToMeshData(root->bottomFrontRight, meshAll, meshContain);
+				getAABBAndRoundToMeshData(root->bottomBackLeft, meshAll, meshContain);
+				getAABBAndRoundToMeshData(root->bottomBackRight, meshAll, meshContain);
+			}
+			else if (mPickToolClass::IsAllPointInRound(ap, _centerScreenPoint, _screenRadius))//包含
+			{
+				meshContain.append(root->meshs);
+			}
+			else
+			{
+				meshAll.append(root->meshs);
+			}
+		}
+	}
+
+	bool mPostMeshPickThread::isIntersectionAABBAndRound(QVector<QVector2D> ap)
+	{
+		if (mPickToolClass::IsLineIntersectionWithCircle(ap, _centerScreenPoint, _screenRadius) || mPickToolClass::IsPointInRound(ap, _centerScreenPoint, _screenRadius))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	bool mPostMeshPickThread::IsSoloPickMeshPart(MDataPost::mPostMeshPartData1 * meshPartData, float &depth)

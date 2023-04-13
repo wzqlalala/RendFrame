@@ -342,6 +342,48 @@ namespace MViewBasic
 		return false;
 	}
 
+	bool mPickToolClass::IsPointInRound(QVector3D point, QVector3D center, QVector3D direction, float r)
+	{
+		if (point.distanceToLine(center, direction) < r)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	bool mPickToolClass::IsPointInRound(QVector2D point, QVector2D center, float r)
+	{
+		if (center.distanceToPoint(point) <= r)//判断包围盒的角点是否在圆内
+		{
+			return true;
+		}
+		return false;
+	}
+
+	bool mPickToolClass::IsPointInRound(QVector<QVector2D> Line1, QVector2D center, float r)
+	{
+		for (auto point : Line1)
+		{
+			if (center.distanceToPoint(point) <= r)//判断包围盒的角点是否在圆内
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool mPickToolClass::IsAllPointInRound(QVector<QVector2D> Line1, QVector2D center, float r)
+	{
+		for (auto point : Line1)
+		{
+			if (center.distanceToPoint(point) > r)//判断包围盒的角点是否在圆内
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 	bool mPickToolClass::IsMeshCenterInPickQuad(const QPoint& pos, QVector<QVector2D> Line1)
 	{
 		QVector2D center;

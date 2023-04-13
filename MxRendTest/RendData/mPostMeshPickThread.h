@@ -95,12 +95,7 @@ namespace MDataPost
 		/*
 		* 设置位置(矩形或者多边形框选)
 		*/
-		void setLocation(QVector<QVector2D> pickQuad);
-
-		/*
-		 * 设置圆形框选位置
-		 */
-		void setLocation(QVector3D centerPoint, QVector3D centerDirection, double radius, QVector2D centerScreenPoint, double screenRadius);
+		void setLocation(QVector<QVector2D> pickQuad, QVector3D direction = QVector3D());
 
 		/*
 		 * 设置窗口大小
@@ -169,6 +164,11 @@ namespace MDataPost
 		void getAABBAndQuadToMeshData(Space::SpaceTree *root, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain);
 		//判断是否相交
 		bool isIntersectionAABBAndQuad(QVector<QVector2D> ap);
+
+		//判断一个包围盒和一个圆形框组成的是否相交
+		void getAABBAndRoundToMeshData(Space::SpaceTree *root, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain);
+		//判断是否相交
+		bool isIntersectionAABBAndRound(QVector<QVector2D> ap);
 
 		
 		//判断单选是否拾取到该部件,并且返回他的深度值
