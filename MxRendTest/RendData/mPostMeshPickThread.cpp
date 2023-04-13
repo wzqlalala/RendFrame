@@ -2699,53 +2699,6 @@ namespace MDataPost
 				futures.takeLast();
 			}
 		}
-		
-
-		/*
-		if (_pickSoloOrMutiply == MViewBasic::SoloPick)//µ¥Ñ¡
-		{
-			switch (_pickFilter)
-			{
-			case PickNothing: break;
-			//case PickAny:SoloPickAny(); break;
-			//case PickPoint:SoloPickPoint(); break;
-			case Pick1DMesh:SoloPick1DMesh(); break;
-			case Pick2DMesh:SoloPick2DMesh(); break;
-			case PickNode:
-			case PickNodeOrder:SoloPickNode(); break;
-			case PickAnyMesh:SoloPickAnyMesh(); break;
-			case PickMeshFace:SoloPickMeshFace(); break;
-			//case PickMeshPart:SoloPickMeshPart(); break;
-			//case PickNodeByPart:SoloPickNodeByPart(); break;
-			//case PickAnyMeshByPart:SoloPickAnyMeshByPart(); break;
-			case PickNodeByLineAngle:SoloPickNodeByLineAngle(); break;
-			case PickNodeByFaceAngle:SoloPickNodeByFaceAngle(); break;
-			case Pick1DMeshByAngle:SoloPick1DMeshByAngle(); break;
-			case Pick2DMeshByAngle:SoloPick2DMeshByAngle(); break;
-			//case PickMeshLineByAngle:SoloPickMeshLineByAngle(); break;
-			case PickMeshFaceByAngle:SoloPickMeshFaceByAngle(); break;
-			default:break;
-			}
-		}
-		else//¿òÑ¡
-		{
-			switch (_pickFilter)
-			{
-			case PickNothing: break;
-			//case PickAny:MultiplyPickAny(); break;
-			//case PickPoint:MultiplyPickPoint(); break;
-			case Pick1DMesh:MultiplyPick1DMesh(); break;
-			case Pick2DMesh:MultiplyPick2DMesh(); break;
-			case PickNode:MultiplyPickNode(); break;
-			case PickAnyMesh:MultiplyPickAnyMesh(); break;
-			case PickMeshFace:MultiplyPickMeshFace(); break;
-			//case PickMeshPart:MultiplyPickMeshPart(); break;
-			//case PickNodeByPart:MultiplyPickNodeByPart(); break;
-			//case PickAnyMeshByPart:MultiplyPickAnyMeshByPart(); break;
-			default:break;
-			}
-		}
-		*/
 
 	}
 
