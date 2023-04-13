@@ -106,6 +106,10 @@ namespace MDataPost
 		_meshData2.resize(_meshtemp.size());
 		for (auto item : _meshtemp)
 		{
+			if (item == nullptr)
+			{
+				continue;
+			}
 			int id = item->getMeshID();
 			if (id < _meshData2.size())
 			{

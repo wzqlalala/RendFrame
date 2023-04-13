@@ -1086,7 +1086,7 @@ namespace MDataPost
 				return;
 			}
 
-			/*QVector3D p1 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
+			QVector3D p1 = ScreenvertexToWorldvertex(QVector3D(_centerBox.x() - _boxXY_2.x(), _centerBox.y() + _boxXY_2.y(), 0.0));
 			QVector3D p2 = ScreenvertexToWorldvertex(QVector3D(_centerBox + _boxXY_2, 0.0));
 
 			QVector3D p3 = ScreenvertexToWorldvertex(QVector3D(_centerBox - _boxXY_2, 0.0));
@@ -1101,13 +1101,13 @@ namespace MDataPost
 
 
 			Space::OBB obb;
-			obb.Set((p2 - p1).normalized(), (p3 - p4).normalized(), (p5 - p6).normalized(), cen, o_size);*/
+			obb.Set((p2 - p1).normalized(), (p3 - p4).normalized(), (p5 - p6).normalized(), cen, o_size);
 
+			QVector<mPostMeshData1*> meshDataAll;
+			QVector<mPostMeshData1*> meshDataContain;
+			Space::getOBBToMeshData(spaceTree, obb, meshDataAll, meshDataContain);
 
-			//Space::SpaceTree* spaceTree /*= partData->spaceTree*/;
-			//QVector<mPostMeshData1*> meshDataAll;
-			//QVector<mPostMeshData1*> meshDataContain;
-			//Space::getOBBToMeshData(spaceTree, obb, meshDataAll, meshDataContain);
+			meshDataAll += meshDataContain;
 			//for (int i = 0; i < meshDataContain.size(); i++)
 			//{
 			//	if (meshDataContain[i]->getMeshVisual())
@@ -1120,26 +1120,26 @@ namespace MDataPost
 			//	}
 			//}
 
-			////²âÊÔ²Ã¼ô
-			//if (_postCuttingNormalVertex.size() != 0)
-			//{
-			//	QVector<int> eraseNodeIDs;
-			//	for (int nodeID : pickNodeDatas)
-			//	{
-			//		QVector3D vertex = _oneFrameData->getNodeDataByID(nodeID)->getNodeVertex() + deformationScale * dis.value(nodeID);
-			//		if (isVertexCuttingByPlane(vertex))
-			//		{
-			//			eraseNodeIDs.append(nodeID);
-			//		}
-			//	}
-			//	for (int nodeID : eraseNodeIDs)
-			//	{
-			//		pickNodeDatas.erase(nodeID);
-			//	}
-			//}
+			//²âÊÔ²Ã¼ô
+			if (_postCuttingNormalVertex.size() != 0)
+			{
+				QVector<int> eraseNodeIDs;
+				for (int nodeID : pickNodeDatas)
+				{
+					QVector3D vertex = _oneFrameData->getNodeDataByID(nodeID)->getNodeVertex() + deformationScale * dis.value(nodeID);
+					if (isVertexCuttingByPlane(vertex))
+					{
+						eraseNodeIDs.append(nodeID);
+					}
+				}
+				for (int nodeID : eraseNodeIDs)
+				{
+					pickNodeDatas.erase(nodeID);
+				}
+			}
 
 			//ÈýÎ¬Íø¸ñµÄ½Úµã
-			QVector<mPostMeshData1*> meshDatas = partData->getMeshDatas0() + partData->getMeshDatas1() + partData->getMeshDatas2() + partData->getMeshDatas3();
+			QVector<mPostMeshData1*> meshDatas = partData->getMeshDatas0() + partData->getMeshDatas1() + partData->getMeshDatas2() + meshDataAll;
 			for (mPostMeshData1 *meshData : meshDatas)
 			{
 				if (meshData == nullptr)
