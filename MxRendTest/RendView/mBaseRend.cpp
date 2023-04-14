@@ -365,6 +365,42 @@ namespace MBaseRend
 		}
 		_renderArray.clear();
 	}
+	void mBaseRend::setCameraKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers> buttons, CameraOperateMode cameraOperateMode)
+	{
+		if (_cameraKeys.contains(buttons))
+		{
+			return;
+		}
+		auto iter = QHashIterator< QPair<Qt::MouseButton, Qt::KeyboardModifiers>, CameraOperateMode>(_cameraKeys);
+		while (iter.hasNext())
+		{
+			iter.next();
+			if (iter.value() == cameraOperateMode)
+			{
+				_cameraKeys.remove(iter.key());
+				break;
+			}
+		}
+		_cameraKeys[buttons] = cameraOperateMode;
+	}
+	void mBaseRend::setPickKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers> buttons, PickMode pickMode)
+	{
+		if (_pickKeys.contains(buttons))
+		{
+			return;
+		}
+		auto iter = QHashIterator< QPair<Qt::MouseButton, Qt::KeyboardModifiers>, PickMode>(_pickKeys);
+		while (iter.hasNext())
+		{
+			iter.next();
+			if (iter.value() == pickMode)
+			{
+				_pickKeys.remove(iter.key());
+				break;
+			}
+		}
+		_pickKeys[buttons] = pickMode;
+	}
 	void mBaseRend::setMultiplyPickMode(MultiplyPickMode multiplyPickMode)
 	{
 		*_multiplyPickMode = multiplyPickMode;

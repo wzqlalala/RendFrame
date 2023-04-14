@@ -370,6 +370,27 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		_postRender->getMeshPickData()->clearAllPickData();
 		_postRender->updateHighLightRender();
 	}
+	else if (event->key() == Qt::Key_G)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+
+		_postRend->setCameraKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::MiddleButton, Qt::ControlModifier | Qt::AltModifier), CameraOperateMode::Zoom);
+		_postRend->setCameraKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton, Qt::ControlModifier | Qt::AltModifier), CameraOperateMode::Rotate);
+		_postRend->setCameraKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::RightButton, Qt::ControlModifier | Qt::AltModifier), CameraOperateMode::Translate);
+	}
+	else if (event->key() == Qt::Key_H)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+
+		_postRend->setPickKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton, Qt::ShiftModifier), PickMode::MultiplyPick);
+		_postRend->setPickKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton, Qt::NoModifier), PickMode::SoloPick);
+	}
 	else if (event->key() == Qt::Key_Asterisk)
 	{
 		if (_postRend == nullptr)

@@ -64,6 +64,10 @@ namespace MBaseRend
 
 		void clearRender();
 
+		void setCameraKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers> buttons, CameraOperateMode cameraOperateMode);
+
+		void setPickKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers> buttons, PickMode pickMode);
+
 		void setMultiplyPickMode(MultiplyPickMode multiplyPickMode);
 
 		void setPickFilter(MViewBasic::PickFilter pickFilter);
