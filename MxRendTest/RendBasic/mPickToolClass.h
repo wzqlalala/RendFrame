@@ -20,9 +20,9 @@ namespace MViewBasic
 		static bool IsLineIntersectionWithQuad(QVector<QVector2D> Line1, QVector<QVector2D> Quad, MBasicFunction::MeshType meshtype);
 
 		/*
-		 * 判断矩形框的点是否在网格内部
+		 * 判断点是否在网格内部
 		 */
-		static bool IsQuadPointInMesh(const QPoint & pos, QVector<QVector2D> Line1, MBasicFunction::MeshType meshtype);
+		static bool IsPointInMesh(const QPoint & pos, QVector<QVector2D> Line1, MBasicFunction::MeshType meshtype);
 
 		/*
 		 * 判断网格的点是否在拾取矩形框内部
@@ -35,6 +35,13 @@ namespace MViewBasic
 		static bool IsPointInQuad(QVector2D point, QVector2D boxCenter, QVector2D boxXY_2);
 		static bool IsPointInQuad(QVector<QVector2D> Line1, QVector2D boxCenter, QVector2D boxXY_2);//部分在内部即可
 		static bool IsAllPointInQuad(QVector<QVector2D> Line1, QVector2D boxCenter, QVector2D boxXY_2);//全部在内部
+
+		/*
+		 * 判断点是否在拾取多边形框内部
+		 */
+		static bool IsPointInPolygon(QVector2D point, QVector2D boxCenter, QVector<QVector2D> polygons);
+		static bool IsPointInPolygon(QVector<QVector2D> Line1, QVector2D boxCenter, QVector<QVector2D> polygons);//部分在内部即可
+		static bool IsAllPointInPolygon(QVector<QVector2D> Line1, QVector2D boxCenter, QVector<QVector2D> polygons);//全部在内部
 
 		/*
 		* 判断多边形是否和圆形选择框相交

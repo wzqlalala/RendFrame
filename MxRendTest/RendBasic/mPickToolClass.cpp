@@ -77,7 +77,7 @@ namespace MViewBasic
 		return false;
 	}
 
-	bool mPickToolClass::IsQuadPointInMesh(const QPoint & pos, QVector<QVector2D> Line1, MeshType meshtype)
+	bool mPickToolClass::IsPointInMesh(const QPoint & pos, QVector<QVector2D> Line1, MeshType meshtype)
 	{
 		int Intersection_times = 0;
 		QVector2D ap1, bp1, bp2;
@@ -255,9 +255,9 @@ namespace MViewBasic
 
 	bool mPickToolClass::IsPointInQuad(QVector<QVector2D> Line1, QVector2D boxCenter, QVector2D boxXY_2)
 	{
-		for (int i = 0; i < Line1.size(); ++i)
+		for (auto point : Line1)
 		{
-			if (qAbs(Line1.at(i).x() - boxCenter.x()) < boxXY_2.x() && qAbs(Line1.at(i).y() - boxCenter.y()) < boxXY_2.y())
+			if (IsPointInQuad(point, boxCenter, boxXY_2))
 			{
 				return true;
 			}
@@ -267,9 +267,57 @@ namespace MViewBasic
 
 	bool mPickToolClass::IsAllPointInQuad(QVector<QVector2D> Line1, QVector2D boxCenter, QVector2D boxXY_2)
 	{
-		for (int i = 0; i < Line1.size(); ++i)
+		for (auto point : Line1)
 		{
-			if (qAbs(Line1.at(i).x() - boxCenter.x()) > boxXY_2.x() || qAbs(Line1.at(i).y() - boxCenter.y()) > boxXY_2.y())
+			if (!IsPointInQuad(point, boxCenter, boxXY_2))
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
+	bool mPickToolClass::IsPointInPolygon(QVector2D point, QVector2D boxCenter, QVector<QVector2D> polygons)
+	{
+		int n = polygons.size();
+		//QVector<QVector2D> sorted_polygons = polygons;
+		//std::sort(sorted_polygons.begin(), sorted_polygons.end(), [&boxCenter](QVector2D a, QVector2D b) {
+		//	return atan2(a.y() - boxCenter.y(), a.x() - boxCenter.x()) < atan2(b.y() - boxCenter.y(), b.x() - boxCenter.x());
+		//});
+		int cnt = 0;
+		for (int i = 0; i < n; i++)
+		{
+			QVector2D p1 = polygons[i];
+			QVector2D p2 = polygons[(i + 1) % n];
+			if ((p1.y() > point.y()) != (p2.y() > point.y()))
+			{
+				float x = (point.y() - p1.y()) * (p2.x() - p1.x()) / (p2.y() - p1.y()) + p1.x();
+				if (x >= point.x())
+				{
+					cnt++;
+				}
+			}
+		}
+		return (cnt % 2 == 1);
+	}
+
+	bool mPickToolClass::IsPointInPolygon(QVector<QVector2D> Line1, QVector2D boxCenter, QVector<QVector2D> polygons)
+	{
+		for (auto point : Line1)
+		{
+			if (IsPointInPolygon(point, boxCenter, polygons))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+	bool mPickToolClass::IsAllPointInPolygon(QVector<QVector2D> Line1, QVector2D boxCenter, QVector<QVector2D> polygons)
+	{
+		for (auto point : Line1)
+		{
+			if (!IsPointInPolygon(point, boxCenter, polygons))
 			{
 				return false;
 			}
@@ -344,7 +392,7 @@ namespace MViewBasic
 
 	bool mPickToolClass::IsPointInRound(QVector3D point, QVector3D center, QVector3D direction, float r)
 	{
-		if (point.distanceToLine(center, direction) < r)
+		if (point.distanceToLine(center, direction) <= r)
 		{
 			return true;
 		}
@@ -353,7 +401,7 @@ namespace MViewBasic
 
 	bool mPickToolClass::IsPointInRound(QVector2D point, QVector2D center, float r)
 	{
-		if (center.distanceToPoint(point) <= r)//判断包围盒的角点是否在圆内
+		if (point.distanceToPoint(center) <= r)//判断包围盒的角点是否在圆内
 		{
 			return true;
 		}
@@ -364,7 +412,7 @@ namespace MViewBasic
 	{
 		for (auto point : Line1)
 		{
-			if (center.distanceToPoint(point) <= r)//判断包围盒的角点是否在圆内
+			if (IsPointInRound(point, center, r))//判断包围盒的角点是否在圆内
 			{
 				return true;
 			}
@@ -376,7 +424,7 @@ namespace MViewBasic
 	{
 		for (auto point : Line1)
 		{
-			if (center.distanceToPoint(point) > r)//判断包围盒的角点是否在圆内
+			if (!IsPointInRound(point, center, r))//判断包围盒的角点是否在圆内
 			{
 				return false;
 			}

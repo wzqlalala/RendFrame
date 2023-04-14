@@ -223,7 +223,7 @@ namespace MDataPost
 			bool isIn = false;
 			for (int i = 0; i < 4; i++)
 			{
-				if (mPickToolClass::IsQuadPointInMesh(multiQuad.at(i).toPoint(), ap, MeshHex))
+				if (mPickToolClass::IsPointInMesh(multiQuad.at(i).toPoint(), ap, MeshHex))
 				{
 					isIn = true;
 					break;
@@ -273,7 +273,48 @@ namespace MDataPost
 
 	void mPostMeshPickThread::doPolygonPick(QString partName, Space::SpaceTree * spaceTree)
 	{
-
+		//判断该部件是否存在碰撞
+		//判断框选的多边形框和部件的包围盒是否相交（主要是将部件的包围盒投影到了屏幕空间下）	
+		QVector<QVector2D> ap;
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.minEdge.x(), spaceTree->space.minEdge.y(), spaceTree->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.minEdge.x(), spaceTree->space.minEdge.y(), spaceTree->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.minEdge.x(), spaceTree->space.maxEdge.y(), spaceTree->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.minEdge.x(), spaceTree->space.maxEdge.y(), spaceTree->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.maxEdge.x(), spaceTree->space.minEdge.y(), spaceTree->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.maxEdge.x(), spaceTree->space.minEdge.y(), spaceTree->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.maxEdge.x(), spaceTree->space.maxEdge.y(), spaceTree->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(spaceTree->space.maxEdge.x(), spaceTree->space.maxEdge.y(), spaceTree->space.minEdge.z())));
+		if (!mPickToolClass::IsLineIntersectionWithQuad(ap, multiQuad, MeshHex) && !mPickToolClass::IsPointInPolygon(ap, _centerBox, multiQuad))
+		{
+			bool isIn = false;
+			for (int i = 0; i < 4; i++)
+			{
+				if (mPickToolClass::IsPointInMesh(multiQuad.at(i).toPoint(), ap, MeshHex))
+				{
+					isIn = true;
+					break;
+				}
+			}
+			if (!isIn)
+			{
+				return;
+			}
+		}
+		switch (*_pickFilter)
+		{
+		case PickFilter::PickNothing: break;
+			//case PickAny:MultiplyPickAny(); break;
+			//case PickPoint:MultiplyPickPoint(); break;
+		case PickFilter::Pick1DMesh:PolygonPick1DMesh(partName, spaceTree); break;
+		case PickFilter::Pick2DMesh:PolygonPick2DMesh(partName, spaceTree); break;
+		case PickFilter::PickNode:PolygonPickNode(partName, spaceTree); break;
+		case PickFilter::PickAnyMesh:PolygonPickAnyMesh(partName, spaceTree); break;
+		case PickFilter::PickMeshFace:PolygonPickMeshFace(partName, spaceTree); break;
+			//case PickMeshPart:MultiplyPickMeshPart(); break;
+			//case PickNodeByPart:MultiplyPickNodeByPart(); break;
+			//case PickAnyMeshByPart:MultiplyPickAnyMeshByPart(); break;
+		default:break;
+		}
 	}
 
 	void mPostMeshPickThread::doAnglePick()
@@ -541,7 +582,7 @@ namespace MDataPost
 					continue;
 				}
 				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
-				if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
+				if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
 				{
 					_meshdepth = *depthlist.begin();
 					_pickMeshid = meshID;
@@ -626,7 +667,7 @@ namespace MDataPost
 						continue;
 					}
 					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
-					if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri:MeshQuad ) && *depthlist.begin() < _meshdepth)
+					if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri:MeshQuad ) && *depthlist.begin() < _meshdepth)
 					{
 						_meshdepth = *depthlist.begin();
 						_pickMeshid = meshID;
@@ -655,7 +696,7 @@ namespace MDataPost
 					continue;
 				}
 				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
-				if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
+				if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
 				{
 					_meshdepth = *depthlist.begin();
 					_pickMeshid = meshID;
@@ -772,7 +813,7 @@ namespace MDataPost
 						continue;
 					}
 					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
-					if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad) && *depthlist.begin() < _meshFacedepth)
+					if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad) && *depthlist.begin() < _meshFacedepth)
 					{
 						_meshFacedepth = *depthlist.begin();
 						_pickMeshFaceid = meshFaceData->getMeshFaceID();
@@ -889,7 +930,7 @@ namespace MDataPost
 					continue;
 				}
 				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
-				if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
+				if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
 				{
 					_meshdepth = *depthlist.begin();
 					_pickMeshid = meshID;
@@ -919,7 +960,7 @@ namespace MDataPost
 					}
 					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
 
-					if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad))
+					if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad))
 					{
 						_meshFacedepth = *depthlist.begin();
 						_pickMeshFaceid = meshFaceData->getMeshFaceID();
@@ -1040,7 +1081,7 @@ namespace MDataPost
 					continue;
 				}
 				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
-				if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
+				if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
 				{
 					_meshdepth = *depthlist.begin();
 					_pickMeshid = meshID;
@@ -1095,7 +1136,7 @@ namespace MDataPost
 					}
 					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
 
-					if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad))
+					if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad))
 					{
 						_meshFacedepth = *depthlist.begin();
 						_pickMeshFaceid = meshFaceData->getMeshFaceID();
@@ -1505,6 +1546,320 @@ namespace MDataPost
 
 	}
 
+	void mPostMeshPickThread::PolygonPickNode(QString partName, Space::SpaceTree * spaceTree)
+	{
+		std::set<int> pickNodeDatas;
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+		//for (QString _partName : _partNames)
+		{
+			mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partName);
+			if (partData == nullptr || !partData->getPartVisual())
+			{
+				return;
+			}
+
+			QVector<mPostMeshData1*> meshDataAll;
+			QVector<mPostMeshData1*> meshDataContain;
+			getAABBAndQuadToMeshData(spaceTree, meshDataAll, meshDataContain);
+
+			meshDataAll += meshDataContain;
+			//三维网格的节点
+			QVector<mPostMeshData1*> meshDatas = partData->getMeshDatas0() + partData->getMeshDatas1() + partData->getMeshDatas2() + meshDataAll;
+			for (mPostMeshData1 *meshData : meshDatas)
+			{
+				if (meshData == nullptr)
+				{
+					continue;
+				}
+				if (!meshData->getMeshVisual())
+				{
+					continue;
+				}
+				QVector<int> index = meshData->getNodeIndex();
+				for (int j = 0; j < index.size(); ++j)
+				{
+					QVector3D vertex0 = _oneFrameData->getNodeDataByID(index.at(j))->getNodeVertex() + deformationScale * dis.value(index.at(j));
+					if (isVertexCuttingByPlane(vertex0))
+					{
+						continue;
+					}
+					QVector2D ap1 = WorldvertexToScreenvertex(vertex0);
+					if (mPickToolClass::IsPointInPolygon(ap1, _centerBox, multiQuad))
+					{
+						pickNodeDatas.insert(index.at(j));
+					}
+				}
+			}
+		}
+		if (pickNodeDatas.size() == 0)
+		{
+			return;
+		}
+		postPickMutex.lock();
+		_postMeshPickData->setMultiplyPickNodeData(pickNodeDatas);
+		postPickMutex.unlock();
+	}
+
+	void mPostMeshPickThread::PolygonPick1DMesh(QString partName, Space::SpaceTree * spaceTree)
+	{
+		std::set<int> pickMeshDatas;
+
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+		//for (QString _partName : _partNames)
+		{
+			mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partName);
+			if (partData == nullptr || !partData->getPartVisual())
+			{
+				return;
+			}
+
+			//一维网格
+			QVector<mPostMeshData1*> meshDatas = partData->getMeshDatas1();
+			for (auto meshData : meshDatas)
+			{
+				if (meshData == nullptr)
+				{
+					continue;
+				}
+				if (!meshData->getMeshVisual())
+				{
+					continue;
+				}
+				QVector<int> index = meshData->getNodeIndex();
+				if ((meshData->getMeshType() == MeshBeam) && (_pickElementTypeFilter.find(meshData->getElementType()) != _pickElementTypeFilter.end()))
+				{
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+					if (isVertexCuttingByPlane(vertexs))
+					{
+						continue;
+					}
+
+					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
+					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
+					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
+					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsPointInPolygon(tempQVector2D, _centerBox,multiQuad))
+					{
+						pickMeshDatas.insert(meshData->getMeshID());
+					}
+				}
+			}
+		}
+		if (pickMeshDatas.size() == 0)
+		{
+			return;
+		}
+		postPickMutex.lock();
+		_postMeshPickData->setMultiplyPickMeshData(pickMeshDatas);
+		postPickMutex.unlock();
+	}
+
+	void mPostMeshPickThread::PolygonPick2DMesh(QString partName, Space::SpaceTree * spaceTree)
+	{
+		std::set<int> pickMeshDatas;
+
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+		//for (QString _partName : _partNames)
+		{
+			mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partName);
+			if (partData == nullptr || !partData->getPartVisual())
+			{
+				return;
+			}
+
+			QVector<mPostMeshData1*> meshDatas = partData->getMeshDatas2();
+			for (auto meshData : meshDatas)
+			{
+				if (meshData == nullptr)
+				{
+					continue;
+				}
+				if (!meshData->getMeshVisual())
+				{
+					continue;
+				}
+				if (_pickElementTypeFilter.find(meshData->getElementType()) == _pickElementTypeFilter.end())
+				{
+					continue;
+				}
+				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+				if (isVertexCuttingByPlane(vertexs))
+				{
+					continue;
+				}
+				QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
+				if (mPickToolClass::IsPointInPolygon(center, _centerBox, multiQuad))
+				{
+					pickMeshDatas.insert(meshData->getMeshID());
+				}
+			}
+		}
+		if (pickMeshDatas.size() == 0)
+		{
+			return;
+		}
+		postPickMutex.lock();
+		_postMeshPickData->setMultiplyPickMeshData(pickMeshDatas);
+		postPickMutex.unlock();
+	}
+
+	void mPostMeshPickThread::PolygonPickAnyMesh(QString partName, Space::SpaceTree * spaceTree)
+	{
+		std::set<int> pickMeshDatas;
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+		//for (QString _partName : _partNames)
+		{
+			mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partName);
+			if (partData == nullptr || !partData->getPartVisual())
+			{
+				return;
+			}
+
+			QVector<mPostMeshData1*> meshDataAll;
+			QVector<mPostMeshData1*> meshDataContain;
+			getAABBAndPolygonToMeshData(spaceTree, meshDataAll, meshDataContain);
+
+			//测试裁剪
+			if (_postCuttingNormalVertex.size() != 0)
+			{
+				for (mPostMeshData1 *meshData : meshDataContain)
+				{
+					if (meshData != nullptr && meshData->getMeshVisual())
+					{
+						QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+						if (!isVertexCuttingByPlane(vertexs))
+						{
+							pickMeshDatas.insert(meshData->getMeshID());
+						}
+					}
+				}
+			}
+			else
+			{
+				for (int i = 0; i < meshDataContain.size(); i++)
+				{
+					if (meshDataContain[i]->getMeshVisual())
+					{
+						pickMeshDatas.insert(meshDataContain[i]->getMeshID());
+					}
+				}
+			}
+
+			//三维网格
+			//二维网格和0维网格
+			meshDataAll += partData->getMeshDatas2() + partData->getMeshDatas0();
+			for (auto meshData : meshDataAll)
+			{
+				if (meshData == nullptr)
+				{
+					continue;
+				}
+				if (!meshData->getMeshVisual())
+				{
+					continue;
+				}
+				QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+				if (isVertexCuttingByPlane(vertexs))
+				{
+					continue;
+				}
+				QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
+				if (mPickToolClass::IsPointInPolygon(center, _centerBox, multiQuad))
+				{
+					pickMeshDatas.insert(meshData->getMeshID());
+				}
+			}
+
+			//一维网格
+			meshDataAll = partData->getMeshDatas1();
+			for (auto meshData : meshDataAll)
+			{
+				if (meshData == nullptr)
+				{
+					continue;
+				}
+				if (!meshData->getMeshVisual())
+				{
+					continue;
+				}
+				QVector<int> index = meshData->getNodeIndex();
+				if (meshData->getMeshType() == MeshBeam)
+				{
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshVertexs(meshData, dis, deformationScale);
+
+					if (isVertexCuttingByPlane(vertexs))
+					{
+						continue;
+					}
+
+					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
+					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
+					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
+					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsPointInPolygon(tempQVector2D, _centerBox, multiQuad))
+					{
+						pickMeshDatas.insert(meshData->getMeshID());
+					}
+				}
+			}
+		}
+
+		if (pickMeshDatas.size() == 0)
+		{
+			return;
+		}
+		postPickMutex.lock();
+		_postMeshPickData->setMultiplyPickMeshData(pickMeshDatas);
+		postPickMutex.unlock();
+	}
+
+	void mPostMeshPickThread::PolygonPickMeshFace(QString partName, Space::SpaceTree * spaceTree)
+	{
+		std::set<int> pickMeshFaceDatas;
+		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
+		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
+		//for (QString _partName : _partNames)
+		{
+			mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partName);
+			if (partData == nullptr || !partData->getPartVisual())
+			{
+				return;
+			}
+
+			//获取所有的网格面ID
+			QVector<mPostMeshFaceData1*> meshFaceIDs = partData->getMeshFaceData();
+			for (mPostMeshFaceData1* meshFaceData : meshFaceIDs)
+			{
+				if (meshFaceData == nullptr)
+				{
+					continue;
+				}
+				if (meshFaceData->getVisual())//判断这个单元面是不是外表面
+				{
+					QVector<QVector3D> vertexs = _oneFrameData->getMeshFaceVertexs(meshFaceData, dis, deformationScale);
+					if (isVertexCuttingByPlane(vertexs))
+					{
+						continue;
+					}
+					QVector2D center = WorldvertexToScreenvertex(getCenter(vertexs));
+					if (mPickToolClass::IsPointInPolygon(center, _centerBox, multiQuad))
+					{
+						pickMeshFaceDatas.insert(meshFaceData->getMeshFaceID());
+					}
+				}
+			}
+		}
+		if (pickMeshFaceDatas.size() == 0)
+		{
+			return;
+		}
+		postPickMutex.lock();
+		_postMeshPickData->setMultiplyPickMeshFaceData(pickMeshFaceDatas);
+		postPickMutex.unlock();
+	}
+
 	void mPostMeshPickThread::RoundPickNode(QString partName, Space::SpaceTree * spaceTree)
 	{
 		std::set<int> pickNodeDatas;
@@ -1597,7 +1952,7 @@ namespace MDataPost
 					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
 					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
 					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
-					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerBox.x(), _centerBox.y(), _boxXY_2.x(), _boxXY_2.y()))
+					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsPointInRound(tempQVector2D, _centerScreenPoint,_screenRadius))
 					{
 						pickMeshDatas.insert(meshData->getMeshID());
 					}
@@ -1756,7 +2111,7 @@ namespace MDataPost
 					QVector2D ap1 = WorldvertexToScreenvertex(vertexs.at(0));
 					QVector2D ap2 = WorldvertexToScreenvertex(vertexs.at(1));
 					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
-					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerBox.x(), _centerBox.y(), _boxXY_2.x(), _boxXY_2.y()))
+					if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MeshBeam) || mPickToolClass::IsPointInRound(tempQVector2D, _centerScreenPoint, _screenRadius))
 					{
 						pickMeshDatas.insert(meshData->getMeshID());
 					}
@@ -3030,7 +3385,62 @@ namespace MDataPost
 		{
 			for (int i = 0; i < multiQuad.size(); i++)
 			{
-				if (mPickToolClass::IsQuadPointInMesh(multiQuad.at(i).toPoint(), ap, MeshHex))
+				if (mPickToolClass::IsPointInMesh(multiQuad.at(i).toPoint(), ap, MeshHex))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		return true;
+	}
+
+	void mPostMeshPickThread::getAABBAndPolygonToMeshData(Space::SpaceTree * root, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain)
+	{
+		if (root == nullptr)
+		{
+			return;
+		}
+		QVector<QVector2D> ap;
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.minEdge.x(), root->space.minEdge.y(), root->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.minEdge.x(), root->space.minEdge.y(), root->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.minEdge.x(), root->space.maxEdge.y(), root->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.minEdge.x(), root->space.maxEdge.y(), root->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.maxEdge.x(), root->space.minEdge.y(), root->space.minEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.maxEdge.x(), root->space.minEdge.y(), root->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.maxEdge.x(), root->space.maxEdge.y(), root->space.maxEdge.z())));
+		ap.append(WorldvertexToScreenvertex(QVector3D(root->space.maxEdge.x(), root->space.maxEdge.y(), root->space.minEdge.z())));
+		if (isIntersectionAABBAndQuad(ap))//相交
+		{
+			if (root->depth != 0)
+			{
+				getAABBAndPolygonToMeshData(root->topFrontLeft, meshAll, meshContain);
+				getAABBAndPolygonToMeshData(root->topFrontRight, meshAll, meshContain);
+				getAABBAndPolygonToMeshData(root->topBackLeft, meshAll, meshContain);
+				getAABBAndPolygonToMeshData(root->topBackRight, meshAll, meshContain);
+				getAABBAndPolygonToMeshData(root->bottomFrontLeft, meshAll, meshContain);
+				getAABBAndPolygonToMeshData(root->bottomFrontRight, meshAll, meshContain);
+				getAABBAndPolygonToMeshData(root->bottomBackLeft, meshAll, meshContain);
+				getAABBAndPolygonToMeshData(root->bottomBackRight, meshAll, meshContain);
+			}
+			else if (mPickToolClass::IsAllPointInPolygon(ap, _centerBox, multiQuad))//包含
+			{
+				meshContain.append(root->meshs);
+			}
+			else
+			{
+				meshAll.append(root->meshs);
+			}
+		}
+	}
+
+	bool mPostMeshPickThread::isIntersectionAABBAndPolygon(QVector<QVector2D> ap)
+	{
+		if (!mPickToolClass::IsLineIntersectionWithQuad(ap, multiQuad, MeshHex) && !mPickToolClass::IsPointInPolygon(ap, _centerBox, multiQuad))
+		{
+			for (auto point : multiQuad)
+			{
+				if (mPickToolClass::IsPointInMesh(point.toPoint(), ap, MeshHex))
 				{
 					return true;
 				}

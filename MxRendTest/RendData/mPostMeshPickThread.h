@@ -143,6 +143,15 @@ namespace MDataPost
 		void MultiplyPickMeshFace(QString partName, Space::SpaceTree* spaceTree);
 
 		/*
+		* 多边形框选
+		*/
+		void PolygonPickNode(QString partName, Space::SpaceTree* spaceTree);
+		void PolygonPick1DMesh(QString partName, Space::SpaceTree* spaceTree);
+		void PolygonPick2DMesh(QString partName, Space::SpaceTree* spaceTree);
+		void PolygonPickAnyMesh(QString partName, Space::SpaceTree* spaceTree);
+		void PolygonPickMeshFace(QString partName, Space::SpaceTree* spaceTree);
+
+		/*
 		* 圆形框选
 		*/
 		void RoundPickNode(QString partName, Space::SpaceTree* spaceTree);
@@ -160,12 +169,17 @@ namespace MDataPost
 		void SoloPick2DMeshByAngle();
 		void SoloPickMeshFaceByAngle();
 
-		//判断一个包围盒和一个多边形框组成的是否相交
+		//判断一个包围盒和一个矩形框组成的是否相交
 		void getAABBAndQuadToMeshData(Space::SpaceTree *root, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain);
 		//判断是否相交
 		bool isIntersectionAABBAndQuad(QVector<QVector2D> ap);
 
-		//判断一个包围盒和一个圆形框组成的是否相交
+		//判断一个包围盒和一个多边形框组成的是否相交
+		void getAABBAndPolygonToMeshData(Space::SpaceTree *root, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain);
+		//判断是否相交
+		bool isIntersectionAABBAndPolygon(QVector<QVector2D> ap);
+
+		//判断一个包围盒和一个多边形框组成的是否相交
 		void getAABBAndRoundToMeshData(Space::SpaceTree *root, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain);
 		//判断是否相交
 		bool isIntersectionAABBAndRound(QVector<QVector2D> ap);
