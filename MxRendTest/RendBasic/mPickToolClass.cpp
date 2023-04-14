@@ -77,6 +77,22 @@ namespace MViewBasic
 		return false;
 	}
 
+	bool mPickToolClass::IsLineIntersectionWithRound(QVector2D p1, QVector2D p2, QVector2D center, float radius)
+	{
+		QVector2D direction = p2 - p1;
+		float length = direction.length();
+		direction /= length;
+		QVector2D dist = center - p1;
+		float proj = QVector2D::dotProduct(direction, dist);
+		if (proj < 0 || proj > length)
+		{
+			return false;
+		}
+		QVector2D closestPoint = p1 + proj * direction;
+		float d = (closestPoint - center).length();
+		return (d < radius);
+	}
+
 	bool mPickToolClass::IsPointInMesh(const QPoint & pos, QVector<QVector2D> Line1, MeshType meshtype)
 	{
 		int Intersection_times = 0;

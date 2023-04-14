@@ -22,6 +22,115 @@ namespace MDataPost
 	class mPostOneFrameRendData;
 	class mPostMeshPickData;
 	class mPostMeshPartData1;
+	class mBasePick
+	{
+	public:
+
+		mBasePick(QMatrix4x4 pvm, int w, int h) { _pvm = pvm; _width = w; _height = h; };
+
+		void getAABBAndPickToMeshData(Space::SpaceTree * spaceTree, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain);
+
+		virtual bool getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree) = 0;
+
+		virtual bool get2DAnd3DMeshCenterIsInPick(QVector3D pointCenter) = 0;//0维和2维和3维
+
+		virtual bool get1DMeshIsInPick(QVector<QVector3D> vertexs) = 0;//1维
+
+		virtual bool isIntersectionAABBAndPick(QVector<QVector2D> ap) = 0;//判断是否相交
+
+		virtual bool isAABBPointIsAllInPick(QVector<QVector2D> ap) = 0;//判断点是否全部
+
+		//将AABB的八个顶点转化为二维屏幕的点
+		QVector<QVector2D> getAABBToScreenVertex(QVector3D minEdge, QVector3D maxEdge);
+		//将屏幕坐标转化为世界坐标
+		QVector3D ScreenvertexToWorldvertex(QVector3D vertex);
+		//将世界坐标转化为屏幕坐标
+		QVector2D WorldvertexToScreenvertex(QVector3D Worldvertex);
+		QVector<QVector2D> WorldvertexToScreenvertex(QVector<QVector3D> Worldvertexs);
+		//将世界坐标转化为屏幕坐标并且返回他的深度值
+		QVector2D WorldvertexToScreenvertex(QVector3D Worldvertex, float &depth);	
+		void WorldvertexToScreenvertex(QVector<QVector3D> Worldvertexs, QVector<QVector2D> &Screenvertexs, std::set<float> &depths);
+
+	protected:
+		QMatrix4x4 _pvm;
+		int _width, _height;
+		MViewBasic::MultiplyPickMode _multiplyPickMode;
+
+	};
+
+
+	class mQuadPick :public mBasePick
+	{
+	public:
+		mQuadPick(QMatrix4x4 pvm, int w, int h, QVector<QVector2D> multiQuad, QVector2D center, QVector2D boxXY_2) :mBasePick(pvm, w, h), _multiQuad(multiQuad), _center(center), _boxXY_2(boxXY_2) {};
+
+		bool getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree) override;
+
+		bool get2DAnd3DMeshCenterIsInPick(QVector3D pointCenter) override;//0维和2维和3维
+
+		bool get1DMeshIsInPick(QVector<QVector3D> vertexs) override;//1维
+
+		bool isIntersectionAABBAndPick(QVector<QVector2D> ap) override;
+
+		bool isAABBPointIsAllInPick(QVector<QVector2D> ap) override;//判断点是否全部
+
+	protected:
+		QVector<QVector2D> _multiQuad;
+
+		QVector2D _center, _boxXY_2;
+
+	};
+
+	class mPolygonPick :public mBasePick
+	{
+	public:
+		mPolygonPick(QMatrix4x4 pvm, int w, int h, QVector<QVector2D> multiQuad, QVector2D center):mBasePick(pvm, w, h),_multiQuad(multiQuad), _center(center){};
+
+		bool getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree) override;
+
+		bool get2DAnd3DMeshCenterIsInPick(QVector3D pointCenter) override;//0维和2维和3维
+
+		bool get1DMeshIsInPick(QVector<QVector3D> vertexs) override;//1维
+
+		bool isIntersectionAABBAndPick(QVector<QVector2D> ap) override;
+
+		bool isAABBPointIsAllInPick(QVector<QVector2D> ap) override;//判断点是否全部
+
+	protected:
+		QVector<QVector2D> _multiQuad;
+
+		QVector2D _center;
+
+	};
+
+	class mRoundPick :public mBasePick
+	{
+	public:
+		mRoundPick(QMatrix4x4 pvm, int w, int h, QVector2D p1, QVector2D p2, QVector3D centerDirection)
+			:mBasePick(pvm, w, h)
+		{
+			_screenCenter = (p1 + p2)/2.0;
+			QVector3D Point = ScreenvertexToWorldvertex(p2);//算出圆上一点的坐标
+			_centerPoint = ScreenvertexToWorldvertex(_screenCenter);//算出圆心坐标
+			_radius = _centerPoint.distanceToPoint(Point);
+			_screenRadius = _screenCenter.distanceToPoint(p1);
+			_centerDirection = centerDirection;
+		};
+
+		bool getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree) override;
+
+		bool get2DAnd3DMeshCenterIsInPick(QVector3D pointCenter) override;//0维和2维和3维
+
+		bool get1DMeshIsInPick(QVector<QVector3D> vertexs) override;//1维
+
+		bool isIntersectionAABBAndPick(QVector<QVector2D> ap) override;
+
+		bool isAABBPointIsAllInPick(QVector<QVector2D> ap) override;//判断点是否全部
+
+	protected:
+		QVector3D _centerPoint; QVector3D _centerDirection; double _radius; //空间
+		QVector2D _screenCenter; double _screenRadius;//屏幕
+	};
 	class RENDDATA_EXPORT mPostMeshPickThread : public QObject
 	{
 		Q_OBJECT
@@ -114,9 +223,7 @@ namespace MDataPost
 	private:
 		//拾取主程序		
 		void doSoloPick(QString partName, Space::SpaceTree* spaceTree);
-		void doQuadPick(QString partName, Space::SpaceTree* spaceTree);
-		void doRoundPick(QString partName, Space::SpaceTree* spaceTree);
-		void doPolygonPick(QString partName, Space::SpaceTree* spaceTree);
+		void doMultiplyPick(QString partName, Space::SpaceTree* spaceTree);
 		void doAnglePick();
 
 		/*
@@ -143,23 +250,17 @@ namespace MDataPost
 		void MultiplyPickMeshFace(QString partName, Space::SpaceTree* spaceTree);
 
 		/*
-		* 多边形框选
-		*/
 		void PolygonPickNode(QString partName, Space::SpaceTree* spaceTree);
 		void PolygonPick1DMesh(QString partName, Space::SpaceTree* spaceTree);
 		void PolygonPick2DMesh(QString partName, Space::SpaceTree* spaceTree);
 		void PolygonPickAnyMesh(QString partName, Space::SpaceTree* spaceTree);
 		void PolygonPickMeshFace(QString partName, Space::SpaceTree* spaceTree);
-
-		/*
-		* 圆形框选
-		*/
 		void RoundPickNode(QString partName, Space::SpaceTree* spaceTree);
 		void RoundPick1DMesh(QString partName, Space::SpaceTree* spaceTree);
 		void RoundPick2DMesh(QString partName, Space::SpaceTree* spaceTree);
 		void RoundPickAnyMesh(QString partName, Space::SpaceTree* spaceTree);
 		void RoundPickMeshFace(QString partName, Space::SpaceTree* spaceTree);
-
+		*/
 		
 		//通过角度拾取
 		void SoloPickNodeByLineAngle();		
@@ -168,21 +269,6 @@ namespace MDataPost
 		void SoloPickMeshLineByAngle();
 		void SoloPick2DMeshByAngle();
 		void SoloPickMeshFaceByAngle();
-
-		//判断一个包围盒和一个矩形框组成的是否相交
-		void getAABBAndQuadToMeshData(Space::SpaceTree *root, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain);
-		//判断是否相交
-		bool isIntersectionAABBAndQuad(QVector<QVector2D> ap);
-
-		//判断一个包围盒和一个多边形框组成的是否相交
-		void getAABBAndPolygonToMeshData(Space::SpaceTree *root, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain);
-		//判断是否相交
-		bool isIntersectionAABBAndPolygon(QVector<QVector2D> ap);
-
-		//判断一个包围盒和一个多边形框组成的是否相交
-		void getAABBAndRoundToMeshData(Space::SpaceTree *root, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain);
-		//判断是否相交
-		bool isIntersectionAABBAndRound(QVector<QVector2D> ap);
 
 		
 		//判断单选是否拾取到该部件,并且返回他的深度值
@@ -232,8 +318,6 @@ namespace MDataPost
 
 
 	private:
-		//线程
-		QThread *_thread;
 
 		//拾取过滤器
 		MViewBasic::PickFilter *_pickFilter;
@@ -286,6 +370,9 @@ namespace MDataPost
 		 */
 		QPoint _pos;
 		float _depth;
+
+		/*********/
+		std::shared_ptr<mBasePick> _pick;
 		/*
 		 * 点选矩形
 		 */

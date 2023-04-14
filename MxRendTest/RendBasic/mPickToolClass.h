@@ -20,6 +20,11 @@ namespace MViewBasic
 		static bool IsLineIntersectionWithQuad(QVector<QVector2D> Line1, QVector<QVector2D> Quad, MBasicFunction::MeshType meshtype);
 
 		/*
+		* 判断一个线段和一个圆形选择框是否相交
+		*/
+		static bool IsLineIntersectionWithRound(QVector2D p1, QVector2D p2, QVector2D center, float radius);
+
+		/*
 		 * 判断点是否在网格内部
 		 */
 		static bool IsPointInMesh(const QPoint & pos, QVector<QVector2D> Line1, MBasicFunction::MeshType meshtype);
