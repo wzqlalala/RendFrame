@@ -2,6 +2,7 @@
 #include "mPostModelRender.h"
 #include "mPostCuttingPlaneRender.h"
 #include "mFontRender.h"
+#include "mArrowRender.h"
 
 #include "mPostRendStatus.h"
 #include <renderpch.h>
@@ -40,10 +41,11 @@ namespace MPostRend
 		_modelRender = make_shared<mPostModelRender>(_geode, _rendStatus, oneFrameData, oneFrameRendData);
 
 		_fontRender = make_shared<MBaseRend::mFontRender>(_app, _geode);
+		_arrowRender = make_shared<MBaseRend::mArrowRender>(_app, _geode);
 
-		_fontRender->appendFixedFont("test", QVector<QVector2D>{QVector2D(0.5, 0.5)}, QVector<QString>{QString("test")});
-
-		_fontRender->setFixedFontIsShow("test", false);
+		//_fontRender->appendFixedFont("test", QVector<QVector2D>{QVector2D(0.5, 0.5)}, QVector<QString>{QString("test")});
+		//_arrowRender->appendCommonArrow("test", QVector<QVector3D>{QVector3D(0, 0, 0)}, QVector<QVector3D>{QVector3D(1, 0, 0)});
+		//_fontRender->setFixedFontIsShow("test", false);
 	}
 	mPostOneFrameRender::~mPostOneFrameRender()
 	{
@@ -91,6 +93,10 @@ namespace MPostRend
 		if (_fontRender)
 		{
 			_fontRender->updateUniform(modelView, commonView);
+		}
+		if (_arrowRender)
+		{
+			_arrowRender->updateUniform(modelView, commonView);
 		}
 		_viewer->noClearRun();
 	}

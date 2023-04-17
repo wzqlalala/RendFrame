@@ -41,8 +41,6 @@ namespace MBaseRend
 
 	protected:
 
-		//坐标轴顶点
-		static QVector<float> _Arrow_Vertices;
 		//VBO顶点数据
 		static QVector<float> _VBOGlobalAxisData_Type;  //类型 0代表X轴 1为Y轴 2为Z轴
 		static QVector<QVector3D>   _VBOGlobalAxisData_Vertex;

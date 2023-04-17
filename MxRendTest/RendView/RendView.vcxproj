@@ -110,15 +110,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\RendData\mPostRendStatus.cpp" />
+    <ClCompile Include="mArrowRender.cpp" />
     <ClCompile Include="mFontRender.cpp" />
-    <ClCompile Include="mGlobalAxisRender.cpp" />
     <ClCompile Include="mPostCuttingPlaneRender.cpp" />
     <ClCompile Include="mPostHighLightRender.cpp" />
     <ClCompile Include="mQuadRender.cpp" />
     <ClCompile Include="tiny_obj_loader.cc" />
     <ClInclude Include="..\RendData\mPostRendStatus.h" />
+    <ClInclude Include="mArrowRender.h" />
     <ClInclude Include="mFontRender.h" />
-    <ClInclude Include="mGlobalAxisRender.h" />
     <ClInclude Include="mPostCuttingPlaneRender.h" />
     <QtMoc Include="mQuadRender.h" />
     <ClInclude Include="mPostHighLightRender.h" />

@@ -33,36 +33,36 @@ vec3 GetGlobleAxisPosition(int x, int y)
  void main()
 {
 	//传递颜色
-	if(aType == 0)
+	if(int(aType) == 0)
 	{
 		Color = vec3(255,0,0);		
 	}
-	else if(aType == 1)
+	else if(int(aType) == 1)
 	{
 		Color =  vec3(0,255,0);	
 	}
-	else if(aType == 2)
+	else if(int(aType) == 2)
 	{
 		Color =  vec3(0,0,255);		
 	}
 	
 	
 	mat4 model;
-	vec3 position = GetGlobleAxisPosition(75,75);//将坐标轴放在左下角 75X75像素处
+	vec3 position = GetGlobleAxisPosition(80,80);//将坐标轴放在左下角 80X80像素处
 
 	//首先判断X轴方向
-	if(aType == 0)
+	if(int(aType) == 0)
 	{ 	
 		model = uModel_c * translate(position.x,position.y,position.z)*scale(0.8,0.8,0.8);
 	}
 	//Y轴
-	else if(aType == 1)
+	else if(int(aType) == 1)
 	{
 		vec3 axisRotate = vec3(0,0,1);
 		model = uModel_c * translate(position.x,position.y,position.z)* rotate(axisRotate.x,axisRotate.y,axisRotate.z,90)*scale(0.8,0.8,0.8);
 	}
 	//Z轴
-	else if(aType == 2)
+	else if(int(aType) == 2)
 	{
 		vec3 axisRotate = vec3(0,1,0);
 		model = uModel_c * translate(position.x,position.y,position.z)* rotate(axisRotate.x,axisRotate.y,axisRotate.z,-90)*scale(0.8,0.8,0.8);

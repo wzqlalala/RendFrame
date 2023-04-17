@@ -1,4 +1,5 @@
 #include "mGlobalAxisRender.h"
+#include "mArrowRender.h"
 #include "mFontRender.h"
 
 #include <renderpch.h>
@@ -12,8 +13,6 @@
 using namespace mxr;
 namespace MBaseRend
 {
-	//坐标轴顶点
-	QVector<float> mGlobalAxisRender::_Arrow_Vertices;
 	//VBO顶点数据
 	QVector<float> mGlobalAxisRender::_VBOGlobalAxisData_Type;  //类型 0代表X轴 1为Y轴 2为Z轴
 	QVector<QVector3D>   mGlobalAxisRender::_VBOGlobalAxisData_Vertex;
@@ -84,7 +83,7 @@ namespace MBaseRend
 
 	void mGlobalAxisRender::InitialAxisData()
 	{
-		if (!_Arrow_Vertices.empty())
+		if (!mArrowRender::_Arrow_Vertices.empty())
 		{
 			return;
 		}
@@ -92,7 +91,7 @@ namespace MBaseRend
 		float h = 1.0; //箭头顶点---原点距离
 		float h1 = 0.6;//四棱锥底面----原点距离
 		float a = 0.06;//四棱锥底面边长的一半
-		_Arrow_Vertices =
+		mArrowRender::_Arrow_Vertices =
 		{
 			0.0f,0.0f,0.0f,	//0
 			h,0.0f,0.0f,	//1
@@ -104,18 +103,18 @@ namespace MBaseRend
 
 		for (int i = 0; i < 3; i++)
 		{
-			for (int j = 0; j < _Arrow_Vertices.size(); j += 3)
+			for (int j = 0; j < mArrowRender::_Arrow_Vertices.size(); j += 3)
 			{
 				//type
 				_VBOGlobalAxisData_Type.push_back(i);
 				//vertex
-				QVector3D ver(_Arrow_Vertices[j], _Arrow_Vertices[j + 1], _Arrow_Vertices[j + 2]);
+				QVector3D ver(mArrowRender::_Arrow_Vertices[j], mArrowRender::_Arrow_Vertices[j + 1], mArrowRender::_Arrow_Vertices[j + 2]);
 				_VBOGlobalAxisData_Vertex.push_back(ver);
 
 			}
 
 			//EBO索引数据
-			int BeginIndex = _VBOGlobalAxisData_Type.size() - _Arrow_Vertices.size() / 3;//找到索引添加的起始点
+			int BeginIndex = _VBOGlobalAxisData_Type.size() - mArrowRender::_Arrow_Vertices.size() / 3;//找到索引添加的起始点
 
 			//直线
 			_EBOGlobalAxisData.push_back(BeginIndex);//0

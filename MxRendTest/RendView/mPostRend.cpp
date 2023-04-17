@@ -1,6 +1,7 @@
 #include "mPostRend.h"
 #include "mPostRender.h"
-#include "mGlobalAxisRender.h"
+#include "mFontRender.h"
+#include "mArrowRender.h"
 
 ////MxRender
 #include <renderpch.h>
@@ -24,8 +25,8 @@ namespace MPostRend
 		shared_ptr<mPostRender> postRender = make_shared<mPostRender>(_app, _root, this);
 		this->addBeforeRender(postRender);	
 
-		shared_ptr<mGlobalAxisRender> globalAxisRender = make_shared<mGlobalAxisRender>(_app, _root, _fontRender);
-		this->addBeforeRender(globalAxisRender);
+		_fontRender->appendGloabalAxisFont();
+		_arrowRender->appendGloabalAxisArrow();
 
 		qDebug() << "Post Initial";
 	}
@@ -70,11 +71,15 @@ namespace MPostRend
 	}
 	shared_ptr<mPostRender> mPostRend::getPostRender()
 	{
-		shared_ptr<mBaseRender> baseRender = getFirstBeforeRender();
-		if (baseRender)
+		for (auto render : _beforeRenderArray)
 		{
-			return dynamic_pointer_cast<mPostRender>(baseRender);
+			auto post = dynamic_pointer_cast<mPostRender>(render);
+			if (post)
+			{
+				return post;
+			}
 		}
+
 		return nullptr;
 	}
 }

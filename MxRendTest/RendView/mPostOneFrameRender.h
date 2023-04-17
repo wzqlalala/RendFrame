@@ -39,6 +39,7 @@ namespace MDataPost
 namespace MBaseRend
 {
 	class mFontRender;
+	class mArrowRender;
 }
 using namespace MViewBasic;
 using namespace MDataPost;
@@ -139,6 +140,8 @@ namespace MPostRend
 		QVector<std::shared_ptr<mPostCuttingPlaneRender>> _cuttingPlaneRenders;//切面渲染
 
 		std::shared_ptr<MBaseRend::mFontRender> _fontRender;//文字渲染
+
+		std::shared_ptr<MBaseRend::mArrowRender> _arrowRender;//箭头渲染
 
 		std::shared_ptr<mxr::Texture> _texture;//颜色表纹理
 

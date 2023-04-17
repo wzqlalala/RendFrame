@@ -43,7 +43,7 @@ void main()
 	TexCoord = vec2(aTexCoord.x/1024.0,aTexCoord.y/1024.0);  //1024为纹理的像素大小
 
 	mat4 model;
-	vec3 position = GetGlobleAxisPosition(75,75);//将坐标轴放在左下角 75X75像素处
+	vec3 position = GetGlobleAxisPosition(80,80);//将坐标轴放在左下角 80X80像素处
 
 	//首先判断X轴方向
 	if(aType == 0)
@@ -64,7 +64,7 @@ void main()
 	}
 
 	//获取文字经过变换后在通用视角下的坐标
-	vec3 FontPos_c_beforeTrans = vec3(1.2,0,0);	//文字变换前在同通用坐标系下的坐标
+	vec3 FontPos_c_beforeTrans = vec3(1.0,0,0);	//文字变换前在同通用坐标系下的坐标
 	vec3 FontPos_c_afterTrans =  (model* vec4(FontPos_c_beforeTrans, 1.0f)).xyz; //文字变换后在通用坐标系下的坐标
 	//获取文字经过变换后在标准坐标系下坐标	
 	vec3 normPos = (uProjection_c *uView_c * uModel_c*vec4(FontPos_c_afterTrans,1.0)).xyz;

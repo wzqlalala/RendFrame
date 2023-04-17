@@ -3,6 +3,7 @@
 #include "mQuadRender.h"
 #include "mBaseRender.h"
 #include "mFontRender.h"
+#include "mArrowRender.h"
 //工具类
 #include"mViewToolClass.h"
 //视图类
@@ -75,6 +76,9 @@ namespace MBaseRend
 		_quadRender = MakeAsset<mQuadRender>(_app, _afterroot, _cameraMode, _pickMode, _multiplyPickMode);
 
 		_fontRender = MakeAsset<mFontRender>(_app, _root, this);
+		this->addBeforeRender(_fontRender);
+		_arrowRender = MakeAsset<mArrowRender>(_app, _root, this);
+		this->addBeforeRender(_arrowRender);
 		
 		makeCurrent();
 		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
