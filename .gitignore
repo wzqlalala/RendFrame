@@ -30,15 +30,12 @@
 *.exe
 *.out
 *.app
-*x64
 
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-x64/
-x86/
 bld/
 [Bb]in/
 [Oo]bj/
@@ -56,3 +53,6 @@ __pycache__/
 /MxRendTest/GLSL/.vs
 /MxRendTest/GLSL
 /MxRendTest/MxRendTest/*.dat
+/MxRendTest/x64/x64/GLSL
+/MxRendTest/x64/GLSL/.vs
+/MxRendTest/x64/Nsight
