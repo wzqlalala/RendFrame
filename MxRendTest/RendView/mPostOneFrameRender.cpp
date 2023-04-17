@@ -42,6 +42,8 @@ namespace MPostRend
 		_fontRender = make_shared<MBaseRend::mFontRender>(_app, _geode);
 
 		_fontRender->appendFixedFont("test", QVector<QVector2D>{QVector2D(0.5, 0.5)}, QVector<QString>{QString("test")});
+
+		_fontRender->setFixedFontIsShow("test", false);
 	}
 	mPostOneFrameRender::~mPostOneFrameRender()
 	{

@@ -47,7 +47,5 @@ namespace MPostRend
 		//std::shared_ptr<mxr::Group> _root;
 
 		//std::shared_ptr<mxr::Viewer> _viewer;
-
-
 	};
 }

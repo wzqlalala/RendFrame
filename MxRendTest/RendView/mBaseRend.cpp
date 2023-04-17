@@ -2,6 +2,7 @@
 #include "mBackGroundRender.h"
 #include "mQuadRender.h"
 #include "mBaseRender.h"
+#include "mFontRender.h"
 //工具类
 #include"mViewToolClass.h"
 //视图类
@@ -72,6 +73,8 @@ namespace MBaseRend
 		_afterviewer = MakeAsset<mxr::Viewer>();
 		_afterviewer->setSceneData(_afterroot);
 		_quadRender = MakeAsset<mQuadRender>(_app, _afterroot, _cameraMode, _pickMode, _multiplyPickMode);
+
+		_fontRender = MakeAsset<mFontRender>(_app, _root, this);
 		
 		makeCurrent();
 		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();

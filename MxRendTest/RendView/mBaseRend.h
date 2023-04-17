@@ -34,6 +34,7 @@ namespace MBaseRend
 	class mQuadRender;
 	class mBaseRender;
 	class mPostRender;
+	class mFontRender;
 	typedef QVector<shared_ptr<mBaseRender>> RenderArray;
 	class RENDVIEW_EXPORT mBaseRend : public QOpenGLWidget, protected QOpenGLFunctions_4_5_Core
 	{
@@ -62,6 +63,8 @@ namespace MBaseRend
 			}
 			return nullptr;
 		};
+
+		shared_ptr<mFontRender> getFontRender() { return _fontRender; };
 
 		virtual shared_ptr<MPostRend::mPostRender> getPostRender() { return nullptr; };
 
@@ -175,6 +178,9 @@ namespace MBaseRend
 		RenderArray _beforeRenderArray;
 
 		RenderArray _afterRenderArray;
+
+		//ÎÄ×ÖäÖÈ¾
+		std::shared_ptr<mFontRender> _fontRender;
 
 		//¾ØÐÎ¿ò
 		std::shared_ptr<mQuadRender> _quadRender;

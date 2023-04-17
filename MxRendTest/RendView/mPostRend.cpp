@@ -10,7 +10,6 @@ namespace MPostRend
 
 	mPostRend::mPostRend(const QString& name):mBaseRend( name)
 	{
-
 		qDebug() << "Post Struct";
 	}
 
@@ -23,9 +22,9 @@ namespace MPostRend
 		context->makeCurrent(context->surface());
 
 		shared_ptr<mPostRender> postRender = make_shared<mPostRender>(_app, _root, this);
-		this->addBeforeRender(postRender);
+		this->addBeforeRender(postRender);	
 
-		shared_ptr<mGlobalAxisRender> globalAxisRender = make_shared<mGlobalAxisRender>(_app, _root);
+		shared_ptr<mGlobalAxisRender> globalAxisRender = make_shared<mGlobalAxisRender>(_app, _root, _fontRender);
 		this->addBeforeRender(globalAxisRender);
 
 		qDebug() << "Post Initial";

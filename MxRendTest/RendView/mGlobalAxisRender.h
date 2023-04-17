@@ -29,7 +29,7 @@ namespace MBaseRend
 	class mGlobalAxisRender :public mBaseRender
 	{
 	public:
-		mGlobalAxisRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> parent);
+		mGlobalAxisRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> parent, std::shared_ptr<mFontRender> fontRender);
 
 		~mGlobalAxisRender();
 

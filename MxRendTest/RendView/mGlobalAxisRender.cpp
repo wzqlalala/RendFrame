@@ -20,7 +20,7 @@ namespace MBaseRend
 	//EBOË÷ÒýÊý¾Ý
 	QVector<GLuint> mGlobalAxisRender::_EBOGlobalAxisData;
 
-	mGlobalAxisRender::mGlobalAxisRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> parent) :mBaseRender(app, parent)
+	mGlobalAxisRender::mGlobalAxisRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> parent, std::shared_ptr<mFontRender> fontRender) :mBaseRender(app, parent)
 	{
 		qDebug() << "mGlobalAxisRender" << QString::number(long long int(QOpenGLContext::currentContext()), 16);
 		this->makeCurrent();
@@ -56,7 +56,7 @@ namespace MBaseRend
 		_drawable->setStateSet(_state);
 
 		_parent->addChild(_drawable);
-		_fontRender = MakeAsset<mFontRender>(_app,_parent);
+		_fontRender = fontRender;
 		_fontRender->appendGloabalAxisFont();
 	}
 

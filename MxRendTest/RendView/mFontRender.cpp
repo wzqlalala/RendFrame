@@ -77,7 +77,7 @@ namespace MBaseRend
 	}
 	mFontRender::~mFontRender()
 	{
-		
+
 	}
 	void mFontRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
 	{
@@ -121,6 +121,14 @@ namespace MBaseRend
 		fonts->AppendFontVertexAndTexcoord(txt, 2, 3);
 		fonts->AppendFontV_Vector2(txt, pos, 4);
 		_fixedFonts[key] = fonts;
+	}
+	void mFontRender::setFixedFontIsShow(QString key, bool isShow)
+	{
+		auto value = _fixedFonts.value(key);
+		if (value)
+		{
+			value->setIsShow(isShow);
+		}
 	}
 	void mFontRender::appendGloabalAxisFont()
 	{
@@ -190,6 +198,22 @@ namespace MBaseRend
 		_drawable = MakeAsset<Drawable>();
 
 		_parent->addChild(_drawable);
+	}
+
+	mBaseFont::~mBaseFont()
+	{
+		if (_parent)
+		{
+			_parent->addChild(_drawable);
+		}
+	}
+
+	void mBaseFont::setIsShow(bool isShow)
+	{
+		if (_drawable)
+		{
+			_drawable->setNodeMask(isShow?0:1);
+		}
 	}
 
 	void mBaseFont::AppendFontVertexAndTexcoord(QVector<QString> txt, int vlocation, int tlocation)

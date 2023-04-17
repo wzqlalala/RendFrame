@@ -46,9 +46,11 @@ namespace MBaseRend
 	public:
 		mBaseFont(std::shared_ptr<mxr::Group> parent);
 
-		~mBaseFont() {};
+		~mBaseFont();
 
 		void setStateSet(std::shared_ptr<mxr::StateSet> stateSet) { _drawable->setStateSet(stateSet); };
+
+		void setIsShow(bool isShow);
 
 		//文字基本数据，位置和纹理坐标
 		void AppendFontVertexAndTexcoord(QVector<QString> txt, int vlocation, int tlocation);
@@ -77,7 +79,8 @@ namespace MBaseRend
 
 		void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView) override;
 
-		void appendFixedFont(QString key, QVector<QVector2D> pos, QVector<QString> txt, QVector3D color = QVector3D(1,1,1), float size = 1.0);
+		void appendFixedFont(QString key, QVector<QVector2D> pos, QVector<QString> txt, QVector3D color = QVector3D(1,1,1), float size = 1.0);//添加固定文字显示
+		void setFixedFontIsShow(QString key, bool isShow);
 
 		void appendGloabalAxisFont();//添加全局坐标系文字显示
 
