@@ -59,7 +59,7 @@ namespace MBaseRend
 		QOpenGLContext *context = QOpenGLContext::currentContext();
 		//qDebug() << "initializeGL" << QString::number(long long int(context->surface()), 16);
 		_app->setContext(context);
-		glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
+		//glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能（已经被核心模式废除）
 		glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
 		_modelView = MakeAsset<mModelView>();
 		_commonView = MakeAsset<mCommonView>();
