@@ -119,12 +119,16 @@ namespace MBaseRend
 		{
 			qDebug() << error;
 		}
-		for (auto baseRender : _renderArray)
+		for (auto baseRender : _beforeRenderArray)
 		{
 			baseRender->updateUniform(_modelView, _commonView);
 		}
 		_quadRender->draw(_polygonVertexs, SCR_WIDTH, SCR_HEIGHT);
 		_afterviewer->noClearRun();
+		for (auto baseRender : _afterRenderArray)
+		{
+			baseRender->updateUniform(_modelView, _commonView);
+		}
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, QOpenGLContext::currentContext()->defaultFramebufferObject());
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FBO->handle());
 		glBlitFramebuffer(0, 0, width(), height(), 0, 0, FBO->width(), FBO->height(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);	
@@ -165,7 +169,15 @@ namespace MBaseRend
 				*_viewOperateMode = ViewOperateMode::PickOperate;
 				if (*_pickMode == PickMode::SoloPick)
 				{
-					for (auto render : _renderArray)
+					for (auto render : _beforeRenderArray)
+					{
+						if (render->getIsDragSomething(QVector2D(nowX, nowY)))
+						{
+							*_pickMode = PickMode::DragPick;
+							break;
+						}
+					}
+					for (auto render : _afterRenderArray)
 					{
 						if (render->getIsDragSomething(QVector2D(nowX, nowY)))
 						{
@@ -205,7 +217,7 @@ namespace MBaseRend
 			if (*_pickMode == PickMode::SoloPick)
 			{
 				_polygonVertexs.append(QVector2D(nowX, nowY));
-				for (auto render : _renderArray)
+				for (auto render : _beforeRenderArray)
 				{
 					makeCurrent();
 					/*
@@ -228,10 +240,21 @@ namespace MBaseRend
 					render->startPick(_polygonVertexs);
 					FBO->release();
 				}
+				for (auto render : _afterRenderArray)
+				{
+					makeCurrent();
+					FBO->bind();
+					render->startPick(_polygonVertexs);
+					FBO->release();
+				}
 			}
 			else if (*_pickMode == PickMode::MultiplyPick)
 			{
-				for (auto render : _renderArray)
+				for (auto render : _beforeRenderArray)
+				{
+					render->startPick(_polygonVertexs);
+				}
+				for (auto render : _afterRenderArray)
 				{
 					render->startPick(_polygonVertexs);
 				}
@@ -291,7 +314,11 @@ namespace MBaseRend
 		{
 			if (*_pickMode == PickMode::DragPick)
 			{
-				for (auto render : _renderArray)
+				for (auto render : _beforeRenderArray)
+				{
+					render->dragSomething(QVector2D(nowX, nowY));
+				}
+				for (auto render : _afterRenderArray)
 				{
 					render->dragSomething(QVector2D(nowX, nowY));
 				}
@@ -341,29 +368,47 @@ namespace MBaseRend
 		qDebug() << "Base Distruct";
 
 	}
-	void mBaseRend::addRender(shared_ptr<mBaseRender> baseRender)
+	void mBaseRend::addBeforeRender(shared_ptr<mBaseRender> baseRender)
 	{
-		if (_renderArray.contains(baseRender))
+		if (_beforeRenderArray.contains(baseRender))
 		{
 			return;
 		}
 		mBaseRender *t = baseRender.get();
 		QObject::connect(t, SIGNAL(update()), this, SLOT(update()));
-		_renderArray.append(baseRender);
+		_beforeRenderArray.append(baseRender);
 	}
-	void mBaseRend::removeRender(shared_ptr<mBaseRender> baseRender)
+	void mBaseRend::removeBeforeRender(shared_ptr<mBaseRender> baseRender)
 	{
-		_renderArray.removeOne(baseRender);
+		_beforeRenderArray.removeOne(baseRender);
+		baseRender.reset();
+	}
+	void mBaseRend::addAfterRender(shared_ptr<mBaseRender> baseRender)
+	{
+		if (_afterRenderArray.contains(baseRender))
+		{
+			return;
+		}
+		mBaseRender *t = baseRender.get();
+		QObject::connect(t, SIGNAL(update()), this, SLOT(update()));
+		_afterRenderArray.append(baseRender);
+	}
+	void mBaseRend::removeAfterRender(shared_ptr<mBaseRender> baseRender)
+	{
+		_afterRenderArray.removeOne(baseRender);
 		baseRender.reset();
 	}
 	void mBaseRend::clearRender()
 	{
-		for (auto baseRender : _renderArray)
+		for (auto baseRender : _beforeRenderArray)
 		{
 			baseRender.reset();
-			//baseRender->updateUniform(_modelView, _commonView);
 		}
-		_renderArray.clear();
+		for (auto baseRender : _afterRenderArray)
+		{
+			baseRender.reset();
+		}
+		_beforeRenderArray.clear();
 	}
 	void mBaseRend::setCameraKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers> buttons, CameraOperateMode cameraOperateMode)
 	{

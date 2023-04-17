@@ -309,7 +309,7 @@ namespace MPostRend
 		_pickData = new mPostMeshPickData;
 		_highLightRender = make_shared<mPostHighLightRender>(_rendStatus, _pickData);
 
-		this->doneCurrent();
+		//this->doneCurrent();
 	}
 	bool mPostRender::getIsDragSomething(QVector2D pos)
 	{
@@ -425,7 +425,7 @@ namespace MPostRend
 		{
 			_oneFrameRender.reset();
 		}
-		_oneFrameRender = make_shared<mPostOneFrameRender>(_rendStatus, oneFrameData, postOneFrameRendData);
+		_oneFrameRender = make_shared<mPostOneFrameRender>(_app, _rendStatus, oneFrameData, postOneFrameRendData);
 		if (!_texture)
 		{
 			mPostColorTableData *table = postOneFrameRendData->getRendColorTable();
@@ -743,7 +743,7 @@ namespace MPostRend
 		mOneFrameData1 *oneFrameData = _dataPost->getOneFrameData(id);
 
 		mPostOneFrameRendData *newFrameRendData = new mPostOneFrameRendData(*postOneFrameRendData);
-		_oneFrameAnimationRender = make_shared<mPostOneFrameRender>(_rendStatus, oneFrameData, newFrameRendData);
+		_oneFrameAnimationRender = make_shared<mPostOneFrameRender>(_app, _rendStatus, oneFrameData, newFrameRendData);
 		_oneFrameAnimationRender->setFaceStateSet(_faceStateSet);
 		_oneFrameAnimationRender->setFaceTransparentNoDeformationStateSet(_faceTransparentNodeformationStateSet);
 		_oneFrameAnimationRender->setFaceTransparentStateSet(_faceTransparentStateSet);

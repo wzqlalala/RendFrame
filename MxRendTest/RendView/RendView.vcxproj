@@ -43,27 +43,28 @@
     <Import Project="$(QtMsBuild)\qt_defaults.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <ExecutablePath>$(VC_ExecutablePath_x64);$(WindowsSDK_ExecutablePath);$(VS_ExecutablePath);$(MSBuild_ExecutablePath);$(FxCopDir);$(PATH);</ExecutablePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
-      <AdditionalDependencies>RendBase.lib;RendData.lib;RendBasic.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\x64\Debug;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>RendBase.lib;RendData.lib;RendBasic.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\x64\Debug;..\x64\freetype_2.10.4_VS2017\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\RendBase;..\RendBase\spdlog\include;.\;..\RendData;..\RendBasic;$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\RendBase;..\RendBase\spdlog\include;.\;..\RendData;..\RendBasic;$(Qt_INCLUDEPATH_);..\x64\freetype_2.10.4_VS2017\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>
       </LanguageStandard>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\RendBase;..\RendBase\spdlog\include;.\;..\RendData;..\RendBasic;$(Qt_INCLUDEPATH_);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\RendBase;..\RendBase\spdlog\include;.\;..\RendData;..\RendBasic;$(Qt_INCLUDEPATH_);..\x64\freetype_2.10.4_VS2017\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>..\x64\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>RendBase.lib;RendData.lib;RendBasic.lib;$(Qt_LIBS_);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\x64\Release;..\x64\freetype_2.10.4_VS2017\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>RendBase.lib;RendData.lib;RendBasic.lib;$(Qt_LIBS_);freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
@@ -109,11 +110,15 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\RendData\mPostRendStatus.cpp" />
+    <ClCompile Include="mFontRender.cpp" />
+    <ClCompile Include="mGlobalAxisRender.cpp" />
     <ClCompile Include="mPostCuttingPlaneRender.cpp" />
     <ClCompile Include="mPostHighLightRender.cpp" />
     <ClCompile Include="mQuadRender.cpp" />
     <ClCompile Include="tiny_obj_loader.cc" />
     <ClInclude Include="..\RendData\mPostRendStatus.h" />
+    <ClInclude Include="mFontRender.h" />
+    <ClInclude Include="mGlobalAxisRender.h" />
     <ClInclude Include="mPostCuttingPlaneRender.h" />
     <QtMoc Include="mQuadRender.h" />
     <ClInclude Include="mPostHighLightRender.h" />

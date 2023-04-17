@@ -1,6 +1,7 @@
 #include "mPostOneFrameRender.h"
 #include "mPostModelRender.h"
 #include "mPostCuttingPlaneRender.h"
+#include "mFontRender.h"
 
 #include "mPostRendStatus.h"
 #include <renderpch.h>
@@ -26,7 +27,8 @@ using namespace mxr;
 using namespace std;
 namespace MPostRend
 {
-	mPostOneFrameRender::mPostOneFrameRender(shared_ptr<mPostRendStatus> rendStatus, mOneFrameData1 *oneFrameData, mPostOneFrameRendData *oneFrameRendData) : _rendStatus(rendStatus), _oneFrameData(oneFrameData), _oneFrameRendData(oneFrameRendData)
+	mPostOneFrameRender::mPostOneFrameRender(std::shared_ptr<mxr::Application> app, shared_ptr<mPostRendStatus> rendStatus, mOneFrameData1 *oneFrameData, mPostOneFrameRendData *oneFrameRendData) : 
+		_app(app), _rendStatus(rendStatus), _oneFrameData(oneFrameData), _oneFrameRendData(oneFrameRendData)
 	{
 		_cuttingPlaneStateSet = nullptr;
 
@@ -36,6 +38,10 @@ namespace MPostRend
 		this->initial();
 
 		_modelRender = make_shared<mPostModelRender>(_geode, _rendStatus, oneFrameData, oneFrameRendData);
+
+		_fontRender = make_shared<MBaseRend::mFontRender>(_app, _geode);
+
+		_fontRender->appendFixedFont("test", QVector<QVector2D>{QVector2D(0.5, 0.5)}, QVector<QString>{QString("test")});
 	}
 	mPostOneFrameRender::~mPostOneFrameRender()
 	{
@@ -79,6 +85,10 @@ namespace MPostRend
 			}
 			//_modelRender->setTexture(_texture);
 			//_modelRender->setDistancePlane(cutplanes);
+		}
+		if (_fontRender)
+		{
+			_fontRender->updateUniform(modelView, commonView);
 		}
 		_viewer->noClearRun();
 	}

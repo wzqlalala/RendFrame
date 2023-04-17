@@ -53,6 +53,12 @@
     <ClInclude Include="mPostHighLightRender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mFontRender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mGlobalAxisRender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mBackGroundRender.cpp">
@@ -104,6 +110,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mPostHighLightRender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mFontRender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mGlobalAxisRender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

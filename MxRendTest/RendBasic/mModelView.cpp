@@ -7,6 +7,7 @@ namespace MViewBasic
 {
 	mModelView::mModelView(QObject *parent) : QObject(parent)
 	{
+		InitialModelView();
 	}
 	mModelView::~mModelView()
 	{

@@ -1,5 +1,6 @@
 #include "mPostRend.h"
 #include "mPostRender.h"
+#include "mGlobalAxisRender.h"
 
 ////MxRender
 #include <renderpch.h>
@@ -9,15 +10,6 @@ namespace MPostRend
 
 	mPostRend::mPostRend(const QString& name):mBaseRend( name)
 	{
-
-		//_root = MakeAsset<mxr::Group>();
-
-		//QSurfaceFormat format;
-		//format.setMajorVersion(4);
-		//format.setMinorVersion(5);
-		//format.setProfile(QSurfaceFormat::OpenGLContextProfile::CoreProfile);
-		//format.setSamples(4);
-		//setFormat(format);
 
 		qDebug() << "Post Struct";
 	}
@@ -31,31 +23,11 @@ namespace MPostRend
 		context->makeCurrent(context->surface());
 
 		shared_ptr<mPostRender> postRender = make_shared<mPostRender>(_app, _root, this);
-		this->addRender(postRender);
-		//glEnable(GL_FRAMEBUFFER_SRGB);
+		this->addBeforeRender(postRender);
 
-		//this->initializeOpenGLFunctions();
+		shared_ptr<mGlobalAxisRender> globalAxisRender = make_shared<mGlobalAxisRender>(_app, _root);
+		this->addBeforeRender(globalAxisRender);
 
-		/*mxr::Application::GetInstance()._context = context();
-
-		glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
-		glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
-		glEnable(GL_DEPTH_TEST);
-
-		mxr::Log::Init();
-		_viewer = MakeAsset<mxr::Viewer>();
-		_viewer->setSceneData(_root);
-
-		_bgRend = new mBackGroundRender(_root);*/
-
-		//glEnable(GL_DEPTH_TEST);
-		//glLineWidth(5.0);
-
-		//_app->GLContext()->functions()->glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
-		//_app->GLContext()->functions()->glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
-
-		//glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能
-		//glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
 		qDebug() << "Post Initial";
 	}
 
@@ -99,7 +71,7 @@ namespace MPostRend
 	}
 	shared_ptr<mPostRender> mPostRend::getPostRender()
 	{
-		shared_ptr<mBaseRender> baseRender = getFirstRender();
+		shared_ptr<mBaseRender> baseRender = getFirstBeforeRender();
 		if (baseRender)
 		{
 			return dynamic_pointer_cast<mPostRender>(baseRender);

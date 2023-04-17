@@ -162,11 +162,15 @@ namespace mxr
 
 		}*/
 
-		int allSize = 0;
 		std::map<int, int> vbosize;//vbo的大小
 		for (auto vbo : vbos)
 		{
 			vbosize[vbo.first] = vbo.second->Size();
+		}
+		int ibosize = 0;//ibo的大小
+		if (HaveIBO && _ibo)
+		{
+			ibosize = _ibo->Size();
 		}
 		std::map<int, std::map<int, DrawableData>> _drawabledatas;
 		for (int i = 0; i < _drawableattribute.size(); i++)
@@ -182,19 +186,17 @@ namespace mxr
 					if (_ibo)
 					{
 						int isize = _drawableattribute[i].drawable->getIndexAttribute()->size() * sizeof(GLuint);
-						const void*idata = _drawableattribute[i].drawable->getIndexAttribute()->data();
-						int _size = _ibo->Size() + isize;
-						ibo = MakeAsset<IBO>(_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
-						ibo->Copy(_ibo->ID(), ibo->ID(), 0, 0, _ibo->Size());
-						ibo->SetData(_ibo->Size(), isize, idata);
-						att = { (int)_ibo->Size() , _size };
+						int _size = ibosize + isize;
+						att = { ibosize, _size };
+						ibosize = _size;
 					}
 					else
 					{
 						int isize = _drawableattribute[i].drawable->getIndexAttribute()->size() * sizeof(GLuint);
-						const void*idata = _drawableattribute[i].drawable->getIndexAttribute()->data();
-						ibo = MakeAsset<IBO>(isize, idata, GL_DYNAMIC_STORAGE_BIT);
+						//const void*idata = _drawableattribute[i].drawable->getIndexAttribute()->data();
+						//ibo = MakeAsset<IBO>(isize, idata, GL_DYNAMIC_STORAGE_BIT);
 						att = { 0 , isize };
+						ibosize = isize;
 					}
 					_ibo = ibo;
 					_drawableattribute[i].drawable->getIndexAttribute()->setBufferAttribute(att);
@@ -272,9 +274,28 @@ namespace mxr
 				vbobool = true;
 				vbos[vsize.first] = MakeAsset<VBO>(vsize.second, nullptr, GL_DYNAMIC_STORAGE_BIT);
 			}
-
 		}
-		if (vbobool)
+		bool ibobool = false;//是否需要重新生成IBO
+		if (HaveIBO)
+		{
+			if (_ibo)
+			{
+				if (_ibo->Size() != ibosize)
+				{
+					asset_ref<IBO> newvbo = MakeAsset<IBO>(ibosize, nullptr, GL_DYNAMIC_STORAGE_BIT);
+					newvbo->Copy(_ibo->ID(), newvbo->ID(), 0, 0, _ibo->Size());
+					_ibo = newvbo;
+					ibobool = true;
+				}
+			}
+			else
+			{
+				ibobool = true;
+				_ibo = MakeAsset<IBO>(ibosize, nullptr, GL_DYNAMIC_STORAGE_BIT);
+			}
+		}
+
+		if (vbobool || ibobool)
 		{
 			for (int i = 0; i < _drawableattribute.size(); i++)
 			{
@@ -285,27 +306,10 @@ namespace mxr
 					isSetVAOFormat = false;
 					if (HaveIBO)
 					{
-						asset_ref<IBO> ibo;
-						BufferAttribute att;
-						if (_ibo)
-						{
-							int isize = _drawableattribute[i].drawable->getIndexAttribute()->size() * sizeof(GLuint);
-							const void*idata = _drawableattribute[i].drawable->getIndexAttribute()->data();
-							int _size = _ibo->Size() + isize;
-							ibo = MakeAsset<IBO>(_size, nullptr, GL_DYNAMIC_STORAGE_BIT);
-							ibo->Copy(_ibo->ID(), ibo->ID(), 0, 0, _ibo->Size());
-							ibo->SetData(_ibo->Size(), isize, idata);
-							att = { (int)_ibo->Size() , _size };
-						}
-						else
-						{
-							int isize = _drawableattribute[i].drawable->getIndexAttribute()->size() * sizeof(GLuint);
-							const void*idata = _drawableattribute[i].drawable->getIndexAttribute()->data();
-							ibo = MakeAsset<IBO>(isize, idata, GL_DYNAMIC_STORAGE_BIT);
-							att = { 0 , isize };
-						}
-						_ibo = ibo;
-						_drawableattribute[i].drawable->getIndexAttribute()->setBufferAttribute(att);
+						auto index = _drawableattribute[i].drawable->getIndexAttribute();
+						BufferAttribute att = index->getBufferAttribute();
+						_ibo->SetData(att._start, index->size() * sizeof(GLuint), index->data());
+						_drawableattribute[i].drawable->getIndexAttribute()->SetBuffer(_ibo);					
 					}
 
 					for (auto &item : _drawabledata)
@@ -321,6 +325,10 @@ namespace mxr
 				else//编译过的，需要拷贝之前的vbo数据
 				{
 					isSetVAOFormat = false;
+					if (HaveIBO)
+					{
+						_drawableattribute[i].drawable->getIndexAttribute()->SetBuffer(_ibo);
+					}
 					for (auto &item : _drawabledata)
 					{
 						_drawableattribute[i].drawable->getVertexAttribArray(item.first)->SetBuffer(vbos[item.first]);
@@ -329,18 +337,6 @@ namespace mxr
 				}
 			}
 		}
-
-		//for (int i = 0; i < _drawableattribute.size(); i++)
-		//{
-		//	for (auto item : vbos)
-		//	{
-		//		_drawableattribute[i].drawable->getVertexAttribArray(item.first)->SetBuffer(item.second);
-		//	}
-		//	if (_drawableattribute[i].drawable->getIndexAttribute())
-		//	{
-		//		_drawableattribute[i].drawable->getIndexAttribute()->SetBuffer(_ibo);
-		//	}
-		//}
 
 		if (!isSetVAOFormat)
 		{

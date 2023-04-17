@@ -49,18 +49,29 @@ namespace MBaseRend
 
 		shared_ptr<mModelView> getCamera() {return _modelView;};
 
-		shared_ptr<mBaseRender> getFirstRender() { 
-			if (!_renderArray.empty()) {
-				return _renderArray.first();
+		shared_ptr<mBaseRender> getFirstBeforeRender() { 
+			if (!_beforeRenderArray.empty()) {
+				return _beforeRenderArray.first();
+			}
+			return nullptr;
+		};
+
+		shared_ptr<mBaseRender> getFirstAfterRender() {
+			if (!_beforeRenderArray.empty()) {
+				return _beforeRenderArray.first();
 			}
 			return nullptr;
 		};
 
 		virtual shared_ptr<MPostRend::mPostRender> getPostRender() { return nullptr; };
 
-		void addRender(shared_ptr<mBaseRender> baseRender);
+		void addBeforeRender(shared_ptr<mBaseRender> baseRender);
 
-		void removeRender(shared_ptr<mBaseRender> baseRender);
+		void removeBeforeRender(shared_ptr<mBaseRender> baseRender);
+
+		void addAfterRender(shared_ptr<mBaseRender> baseRender);
+
+		void removeAfterRender(shared_ptr<mBaseRender> baseRender);
 
 		void clearRender();
 
@@ -161,7 +172,9 @@ namespace MBaseRend
 
 		std::shared_ptr<mCommonView> _commonView;
 
-		RenderArray _renderArray;
+		RenderArray _beforeRenderArray;
+
+		RenderArray _afterRenderArray;
 
 		//¾ØÐÎ¿ò
 		std::shared_ptr<mQuadRender> _quadRender;

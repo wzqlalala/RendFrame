@@ -4,6 +4,7 @@ namespace MViewBasic
 {
 	mCommonView::mCommonView()
 	{
+		InitialCommonView();
 	}
 
 	mCommonView::~mCommonView()

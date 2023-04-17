@@ -11,6 +11,8 @@
 #include "mMeshViewEnum.h"
 #include "mBasicStructor.h"
 
+#include "app.h"
+
 namespace mxr
 {
 	class Shader;
@@ -34,6 +36,10 @@ namespace MDataPost
 	class mOneFrameData1;
 	class mPostOneFrameRendData;
 }
+namespace MBaseRend
+{
+	class mFontRender;
+}
 using namespace MViewBasic;
 using namespace MDataPost;
 using namespace std;
@@ -46,7 +52,7 @@ namespace MPostRend
 	{
 	public:
 
-		mPostOneFrameRender(shared_ptr<mPostRendStatus> rendStatus, mOneFrameData1 *oneFrameData, mPostOneFrameRendData *oneFrameRendData);
+		mPostOneFrameRender(std::shared_ptr<mxr::Application> app, shared_ptr<mPostRendStatus> rendStatus, mOneFrameData1 *oneFrameData, mPostOneFrameRendData *oneFrameRendData);
 
 		~mPostOneFrameRender();
 
@@ -114,7 +120,13 @@ namespace MPostRend
 	private:
 
 		void initial();
+
+		void makeCurrent() { _app->GLContext()->makeCurrent(_app->GLContext()->surface()); };
+
+		void doneCurrent() { _app->GLContext()->doneCurrent(); };
 	private:
+		std::shared_ptr<mxr::Application> _app;
+
 		std::shared_ptr<mxr::Geode> _geode;//当前总节点
 
 		std::shared_ptr<mPostRendStatus> _rendStatus;
@@ -125,6 +137,8 @@ namespace MPostRend
 		std::shared_ptr<mPostModelRender> _modelRender;	//模型渲染
 
 		QVector<std::shared_ptr<mPostCuttingPlaneRender>> _cuttingPlaneRenders;//切面渲染
+
+		std::shared_ptr<MBaseRend::mFontRender> _fontRender;//文字渲染
 
 		std::shared_ptr<mxr::Texture> _texture;//颜色表纹理
 

@@ -95,7 +95,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 
 		_modelRender = make_shared<MBaseRend::mModelTestRender>(_preRend->getApplication(), _preRend->getRoot());
 		auto model = _modelRender->setData(attrib, shapes, materials);
-		_preRend->addRender(_modelRender);
+		_preRend->addBeforeRender(_modelRender);
 		_preRend->getCamera()->ResetOrthoAndCamera(model.first, model.second);
 	}
 
@@ -117,7 +117,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		}
 		_postRender->setPostData(dp);
 		_postRender->setRendCurrentFrameData(oneFrameRendData);	
-		_postRend->addRender(_postRender);
+		_postRend->addBeforeRender(_postRender);
 		Space::AABB aabb = _postRender->getOneFrameRender()->getModelRender()->getModelAABB();
 		QVector3D center = (aabb.maxEdge + aabb.minEdge) / 2.0;
 		float radius = (aabb.maxEdge - aabb.minEdge).length()/2.0;
@@ -445,7 +445,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		if (!_testRender)
 		{
 			_testRender = make_shared<MBaseRend::mTestRender>(_preRend->getApplication(), _preRend->getRoot());
-			_preRend->addRender(_testRender);
+			_preRend->addBeforeRender(_testRender);
 		}
 		_testRender->appendOnePart();
 		_preRend->getCamera()->ResetOrthoAndCamera(QVector3D(0, 0, 0), 5.0);

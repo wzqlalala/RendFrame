@@ -18,23 +18,24 @@ namespace MBaseRend
 		qDebug() << "mBaseRend::paintGL()" << QString::number(long long int(context), 16);
 
 		_backGroundMode = GradientL_R;
-		_backGroundVertex = QVector<QVector2D>{ QVector2D(-1,-1),QVector2D(-1,1), QVector2D(1,1),QVector2D(-1,-1), QVector2D(1,1), QVector2D(1,-1) };//左下，左上，右上，右下
+		_backGroundVertex = QVector<QVector2D>{ QVector2D(-1,-1),QVector2D(-1,1), QVector2D(1,1), QVector2D(1,-1) };//左下，左上，右上，右下
 		//for (QVector2D &v: _backGroundVertex)
 		//{
 		//	v /= id;
 		//}
-		_backGroundColor = QVector<QVector3D>{ QVector3D(0.59,0.78,0.93),QVector3D(0.59,0.78,0.93),QVector3D(0.88,0.93,0.98), QVector3D(0.59,0.78,0.93),QVector3D(0.88,0.93,0.98),QVector3D(0.88,0.93,0.98) };//左下，左上，右上，右下
+		_backGroundColor = QVector<QVector3D>{ QVector3D(0.59,0.78,0.93),QVector3D(0.59,0.78,0.93),QVector3D(0.88,0.93,0.98), QVector3D(0.88,0.93,0.98) };//左下，左上，右上，右下
+		QVector<uint> index{ 0,1,2,2,3,0};
 		for (QVector3D &v : _backGroundColor)
 		{
 			v /= id;
 		}
 		id++;
 		_backgroundShader = mShaderManage::GetInstance()->GetShader("BackGround");
-		asset_ref<Vec2Array> _vertex = MakeAsset<Vec2Array>(_backGroundVertex);
-		asset_ref<Vec3Array> _color = MakeAsset<Vec3Array>(_backGroundColor);
 		_drawable = MakeAsset<Drawable>();
-		_drawable->setVertexAttribArray(0, _vertex);
-		_drawable->setVertexAttribArray(1, _color);
+		_drawable->setVertexAttribArray(0, MakeAsset<Vec2Array>(_backGroundVertex));
+		_drawable->setVertexAttribArray(1, MakeAsset<Vec3Array>(_backGroundColor));
+		_drawable->setIndexAttribute(MakeAsset<UIntArray>(index));
+
 		asset_ref<StateSet> set = _drawable->getOrCreateStateSet();
 		set->setAttributeAndModes(MakeAsset<Depth>(), 0);
 		set->setAttributeAndModes(MakeAsset<PolygonMode>(), 1);

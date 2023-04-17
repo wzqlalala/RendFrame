@@ -62,7 +62,11 @@ namespace MDataPost
 	class mQuadPick :public mBasePick
 	{
 	public:
-		mQuadPick(QMatrix4x4 pvm, int w, int h, QVector<QVector2D> multiQuad, QVector2D center, QVector2D boxXY_2) :mBasePick(pvm, w, h), _multiQuad(multiQuad), _center(center), _boxXY_2(boxXY_2) {};
+		mQuadPick(QMatrix4x4 pvm, int w, int h, QVector<QVector2D> multiQuad) :mBasePick(pvm, w, h), _multiQuad(multiQuad)
+		{
+			_center = (_multiQuad.first() + _multiQuad.last()) / 2.0;
+			_boxXY_2 = _multiQuad.first() - _center; _boxXY_2[0] = qAbs(_boxXY_2[0]); _boxXY_2[1] = qAbs(_boxXY_2[1]);
+		};
 
 		bool getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree) override;
 
@@ -84,7 +88,10 @@ namespace MDataPost
 	class mPolygonPick :public mBasePick
 	{
 	public:
-		mPolygonPick(QMatrix4x4 pvm, int w, int h, QVector<QVector2D> multiQuad, QVector2D center):mBasePick(pvm, w, h),_multiQuad(multiQuad), _center(center){};
+		mPolygonPick(QMatrix4x4 pvm, int w, int h, QVector<QVector2D> multiQuad):mBasePick(pvm, w, h),_multiQuad(multiQuad)
+		{
+			_center = (_multiQuad.first() + _multiQuad.last()) / 2.0;
+		};
 
 		bool getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree) override;
 
@@ -378,20 +385,20 @@ namespace MDataPost
 		 */
 		QVector<QVector2D> soloQuad;
 
-		//框选矩形
+		////框选矩形
 
-		/*
-		 * 矩形和多边形框选位置
-		 */
-		QVector<QVector2D> multiQuad{};
+		///*
+		// * 矩形和多边形框选位置
+		// */
+		//QVector<QVector2D> multiQuad{};
 
-		/*
-		* 圆形框选位置
-		*/
-		QVector3D _centerPoint; QVector3D _centerDirection; double _radius; QVector2D _centerScreenPoint; double _screenRadius;
+		///*
+		//* 圆形框选位置
+		//*/
+		//QVector3D _centerPoint; QVector3D _centerDirection; double _radius; QVector2D _centerScreenPoint; double _screenRadius;
 
-		//矩形框选中心和其半个宽度和半个高度
-		QVector2D _centerBox, _boxXY_2;
+		////矩形框选中心和其半个宽度和半个高度
+		//QVector2D _centerBox, _boxXY_2;
 
 		/*
 		 * 是否完成
