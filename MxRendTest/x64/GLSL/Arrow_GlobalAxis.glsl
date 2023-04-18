@@ -35,15 +35,15 @@ vec3 GetGlobleAxisPosition(int x, int y)
 	//传递颜色
 	if(int(aType) == 0)
 	{
-		Color = vec3(255,0,0);		
+		Color = vec3(1,0,0);		
 	}
 	else if(int(aType) == 1)
 	{
-		Color =  vec3(0,255,0);	
+		Color =  vec3(0,1,0);	
 	}
 	else if(int(aType) == 2)
 	{
-		Color =  vec3(0,0,255);		
+		Color =  vec3(0,0,1);		
 	}
 	
 	
@@ -80,7 +80,7 @@ in vec3 Color;
 void main()
 {	
 	
-	 FragColor = vec4(Color.x/255.0,Color.y/255.0,Color.z/255.0,1.0);
+	 FragColor = vec4(Color,1.0);
 	 //FragColor = vec4(1.0,1.0,1.0,1.0);
 	
 } 

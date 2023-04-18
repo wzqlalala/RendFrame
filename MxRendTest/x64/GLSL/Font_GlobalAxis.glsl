@@ -39,7 +39,7 @@ vec3 GetGlobleAxisPosition(int x, int y)
 }
 void main()
 {
-	Color = vec3(255,255,255);//白色
+	Color = vec3(1,1,1);//白色
 	TexCoord = vec2(aTexCoord.x/1024.0,aTexCoord.y/1024.0);  //1024为纹理的像素大小
 
 	mat4 model;
@@ -93,7 +93,7 @@ void main()
 {
 
 	vec4 sampled = vec4(1.0, 1.0, 1.0, texture(Texture, TexCoord).r);
-	FragColor = vec4( Color,1.0)* sampled;
+	FragColor = vec4(Color,1.0)* sampled;
      
 }
 #endif

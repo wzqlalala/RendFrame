@@ -58,6 +58,10 @@ namespace MBaseRend
 	{
 
 	}
+	void mArrowRender::clearAllRender()
+	{
+		QHash<QString, std::shared_ptr<mBaseArrow>>().swap(_commonArrows);
+	}
 	void mArrowRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
 	{
 		QMatrix4x4 projection, view, model;
@@ -108,11 +112,11 @@ namespace MBaseRend
 	void mArrowRender::appendGloabalAxisArrow()
 	{
 		makeCurrent();
-		std::shared_ptr<mBaseArrow> arrows = MakeAsset<mBaseArrow>(_parent);
-		arrows->setStateSet(_fixedArrowFontState);
-		arrows->AppendArrowV_Int(3, _Arrow_Vertices.size(), QVector<int>{0,1,2}, 0);
-		arrows->AppendArrowVertex(3, 1);
-		arrows->AppendArrowIntIndex();
+		_globalAxisArrow = MakeAsset<mBaseArrow>(_parent);
+		_globalAxisArrow->setStateSet(_fixedArrowFontState);
+		_globalAxisArrow->AppendArrowV_Int(3, _Arrow_Vertices.size(), QVector<int>{0,1,2}, 0);
+		_globalAxisArrow->AppendArrowVertex(3, 1);
+		_globalAxisArrow->AppendArrowIntIndex();
 	}
 
 	mBaseArrow::mBaseArrow(std::shared_ptr<mxr::Group> parent)
@@ -128,7 +132,7 @@ namespace MBaseRend
 	{
 		if (_parent)
 		{
-			_parent->addChild(_drawable);
+			_parent->removeChild(_drawable);
 		}
 	}
 

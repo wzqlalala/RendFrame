@@ -5,6 +5,8 @@
 #include "mPostModelRender.h"
 #include "mPostAnimationRender.h"
 #include "mPostHighLightRender.h"
+#include "mFontRender.h"
+#include "mArrowRender.h"
 
 #include <renderpch.h>
 #include "texture.h"
@@ -411,6 +413,8 @@ namespace MPostRend
 			_oneFrameRender.reset();
 		}
 		deleteAnimation();
+		_baseRend->getFontRender()->clearAllRender();
+		_baseRend->getArrowRender()->clearAllRender();
 	}
 	void mPostRender::setRendCurrentFrameData(mPostOneFrameRendData* postOneFrameRendData)
 	{

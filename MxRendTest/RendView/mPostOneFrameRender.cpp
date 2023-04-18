@@ -46,6 +46,8 @@ namespace MPostRend
 		//_fontRender->appendFixedFont("test", QVector<QVector2D>{QVector2D(0.5, 0.5)}, QVector<QString>{QString("test")});
 		//_arrowRender->appendCommonArrow("test", QVector<QVector3D>{QVector3D(0, 0, 0)}, QVector<QVector3D>{QVector3D(1, 0, 0)});
 		//_fontRender->setFixedFontIsShow("test", false);
+		//_fontRender->appendFixedFont("test", QVector<QVector2D>{QVector2D(0.5, 0.5)}, QVector<QString>{QString("test2dfont")});
+		//_fontRender->appendCommonFont("test", QVector<QVector3D>{QVector3D(0.5, 0.5, 0.5)}, QVector<QString>{QString("test3dfont")});
 	}
 	mPostOneFrameRender::~mPostOneFrameRender()
 	{

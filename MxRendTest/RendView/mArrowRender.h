@@ -1,4 +1,8 @@
 #pragma once
+#include "rendview_global.h"
+//解决中文乱码
+#pragma execution_character_set("utf-8")
+
 #include <QVector2D>
 #include <QVector>
 #include <QVector3D>
@@ -59,13 +63,15 @@ namespace MBaseRend
 	};
 
 	class mBaseRend;
-	class mArrowRender : public mBaseRender
+	class RENDVIEW_EXPORT mArrowRender : public mBaseRender
 	{
 	public:
 
 		mArrowRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> parent, mBaseRend *baseRend = nullptr);
 
 		~mArrowRender();
+
+		void clearAllRender();
 
 		void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView) override;
 
@@ -81,6 +87,7 @@ namespace MBaseRend
 
 		QHash<QString, std::shared_ptr<mBaseArrow>> _commonArrows;
 
+		std::shared_ptr<mBaseArrow> _globalAxisArrow;
 	};
 }
 

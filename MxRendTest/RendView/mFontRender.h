@@ -1,4 +1,8 @@
 #pragma once
+#include "rendview_global.h"
+//解决中文乱码
+#pragma execution_character_set("utf-8")
+
 #include <QVector2D>
 #include <QVector>
 #include <QVector3D>
@@ -69,7 +73,7 @@ namespace MBaseRend
 	};
 
 	class mBaseRend;
-	class mFontRender : public mBaseRender
+	class RENDVIEW_EXPORT mFontRender : public mBaseRender
 	{
 	public:
 
@@ -77,10 +81,15 @@ namespace MBaseRend
 
 		~mFontRender();
 
+		void clearAllRender();
+
 		void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView) override;
 
 		void appendFixedFont(QString key, QVector<QVector2D> pos, QVector<QString> txt, QVector3D color = QVector3D(1,1,1), float size = 1.0);//添加固定文字显示
 		void setFixedFontIsShow(QString key, bool isShow);
+
+		void appendCommonFont(QString key, QVector<QVector3D> pos, QVector<QString> txt, QVector3D color = QVector3D(1, 1, 1), float size = 1.0);//添加固定文字显示
+		void setCommonFontIsShow(QString key, bool isShow);
 
 		void appendGloabalAxisFont();//添加全局坐标系文字显示
 
@@ -99,8 +108,13 @@ namespace MBaseRend
 
 		std::shared_ptr<mxr::StateSet> _fixedFontState;//不支持旋转、平移、缩放等的事件
 		std::shared_ptr<mxr::StateSet> _fixedAxisFontState;//不支持平移、缩放等的事件、支持旋转的事件
+		std::shared_ptr<mxr::StateSet> _commonFontState;//支持平移、旋转的事件
 
 		QHash<QString, std::shared_ptr<mBaseFont>> _fixedFonts;
+
+		QHash<QString, std::shared_ptr<mBaseFont>> _commonFonts;
+
+		std::shared_ptr<mBaseFont> _globalAxisFont;
 
 	};
 }

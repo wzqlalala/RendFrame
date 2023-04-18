@@ -6,6 +6,8 @@
 #include "mModelTestRender.h"
 #include "mPostOneFrameRender.h"
 #include "mPostModelRender.h"
+#include "mFontRender.h"
+#include "mArrowRender.h"
 #include "mModelView.h"
 
 #include "mDataPost1.h"
@@ -390,6 +392,17 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 
 		_postRend->setPickKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton, Qt::ShiftModifier), PickMode::MultiplyPick);
 		_postRend->setPickKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton, Qt::NoModifier), PickMode::SoloPick);
+	}
+	else if (event->key() == Qt::Key_P)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+
+		_postRend->getArrowRender()->appendCommonArrow("test", QVector<QVector3D>{QVector3D(0, 0, 0)}, QVector<QVector3D>{QVector3D(1, 0, 0)});
+		_postRend->getFontRender()->appendFixedFont("test", QVector<QVector2D>{QVector2D(0.5, 0.5)}, QVector<QString>{QString("test2dfont")});
+		_postRend->getFontRender()->appendCommonFont("test", QVector<QVector3D>{QVector3D(0.5, 0.5, 0.5)}, QVector<QString>{QString("test3dfont")});
 	}
 	else if (event->key() == Qt::Key_Asterisk)
 	{

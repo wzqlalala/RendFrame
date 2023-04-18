@@ -64,7 +64,7 @@ in float Depth;
 
 void main()
 {	
-	FragColor = vec4(Color.x/255.0,Color.y/255.0,Color.z/255.0,1.0);	 
+	FragColor = vec4(Color, 1.0);	 
 	//手动修改深度值，使其与添加载荷边界点的深度值保持一致
 	gl_FragDepth = Depth;
 }

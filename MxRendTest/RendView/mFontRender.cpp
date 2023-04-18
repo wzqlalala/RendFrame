@@ -59,9 +59,6 @@ namespace MBaseRend
 		_fixedAxisFontState->setTexture("Texture", textTexture);
 
 		_fixedFontState = MakeAsset<StateSet>();
-		asset_ref<Shader> FixedFontShader = mShaderManage::GetInstance()->GetShader("Font_Fixed");
-
-		_fixedFontState->setShader(FixedFontShader);
 		_fixedFontState->setUniform(MakeAsset<Uniform>("uView_font", QMatrix4x4()));
 		_fixedFontState->setUniform(MakeAsset<Uniform>("uProjection_font", QMatrix4x4()));
 		_fixedFontState->setUniform(MakeAsset<Uniform>("uModel_font", QMatrix4x4()));
@@ -69,15 +66,41 @@ namespace MBaseRend
 		_fixedFontState->setUniform(MakeAsset<Uniform>("uScr_height", float(0)));
 		_fixedFontState->setUniform(MakeAsset<Uniform>("uRatio", float(0)));
 
+		asset_ref<Shader> FixedFontShader = mShaderManage::GetInstance()->GetShader("Font_Fixed");
+		_fixedFontState->setShader(FixedFontShader);
 		_fixedFontState->setAttributeAndModes(MakeAsset<Depth>(), 0);
 		_fixedFontState->setAttributeAndModes(MakeAsset<PolygonMode>(), 1);
 		_fixedFontState->setAttributeAndModes(MakeAsset<BlendFunc>(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA), 1);
 		_fixedFontState->setTexture("Texture", textTexture);
 
+
+		_commonFontState = MakeAsset<StateSet>();
+		_commonFontState->setUniform(MakeAsset<Uniform>("uView_font", QMatrix4x4()));
+		_commonFontState->setUniform(MakeAsset<Uniform>("uProjection_font", QMatrix4x4()));
+		_commonFontState->setUniform(MakeAsset<Uniform>("uModel_font", QMatrix4x4()));
+		_commonFontState->setUniform(MakeAsset<Uniform>("uModel_m", QMatrix4x4()));
+		_commonFontState->setUniform(MakeAsset<Uniform>("uView_m", QMatrix4x4()));
+		_commonFontState->setUniform(MakeAsset<Uniform>("uProjection_m", QMatrix4x4()));
+		_commonFontState->setUniform(MakeAsset<Uniform>("uScr_width", float(0)));
+		_commonFontState->setUniform(MakeAsset<Uniform>("uScr_height", float(0)));
+		_commonFontState->setUniform(MakeAsset<Uniform>("uRatio", float(0)));
+
+		asset_ref<Shader> CommonFontShader = mShaderManage::GetInstance()->GetShader("Font_Common");
+		_commonFontState->setShader(CommonFontShader);
+		_commonFontState->setAttributeAndModes(MakeAsset<Depth>(), 0);
+		_commonFontState->setAttributeAndModes(MakeAsset<PolygonMode>(), 1);
+		_commonFontState->setAttributeAndModes(MakeAsset<BlendFunc>(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA), 1);
+		_commonFontState->setTexture("Texture", textTexture);
+
 	}
 	mFontRender::~mFontRender()
 	{
 
+	}
+	void mFontRender::clearAllRender()
+	{
+		QHash<QString, std::shared_ptr<mBaseFont>>().swap(_commonFonts);
+		QHash<QString, std::shared_ptr<mBaseFont>>().swap(_fixedFonts);
 	}
 	void mFontRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
 	{
@@ -109,6 +132,17 @@ namespace MBaseRend
 		_fixedFontState->getUniform("uScr_width")->SetData((float)modelView->SCR_WIDTH);
 		_fixedFontState->getUniform("uScr_height")->SetData((float)modelView->SCR_HEIGHT);
 		_fixedFontState->getUniform("uRatio")->SetData(_ratio);
+
+
+		_commonFontState->getUniform("uView_font")->SetData(view);
+		_commonFontState->getUniform("uProjection_font")->SetData(projection);
+		_commonFontState->getUniform("uModel_font")->SetData(model);
+		_commonFontState->getUniform("uModel_m")->SetData(modelView->_model);
+		_commonFontState->getUniform("uView_m")->SetData(modelView->_view);
+		_commonFontState->getUniform("uProjection_m")->SetData(modelView->_projection);
+		_commonFontState->getUniform("uScr_width")->SetData((float)modelView->SCR_WIDTH);
+		_commonFontState->getUniform("uScr_height")->SetData((float)modelView->SCR_HEIGHT);
+		_commonFontState->getUniform("uRatio")->SetData(_ratio);
 	}
 	void mFontRender::appendFixedFont(QString key, QVector<QVector2D> pos, QVector<QString> txt, QVector3D color, float size)
 	{
@@ -130,15 +164,35 @@ namespace MBaseRend
 			value->setIsShow(isShow);
 		}
 	}
+	void mFontRender::appendCommonFont(QString key, QVector<QVector3D> pos, QVector<QString> txt, QVector3D color, float size)
+	{
+		makeCurrent();
+		std::shared_ptr<mBaseFont> fonts = MakeAsset<mBaseFont>(_parent);
+		fonts->setStateSet(_commonFontState);
+
+		fonts->AppendFontVector3(txt, color, 0);
+		fonts->AppendFontFloat(txt, size, 1);
+		fonts->AppendFontVertexAndTexcoord(txt, 2, 3);
+		fonts->AppendFontV_Vector3(txt, pos, 4);
+		_commonFonts[key] = fonts;
+	}
+	void mFontRender::setCommonFontIsShow(QString key, bool isShow)
+	{
+		auto value = _commonFonts.value(key);
+		if (value)
+		{
+			value->setIsShow(isShow);
+		}
+	}
 	void mFontRender::appendGloabalAxisFont()
 	{
 		makeCurrent();
 		QVector<QString> txt = { "X","Y","Z" };
 		QVector<int> types = { 0,1,2 };
-		std::shared_ptr<mBaseFont> fonts = MakeAsset<mBaseFont>(_parent);
-		fonts->setStateSet(_fixedAxisFontState);
-		fonts->AppendFontV_Int(txt, types, 0);
-		fonts->AppendFontVertexAndTexcoord(txt, 1, 2);
+		_globalAxisFont = MakeAsset<mBaseFont>(_parent);
+		_globalAxisFont->setStateSet(_fixedAxisFontState);
+		_globalAxisFont->AppendFontV_Int(txt, types, 0);
+		_globalAxisFont->AppendFontVertexAndTexcoord(txt, 1, 2);
 
 
 	}
@@ -204,7 +258,7 @@ namespace MBaseRend
 	{
 		if (_parent)
 		{
-			_parent->addChild(_drawable);
+			_parent->removeChild(_drawable);
 		}
 	}
 
