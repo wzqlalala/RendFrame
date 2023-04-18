@@ -25,8 +25,8 @@ namespace MPostRend
 		shared_ptr<mPostRender> postRender = make_shared<mPostRender>(_app, _root, this);
 		this->addBeforeRender(postRender);	
 
-		_fontRender->appendGloabalAxisFont();
-		_arrowRender->appendGloabalAxisArrow();
+		//_fontRender->appendGloabalAxisFont();
+		//_arrowRender->appendGloabalAxisArrow();
 
 		qDebug() << "Post Initial";
 	}

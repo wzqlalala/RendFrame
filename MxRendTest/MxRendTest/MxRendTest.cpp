@@ -400,8 +400,9 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 			return;
 		}
 
-		_postRend->getArrowRender()->appendCommonArrow("test", QVector<QVector3D>{QVector3D(0, 0, 0)}, QVector<QVector3D>{QVector3D(1, 0, 0)});
-		_postRend->getArrowRender()->appendCommonArrow("test1", QVector<QVector3D>{QVector3D(1, 1, 1)}, QVector<QVector3D>{QVector3D(0, 1, 0)});
+		_postRend->getArrowRender()->appendCommonArrow("test0", QVector<QVector3D>{QVector3D(0, 0, 0)}, QVector<QVector3D>{QVector3D(1, 0, 0)});
+		_postRend->getArrowRender()->appendCommonArrow("test1", QVector<QVector3D>{QVector3D(0.5, 0, 0)}, QVector<QVector3D>{QVector3D(0, 1, 0)});
+		_postRend->getArrowRender()->appendCommonArrow("test2", QVector<QVector3D>{QVector3D(0, 0, 0.5)}, QVector<QVector3D>{QVector3D(0, 0, 1)});
 	}
 	else if (event->key() == Qt::Key_P)
 	{
@@ -410,7 +411,8 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 			return;
 		}
 
-		_postRend->getArrowRender()->appendCommonArrow("test", QVector<QVector3D>{QVector3D(0, 0, 0)}, QVector<QVector3D>{QVector3D(1, 0, 0)});
+		_postRend->getArrowRender()->appendCommonArrow("test", QVector<QVector3D>{QVector3D(0, 0.5, 0)}, QVector<QVector3D>{QVector3D(1, 0, 0)});
+
 		_postRend->getFontRender()->appendFixedFont("test", QVector<QVector2D>{QVector2D(0.5, 0.5)}, QVector<QString>{QString("test2dfont")});
 		_postRend->getFontRender()->appendCommonFont("test", QVector<QVector3D>{QVector3D(0.5, 0.5, 0.5)}, QVector<QString>{QString("test3dfont")});
 	}

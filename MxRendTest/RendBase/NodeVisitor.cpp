@@ -183,22 +183,21 @@ namespace mxr
 				{
 					asset_ref<IBO> ibo;
 					BufferAttribute att;
-					if (_ibo)
+					//if (_ibo)
+					//{
+					//	int isize = _drawableattribute[i].drawable->getIndexAttribute()->size() * sizeof(GLuint);
+					//	int _size = ibosize + isize;
+					//	att = { ibosize, _size };
+					//	ibosize = _size;
+					//}
+					//else
 					{
-						int isize = _drawableattribute[i].drawable->getIndexAttribute()->size() * sizeof(GLuint);
-						int _size = ibosize + isize;
-						att = { ibosize, _size };
-						ibosize = _size;
-					}
-					else
-					{
-						int isize = _drawableattribute[i].drawable->getIndexAttribute()->size() * sizeof(GLuint);
+						int isize = _drawableattribute[i].drawable->getIndexAttribute()->size() * sizeof(GLuint) + ibosize;
 						//const void*idata = _drawableattribute[i].drawable->getIndexAttribute()->data();
 						//ibo = MakeAsset<IBO>(isize, idata, GL_DYNAMIC_STORAGE_BIT);
-						att = { 0 , isize };
+						att = { ibosize , isize };
 						ibosize = isize;
 					}
-					_ibo = ibo;
 					_drawableattribute[i].drawable->getIndexAttribute()->setBufferAttribute(att);
 				}
 
