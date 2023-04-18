@@ -393,6 +393,16 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		_postRend->setPickKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton, Qt::ShiftModifier), PickMode::MultiplyPick);
 		_postRend->setPickKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers>(Qt::LeftButton, Qt::NoModifier), PickMode::SoloPick);
 	}
+	else if (event->key() == Qt::Key_O)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+
+		_postRend->getArrowRender()->appendCommonArrow("test", QVector<QVector3D>{QVector3D(0, 0, 0)}, QVector<QVector3D>{QVector3D(1, 0, 0)});
+		_postRend->getArrowRender()->appendCommonArrow("test1", QVector<QVector3D>{QVector3D(1, 1, 1)}, QVector<QVector3D>{QVector3D(0, 1, 0)});
+	}
 	else if (event->key() == Qt::Key_P)
 	{
 		if (_postRend == nullptr)
