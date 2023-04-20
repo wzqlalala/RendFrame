@@ -14,7 +14,7 @@
 
 // ”Õº¿‡
 #include "mModelView.h"
-#include "mCommonView.h"
+#include "mViewBase.h"
 
 #include <QMatrix3x3>
 #include <QFileDialog>
@@ -69,7 +69,7 @@ namespace MPostRend
 		}
 	}
 
-	void mPostOneFrameRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
+	void mPostOneFrameRender::updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView)
 	{
 		if (_modelRender)
 		{

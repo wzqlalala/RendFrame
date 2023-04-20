@@ -183,6 +183,13 @@ namespace MViewBasic
 		Other,
 	};
 
+	enum class CameraType
+	{
+		Camera1,
+
+		Camera2,
+	};
+
 	enum class ViewOperateMode
 	{
 		NoViewOperate,

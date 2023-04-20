@@ -28,7 +28,7 @@ namespace mxr
 namespace MViewBasic
 {
 	class mModelView;
-	class mCommonView;
+	class mViewBase;
 }
 namespace MDataPost
 {
@@ -67,7 +67,7 @@ namespace MPostRend
 
 		std::shared_ptr<mPostModelRender> getModelRender() {return _modelRender;};
 
-		void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView);
+		void updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView);
 
 		//void UpdateModelBuffer();
 

@@ -15,7 +15,7 @@
 
 // ”Õº¿‡
 #include "mModelView.h"
-#include "mCommonView.h"
+#include "mViewBase.h"
 
 #include <QMatrix3x3>
 #include <QFileDialog>

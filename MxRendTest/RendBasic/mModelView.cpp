@@ -5,7 +5,7 @@
 
 namespace MViewBasic
 {
-	mModelView::mModelView(QObject *parent) : QObject(parent)
+	mModelView::mModelView()
 	{
 		InitialModelView();
 	}
@@ -41,6 +41,7 @@ namespace MViewBasic
 		_Eye_0 = QVector3D(0, 0, 1);
 		_Center = QVector3D(0, 0, 0);
 		_Up = QVector3D(0, 1, 0);
+		_MaxRadius = 1.0;
 	}
 	void mModelView::SetOrthoByRatio(float scr_width, float scr_height)
 	{
@@ -83,14 +84,7 @@ namespace MViewBasic
 			_Bottom_res = _Bottom;
 		}
 	}
-	void mModelView::SetPVMValue()
-	{
-		_projection.setToIdentity();
-		_model.setToIdentity();
-		_view.setToIdentity();
-		_projection.ortho(_Left, _Right, _Bottom, _Top, _NearPlane, _FarPlane);
-		_view.lookAt(_Eye, _Center, _Up);
-	}
+
 	void mModelView::Translate(float xoffset, float yoffset)
 	{
 		float XOffsetOfOrtho = xoffset * (_Right - _Left) / SCR_WIDTH;

@@ -122,7 +122,7 @@ namespace MBaseRend
 			_parent->removeAllChild();
 		}
 	}
-	void mTestRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
+	void mTestRender::updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView)
 	{
 		_stateSet->getUniform("projection")->SetData(modelView->_projection);
 		_stateSet->getUniform("view")->SetData(modelView->_view);

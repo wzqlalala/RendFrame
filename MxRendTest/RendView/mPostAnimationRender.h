@@ -21,7 +21,7 @@ namespace mxr
 namespace MViewBasic
 {
 	class mModelView;
-	class mCommonView;
+	class mViewBase;
 }
 using namespace MViewBasic;
 namespace MPostRend

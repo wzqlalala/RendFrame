@@ -56,6 +56,18 @@
     <ClInclude Include="mPickToolClass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mModelView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mCameraModelView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mCameraCommonView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mCommonView.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mColor.cpp">
@@ -85,15 +97,21 @@
     <ClCompile Include="mPickToolClass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mViewBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mCameraModelView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mCameraCommonView.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="mCommonView.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
-    <QtMoc Include="mModelView.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="mViewToolClass.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="mViewBase.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

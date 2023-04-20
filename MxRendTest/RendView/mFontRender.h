@@ -83,7 +83,7 @@ namespace MBaseRend
 
 		void clearAllRender();
 
-		void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView) override;
+		void updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView) override;
 
 		void appendFixedFont(QString key, QVector<QVector2D> pos, QVector<QString> txt, QVector3D color = QVector3D(1,1,1), float size = 1.0);//添加固定文字显示
 		void setFixedFontIsShow(QString key, bool isShow);

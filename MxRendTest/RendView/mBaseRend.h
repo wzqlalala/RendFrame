@@ -15,7 +15,7 @@
 namespace MViewBasic
 {
 	class mModelView;
-	class mCommonView;
+	class mViewBase;
 }
 namespace mxr
 {
@@ -49,7 +49,11 @@ namespace MBaseRend
 
 		shared_ptr<mxr::Group> getRoot() { return _root; };
 
-		shared_ptr<mModelView> getCamera() {return _modelView;};
+		shared_ptr<mViewBase> getCamera() {return _modelView;};
+
+		shared_ptr<mViewBase> getCamera1() { return _commonView; };
+
+		void setCameraType(CameraType cameratype);
 
 		shared_ptr<mBaseRender> getFirstBeforeRender() { 
 			if (!_beforeRenderArray.empty()) {
@@ -114,6 +118,8 @@ namespace MBaseRend
 		void mouseMoveEvent(QMouseEvent *event) Q_DECL_OVERRIDE;
 		void wheelEvent(QWheelEvent *event) Q_DECL_OVERRIDE;
 
+		virtual bool event(QEvent *e) override;
+
 	protected:
 		void GetPointDepthAtMouse();
 
@@ -174,9 +180,11 @@ namespace MBaseRend
 
 		std::shared_ptr< mBackGroundRender> _bgRend;
 
-		std::shared_ptr<mModelView> _modelView;
+		std::shared_ptr<mViewBase> _modelView;
 
-		std::shared_ptr<mCommonView> _commonView;
+		CameraType _cameraType{ CameraType::Camera1};
+
+		std::shared_ptr<mViewBase> _commonView;
 
 		RenderArray _beforeRenderArray;
 

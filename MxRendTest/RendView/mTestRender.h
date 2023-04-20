@@ -19,8 +19,7 @@ namespace mxr
 }
 namespace MViewBasic
 {
-	class mModelView;
-	class mCommonView;
+	class mViewBase;
 }
 
 using namespace MViewBasic;
@@ -36,7 +35,7 @@ namespace MBaseRend
 
 		void appendOnePart();
 
-		void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView) override;
+		void updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView) override;
 
 	private:
 

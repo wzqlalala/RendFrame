@@ -38,9 +38,13 @@ void main()
 	vec3 pos_norm = ModelToNormPositon(aPointPos,uProjection_m,uView_m,uModel_m);
 	Depth = 0.5+pos_norm.z*0.5-0.1;  //输出深度值 让文字的深度值和载荷添加点的深度值保持一致
 
-	vec3 pos_font = NormToModelPositon(pos_norm,uProjection_font,uView_font,uModel_font);
+	//vec3 pos_font = NormToModelPositon(pos_norm,uProjection_font,uView_font,uModel_font);
+	//mat4 Model;
+	//Model = translate(pos_font.x,pos_font.y,pos_font.z)*scale(0.3*aSize*uRatio,0.3*aSize*uRatio,0.3*aSize*uRatio);  //调整文字大小
+	
 	mat4 Model;
-	Model = translate(pos_font.x,pos_font.y,pos_font.z)*scale(0.3*aSize*uRatio,0.3*aSize*uRatio,0.3*aSize*uRatio);  //调整文字大小
+	Model = translate(uScr_width/2+pos_norm.x*uScr_width/2,uScr_height/2+pos_norm.y*uScr_height/2,0)*scale(0.3*uRatio*aSize,0.3*uRatio*aSize,0.3*uRatio*aSize);  //调整文字大小  调整到以屏幕中心为原点
+	
 	gl_Position = uProjection_font * uView_font * Model * vec4(aVertex,0,1);
 }
 #endif

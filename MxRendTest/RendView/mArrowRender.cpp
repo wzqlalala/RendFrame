@@ -7,7 +7,7 @@
 #include "mShaderManage.h"
 
 #include "mModelView.h"
-#include "mCommonView.h"
+#include "mViewBase.h"
 
 //freetype
 #include "ft2build.h"
@@ -62,7 +62,7 @@ namespace MBaseRend
 	{
 		QHash<QString, std::shared_ptr<mBaseArrow>>().swap(_commonArrows);
 	}
-	void mArrowRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
+	void mArrowRender::updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView)
 	{
 		QMatrix4x4 projection, view, model;
 		projection.ortho(0, modelView->SCR_WIDTH, 0, modelView->SCR_HEIGHT, 0.1, 99);
@@ -74,8 +74,8 @@ namespace MBaseRend
 		_fixedArrowFontState->getUniform("uProjection_c")->SetData(commonView->_projection);
 		_fixedArrowFontState->getUniform("uScr_width")->SetData((float)modelView->SCR_WIDTH);
 		_fixedArrowFontState->getUniform("uScr_height")->SetData((float)modelView->SCR_HEIGHT);
-		_fixedArrowFontState->getUniform("uPers_width")->SetData((float)commonView->_Right - commonView->_Left);
-		_fixedArrowFontState->getUniform("uPers_height")->SetData((float)commonView->_Top - commonView->_Bottom);
+		_fixedArrowFontState->getUniform("uPers_width")->SetData((float)commonView->_Right - (float)commonView->_Left);
+		_fixedArrowFontState->getUniform("uPers_height")->SetData((float)commonView->_Top - (float)commonView->_Bottom);
 		_fixedArrowFontState->getUniform("uAuxX_new")->SetData(QVector3D::crossProduct(commonView->_Up, commonView->_Eye).normalized());
 		_fixedArrowFontState->getUniform("uAuxY_new")->SetData(commonView->_Up.normalized());
 		_fixedArrowFontState->getUniform("uAuxZ_new")->SetData(commonView->_Eye.normalized());

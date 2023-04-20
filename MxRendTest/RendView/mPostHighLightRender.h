@@ -28,7 +28,8 @@ namespace mxr
 namespace MViewBasic
 {
 	class mModelView;
-	class mCommonView;
+	class mViewBase;
+	class mViewBase;
 }
 namespace MDataPost
 {
@@ -82,7 +83,7 @@ namespace MPostRend
 
 		void updateHighLightRender(mOneFrameData1 *oneFrameData, mPostOneFrameRendData* oneFrameRendData);
 
-		void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView);
+		void updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView);
 
 		void setEdgeLineStateSet(std::shared_ptr<mxr::StateSet> meshlineStateSet);
 		void setFaceLineStateSet(std::shared_ptr<mxr::StateSet> facelineStateSet);

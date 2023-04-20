@@ -22,7 +22,8 @@ namespace mxr
 namespace MViewBasic
 {
 	class mModelView;
-	class mCommonView;
+	class mViewBase;
+	class mViewBase;
 }
 
 
@@ -39,7 +40,7 @@ namespace MBaseRend
 
 		QPair<QVector3D, float> setData(const tinyobj::attrib_t &attrib, const std::vector<tinyobj::shape_t> &shapes,const std::vector<tinyobj::material_t> &materials);
 
-		void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView) override;
+		void updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView) override;
 
 	private:
 		std::shared_ptr<mxr::Drawable> _drawable; //设置顶点属性；设置StateSet；将其添加进父节点中;

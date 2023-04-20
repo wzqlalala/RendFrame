@@ -215,13 +215,4 @@ namespace MViewBasic
 		_projection = _projection_Saved; _view = _view_Saved; _model = _model_Saved;
 	}
 
-	void mCommonView::SetPVMValue()
-	{
-		_projection.setToIdentity();
-		_model.setToIdentity();
-		_view.setToIdentity();
-		_projection.ortho(_Left, _Right, _Bottom, _Top, _NearPlane, _FarPlane);
-		_view.lookAt(_Eye, _Center, _Up);
-	}
-
 }

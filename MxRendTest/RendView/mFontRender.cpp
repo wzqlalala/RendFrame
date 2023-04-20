@@ -7,7 +7,7 @@
 #include "mShaderManage.h"
 
 #include "mModelView.h"
-#include "mCommonView.h"
+#include "mViewBase.h"
 
 //freetype
 #include "ft2build.h"
@@ -102,10 +102,11 @@ namespace MBaseRend
 		QHash<QString, std::shared_ptr<mBaseFont>>().swap(_commonFonts);
 		QHash<QString, std::shared_ptr<mBaseFont>>().swap(_fixedFonts);
 	}
-	void mFontRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
+	void mFontRender::updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView)
 	{
 		QMatrix4x4 projection, view, model;
 		projection.ortho(0, modelView->SCR_WIDTH, 0, modelView->SCR_HEIGHT, 0.1, 99);
+		//projection.perspective(45.0f, 1.0 * modelView->SCR_WIDTH / modelView->SCR_HEIGHT, 0.1, 100.0);
 		view.lookAt(QVector3D(0, 0, 2), QVector3D(0, 0, 0), QVector3D(0, 1, 0));
 		model.setToIdentity();
 
@@ -118,8 +119,8 @@ namespace MBaseRend
 
 		_fixedAxisFontState->getUniform("uScr_width")->SetData((float)modelView->SCR_WIDTH);
 		_fixedAxisFontState->getUniform("uScr_height")->SetData((float)modelView->SCR_HEIGHT);
-		_fixedAxisFontState->getUniform("uPers_width")->SetData((float)commonView->_Right - commonView->_Left);
-		_fixedAxisFontState->getUniform("uPers_height")->SetData((float)commonView->_Top - commonView->_Bottom);
+		_fixedAxisFontState->getUniform("uPers_width")->SetData((float)(commonView->_Right - commonView->_Left));
+		_fixedAxisFontState->getUniform("uPers_height")->SetData((float)(commonView->_Top - commonView->_Bottom));
 
 		_fixedAxisFontState->getUniform("uAuxX_new")->SetData(QVector3D::crossProduct(commonView->_Up, commonView->_Eye).normalized());
 		_fixedAxisFontState->getUniform("uAuxY_new")->SetData(commonView->_Up.normalized());

@@ -7,7 +7,7 @@
 
 // ”Õº¿‡
 #include "mModelView.h"
-#include "mCommonView.h"
+#include "mViewBase.h"
 
 #include <QMatrix3x3>
 #include <QFileDialog>
@@ -318,7 +318,7 @@ namespace MBaseRend
 		return { center ,radius };
 	
 	}
-	void mModelTestRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
+	void mModelTestRender::updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView)
 	{
 		_stateSet->getUniform("projection")->SetData(modelView->_projection);
 		_stateSet->getUniform("view")->SetData(modelView->_view);

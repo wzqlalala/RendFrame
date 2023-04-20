@@ -109,18 +109,23 @@
     <ClInclude Include="mBasicEnum.h" />
     <ClInclude Include="mBasicStruct.h" />
     <ClInclude Include="mBasicStructor.h" />
+    <ClInclude Include="mCameraCommonView.h" />
+    <ClInclude Include="mCameraModelView.h" />
     <ClInclude Include="mColor.h" />
     <ClInclude Include="mCommonFunctions.h" />
-    <QtMoc Include="mCommonView.h" />
+    <ClInclude Include="mCommonView.h" />
     <ClInclude Include="mContainers.h" />
     <ClInclude Include="mFileConfiguration.h" />
-    <QtMoc Include="mModelView.h" />
+    <ClInclude Include="mModelView.h" />
     <ClInclude Include="mMeshViewEnum.h" />
     <ClInclude Include="mPickToolClass.h" />
     <ClInclude Include="mPostEnum.h" />
     <QtMoc Include="mViewToolClass.h" />
+    <QtMoc Include="mViewBase.h" />
     <ClInclude Include="rendbasic_global.h" />
     <ClCompile Include="mAppConfigurationSingleton.cpp" />
+    <ClCompile Include="mCameraCommonView.cpp" />
+    <ClCompile Include="mCameraModelView.cpp" />
     <ClCompile Include="mColor.cpp" />
     <ClCompile Include="mCommonFunctions.cpp" />
     <ClCompile Include="mCommonView.cpp" />
@@ -128,6 +133,7 @@
     <ClCompile Include="mFileConfiguration.cpp" />
     <ClCompile Include="mModelView.cpp" />
     <ClCompile Include="mPickToolClass.cpp" />
+    <ClCompile Include="mViewBase.cpp" />
     <ClCompile Include="mViewToolClass.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

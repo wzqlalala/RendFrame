@@ -14,8 +14,7 @@ namespace mxr
 }
 namespace MViewBasic
 {
-	class mModelView;
-	class mCommonView;
+	class mViewBase;
 }
 using namespace MViewBasic;
 using namespace std;
@@ -31,7 +30,7 @@ namespace MBaseRend
 
 		~mBaseRender();
 
-		virtual void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView) {};
+		virtual void updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView) {};
 
 		virtual void startPick(QVector<QVector2D> poses) { _poses = poses; };
 

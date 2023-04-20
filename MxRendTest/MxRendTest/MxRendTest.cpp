@@ -124,7 +124,24 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		QVector3D center = (aabb.maxEdge + aabb.minEdge) / 2.0;
 		float radius = (aabb.maxEdge - aabb.minEdge).length()/2.0;
 		_postRend->getCamera()->ResetOrthoAndCamera(center, radius);
+		_postRend->getCamera1()->ResetOrthoAndCamera(center, radius);
 		_postRender->setShowFuntion(ElementFace);
+	}
+	else if (event->key() == Qt::Key_Tab)
+	{
+		if (_postRend == nullptr)
+		{
+			return;
+		}
+		if (_cameraType == CameraType::Camera1)
+		{
+			_cameraType = CameraType::Camera2;
+		}
+		else
+		{
+			_cameraType = CameraType::Camera1;
+		}
+		_postRend->setCameraType(_cameraType);
 	}
 	else if (event->key() == Qt::Key_1)
 	{
@@ -241,19 +258,19 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		_postRender->setPlaneData(_cuttingPlaneNum, planeNormals.at(_cuttingPlaneNum), center, radius);
 		_cuttingPlaneNum++;
 	}
-	else if (event->key() == Qt::Key_W)
-	{
-		if (_postRend == nullptr)
-		{
-			return;
-		}
-		if (_cuttingPlaneNum > 0)
-		{
-			_postRender->deleteCuttingPlane(0);
-			_cuttingPlaneNum--;
-		}
+	//else if (event->key() == Qt::Key_W)
+	//{
+	//	if (_postRend == nullptr)
+	//	{
+	//		return;
+	//	}
+	//	if (_cuttingPlaneNum > 0)
+	//	{
+	//		_postRender->deleteCuttingPlane(0);
+	//		_cuttingPlaneNum--;
+	//	}
 
-	}
+	//}
 	else if (event->key() == Qt::Key_E)
 	{
 		if (_postRend == nullptr)
@@ -295,14 +312,14 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		_isOnlyShowPlane = !_isOnlyShowPlane;
 		_postRender->setOnlyShowCuttingPlane(_isOnlyShowPlane);
 	}
-	else if (event->key() == Qt::Key_A)
-	{
-		if (_postRend == nullptr)
-		{
-			return;
-		}
-		_postRender->createLinearAnimation(_isLinearAnimation ? OneFrameLinearAnimation : OneFrameSinAnimation);
-	}
+	//else if (event->key() == Qt::Key_A)
+	//{
+	//	if (_postRend == nullptr)
+	//	{
+	//		return;
+	//	}
+	//	_postRender->createLinearAnimation(_isLinearAnimation ? OneFrameLinearAnimation : OneFrameSinAnimation);
+	//}
 	else if (event->key() == Qt::Key_F)
 	{
 		if (_postRend == nullptr)
@@ -311,23 +328,23 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		}
 		_postRender->setPostMode(_postMode);
 	}
-	else if (event->key() == Qt::Key_S)
-	{
-		if (_postRend == nullptr)
-		{
-			return;
-		}
-		_postRender->setTimerOn(_isLinearAnimation);
-		_isLinearAnimation = !_isLinearAnimation;
-	}
-	else if (event->key() == Qt::Key_D)
-	{
-		if (_postRend == nullptr)
-		{
-			return;
-		}
-		_postRender->deleteAnimation();
-	}
+	//else if (event->key() == Qt::Key_S)
+	//{
+	//	if (_postRend == nullptr)
+	//	{
+	//		return;
+	//	}
+	//	_postRender->setTimerOn(_isLinearAnimation);
+	//	_isLinearAnimation = !_isLinearAnimation;
+	//}
+	//else if (event->key() == Qt::Key_D)
+	//{
+	//	if (_postRend == nullptr)
+	//	{
+	//		return;
+	//	}
+	//	_postRender->deleteAnimation();
+	//}
 	else if (event->key() == Qt::Key_Z)
 	{
 		if (_postRend == nullptr)
@@ -414,7 +431,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 		_postRend->getArrowRender()->appendCommonArrow("test", QVector<QVector3D>{QVector3D(0, 0.5, 0)}, QVector<QVector3D>{QVector3D(1, 0, 0)});
 
 		_postRend->getFontRender()->appendFixedFont("test", QVector<QVector2D>{QVector2D(0.5, 0.5)}, QVector<QString>{QString("test2dfont")});
-		_postRend->getFontRender()->appendCommonFont("test", QVector<QVector3D>{QVector3D(0.5, 0.5, 0.5)}, QVector<QString>{QString("test3dfont")});
+		_postRend->getFontRender()->appendCommonFont("test", QVector<QVector3D>{QVector3D(0, 0, 0)}, QVector<QString>{QString("test3dfont")});
 	}
 	else if (event->key() == Qt::Key_Asterisk)
 	{

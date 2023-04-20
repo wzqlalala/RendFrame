@@ -9,6 +9,9 @@
 //视图类
 #include "mModelView.h"
 #include "mCommonView.h"
+#include "mViewBase.h"
+#include "mCameraModelView.h"
+#include "mCameraCommonView.h"
 
 //Qt
 #include <QMouseEvent>
@@ -64,6 +67,7 @@ namespace MBaseRend
 		//glEnable(GL_POINT_SPRITE);		//开启渲染点精灵功能（已经被核心模式废除）
 		glEnable(GL_PROGRAM_POINT_SIZE); //让顶点程序决定点块大小
 		_modelView = MakeAsset<mModelView>();
+		//_modelView = MakeAsset<mModelView>();
 		_commonView = MakeAsset<mCommonView>();
 		
 		mxr::Log::Init();
@@ -212,66 +216,69 @@ namespace MBaseRend
 	}
 	void mBaseRend::mouseReleaseEvent(QMouseEvent *event)
 	{
-		if (*_viewOperateMode == ViewOperateMode::CameraOperate)
+		auto view = dynamic_pointer_cast<mModelView>(_modelView);
+		if (view)
 		{
-			if (*_cameraMode == CameraOperateMode::Zoom)
+			if (*_viewOperateMode == ViewOperateMode::CameraOperate)
 			{
-				_modelView->ZoomAtFrameCenter((Posx_Firstmouse + nowX) / 2, (Posy_Firstmouse + nowY) / 2);
-			}
-		}
-		else if (*_viewOperateMode == ViewOperateMode::PickOperate)
-		{
-			if (*_pickMode == PickMode::SoloPick)
-			{
-				_polygonVertexs.append(QVector2D(nowX, nowY));
-				for (auto render : _beforeRenderArray)
+				if (*_cameraMode == CameraOperateMode::Zoom)
 				{
-					makeCurrent();
-					/*
-					FBO->bind();
-					float depth = 0.0;
-					QOpenGLContext::currentContext()->functions()->glReadPixels(nowX, SCR_HEIGHT - nowY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-					if (depth != 0)
+					view->ZoomAtFrameCenter((Posx_Firstmouse + nowX) / 2, (Posy_Firstmouse + nowY) / 2);
+				}
+			}
+			else if (*_viewOperateMode == ViewOperateMode::PickOperate)
+			{
+				if (*_pickMode == PickMode::SoloPick)
+				{
+					_polygonVertexs.append(QVector2D(nowX, nowY));
+					for (auto render : _beforeRenderArray)
 					{
-						qDebug() << "depth" << depth;
+						makeCurrent();
+						/*
+						FBO->bind();
+						float depth = 0.0;
+						QOpenGLContext::currentContext()->functions()->glReadPixels(nowX, SCR_HEIGHT - nowY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+						if (depth != 0)
+						{
+							qDebug() << "depth" << depth;
+						}
+						GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
+						if (error != 0)
+						{
+							qDebug() << error;
+						}
+						render->startPick(_polygonVertexs);
+						FBO->release();
+						*/
+						FBO->bind();
+						render->startPick(_polygonVertexs);
+						FBO->release();
 					}
-					GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
-					if (error != 0)
+					for (auto render : _afterRenderArray)
 					{
-						qDebug() << error;
+						makeCurrent();
+						FBO->bind();
+						render->startPick(_polygonVertexs);
+						FBO->release();
 					}
-					render->startPick(_polygonVertexs);
-					FBO->release();
-					*/
-					FBO->bind();
-					render->startPick(_polygonVertexs);
-					FBO->release();
 				}
-				for (auto render : _afterRenderArray)
+				else if (*_pickMode == PickMode::MultiplyPick)
 				{
-					makeCurrent();
-					FBO->bind();
-					render->startPick(_polygonVertexs);
-					FBO->release();
+					for (auto render : _beforeRenderArray)
+					{
+						render->startPick(_polygonVertexs);
+					}
+					for (auto render : _afterRenderArray)
+					{
+						render->startPick(_polygonVertexs);
+					}
 				}
 			}
-			else if (*_pickMode == PickMode::MultiplyPick)
-			{
-				for (auto render : _beforeRenderArray)
-				{
-					render->startPick(_polygonVertexs);
-				}
-				for (auto render : _afterRenderArray)
-				{
-					render->startPick(_polygonVertexs);
-				}
-			}
+			_polygonVertexs.clear();
+			*_viewOperateMode = ViewOperateMode::NoViewOperate;
+			*_cameraMode = CameraOperateMode::NoCameraOperate;
+			*_pickMode = PickMode::NoPick;
 		}
-		_polygonVertexs.clear();
-		*_viewOperateMode = ViewOperateMode::NoViewOperate;
-		*_cameraMode = CameraOperateMode::NoCameraOperate;
-		*_pickMode = PickMode::NoPick;
-		
 		update();
 	}
 
@@ -280,75 +287,87 @@ namespace MBaseRend
 		isMouseMove = true;
 		nowX = event->pos().x();
 		nowY = event->pos().y();
+		//QCursor::setPos(geometry().center());
 		GLint xoffset = lastX - nowX;//计算X方向偏移量(移动像素)
 		GLint yoffset = nowY - lastY;// 计算Y方向偏移量
 		lastX = nowX;
 		lastY = nowY;
 
-		if (*_viewOperateMode == ViewOperateMode::CameraOperate)
+		auto view = dynamic_pointer_cast<mModelView>(_modelView);
+		auto view1 = dynamic_pointer_cast<mCommonView>(_commonView);
+		if (view)
 		{
-			if (*_cameraMode == CameraOperateMode::Rotate)
+			if (*_viewOperateMode == ViewOperateMode::CameraOperate)
 			{
-				if (ifRotateAtXY == true && ifGetRotateCenter == false)
+				if (*_cameraMode == CameraOperateMode::Rotate)
 				{
-					_modelView->Rotate(xoffset, yoffset, Rotate_XY);
-					_commonView->Rotate(xoffset, yoffset, Rotate_XY);
+					if (ifRotateAtXY == true && ifGetRotateCenter == false)
+					{
+						view->Rotate(xoffset, yoffset, Rotate_XY);
+						view1->Rotate(xoffset, yoffset, Rotate_XY);
+					}
+					else if (ifRotateAtZ == true && ifGetRotateCenter == false)
+					{
+						view->Rotate(xoffset, yoffset, Rotate_Z);
+						view1->Rotate(xoffset, yoffset, Rotate_Z);
+					}
 				}
-				else if (ifRotateAtZ == true && ifGetRotateCenter == false)
+				else if (*_cameraMode == CameraOperateMode::Translate)
 				{
-					_modelView->Rotate(xoffset, yoffset, Rotate_Z);
-					_commonView->Rotate(xoffset, yoffset, Rotate_Z);
+					view->Translate(xoffset, yoffset);
 				}
-			}
-			else if (*_cameraMode == CameraOperateMode::Translate)
-			{
-				_modelView->Translate(xoffset, yoffset);			
-			}
-			else if (*_cameraMode == CameraOperateMode::Zoom)
-			{
-				float distance = 0.0;
-				if (_polygonVertexs.size() > 0)
+				else if (*_cameraMode == CameraOperateMode::Zoom)
 				{
-					distance = _polygonVertexs.last().distanceToPoint(QVector2D(nowX, nowY));
-				}
-				if (distance > 20)
-				{
-					_polygonVertexs.append(QVector2D(nowX, nowY));
-				}
-			}
-		}
-		else if (*_viewOperateMode == ViewOperateMode::PickOperate)
-		{
-			if (*_pickMode == PickMode::DragPick)
-			{
-				for (auto render : _beforeRenderArray)
-				{
-					render->dragSomething(QVector2D(nowX, nowY));
-				}
-				for (auto render : _afterRenderArray)
-				{
-					render->dragSomething(QVector2D(nowX, nowY));
-				}
-			}
-			else if (*_pickMode == PickMode::MultiplyPick)
-			{
-				float distance = 0.0;
-				if (_polygonVertexs.size() > 0)
-				{
-					distance = _polygonVertexs.last().distanceToPoint(QVector2D(nowX, nowY));
-				}
-				if (*_multiplyPickMode == MultiplyPickMode::PolygonPick)
-				{
+					float distance = 0.0;
+					if (_polygonVertexs.size() > 0)
+					{
+						distance = _polygonVertexs.last().distanceToPoint(QVector2D(nowX, nowY));
+					}
 					if (distance > 20)
 					{
 						_polygonVertexs.append(QVector2D(nowX, nowY));
 					}
 				}
-				else
+			}
+			else if (*_viewOperateMode == ViewOperateMode::PickOperate)
+			{
+				if (*_pickMode == PickMode::DragPick)
 				{
-					_polygonVertexs.append(QVector2D(nowX, nowY));
+					for (auto render : _beforeRenderArray)
+					{
+						render->dragSomething(QVector2D(nowX, nowY));
+					}
+					for (auto render : _afterRenderArray)
+					{
+						render->dragSomething(QVector2D(nowX, nowY));
+					}
+				}
+				else if (*_pickMode == PickMode::MultiplyPick)
+				{
+					float distance = 0.0;
+					if (_polygonVertexs.size() > 0)
+					{
+						distance = _polygonVertexs.last().distanceToPoint(QVector2D(nowX, nowY));
+					}
+					if (*_multiplyPickMode == MultiplyPickMode::PolygonPick)
+					{
+						if (distance > 20)
+						{
+							_polygonVertexs.append(QVector2D(nowX, nowY));
+						}
+					}
+					else
+					{
+						_polygonVertexs.append(QVector2D(nowX, nowY));
+					}
 				}
 			}
+		}
+		else
+		{
+			//lastX = geometry().center().x();
+			//lastY = geometry().center().y();
+			//QCursor::setPos(geometry().center());
 		}
 		update();
 
@@ -359,8 +378,12 @@ namespace MBaseRend
 		if (abs(numDegrees.y() - 0) < 0.0001)
 		{
 			return;
+		}	
+		auto view = dynamic_pointer_cast<mModelView>(_modelView);
+		if (view)
+		{
+			view->ZoomAtMouse_Bywheel(nowX, nowY, numDegrees.y(), Model);
 		}
-		_modelView->ZoomAtMouse_Bywheel(nowX, nowY, numDegrees.y(), Model);
 		update();
 	}
 
@@ -374,6 +397,28 @@ namespace MBaseRend
 		}
 		qDebug() << "Base Distruct";
 
+	}
+	void mBaseRend::setCameraType(CameraType cameratype)
+	{
+		_cameraType = cameratype;
+		if (_cameraType == CameraType::Camera1)//普通视角
+		{
+			_commonView = MakeAsset<mCommonView>();
+			auto view = MakeAsset<mModelView>();		
+			view->SetOrthoByRatio(SCR_WIDTH, SCR_HEIGHT);
+			view->ResetOrthoAndCamera(_modelView->_Center, _modelView->_MaxRadius);
+			_modelView = view;
+			this->setCursor(Qt::ArrowCursor);
+		}
+		else//漫游视角
+		{
+			_commonView = MakeAsset<mCameraCommonView>(this);
+			auto view = MakeAsset<mCameraModelView>(this);
+			view->SetOrthoByRatio(SCR_WIDTH, SCR_HEIGHT);
+			view->ResetOrthoAndCamera(_modelView->_Center, _modelView->_MaxRadius);
+			_modelView = view;
+			this->setCursor(Qt::BlankCursor);
+		}
 	}
 	void mBaseRend::addBeforeRender(shared_ptr<mBaseRender> baseRender)
 	{
@@ -461,6 +506,17 @@ namespace MBaseRend
 	{
 		*_pickFilter = pickFilter;
 	}
+	bool mBaseRend::event(QEvent * e)
+	{
+		auto view = dynamic_pointer_cast<mCameraModelView>(_modelView);
+		auto view1 = dynamic_pointer_cast<mCameraCommonView>(_commonView);
+		if (view)
+		{
+			view->handle(e);
+			view1->handle(e);
+		}
+		return QWidget::event(e);
+	}
 	void mBaseRend::GetPointDepthAtMouse()
 	{
 		glReadPixels(nowX, SCR_HEIGHT - nowY, 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &BufDepth);//OpenGL像素坐标原点左下角 BufDepth范围（0,1）
@@ -527,7 +583,11 @@ namespace MBaseRend
 	}
 	void mBaseRend::SetZoomAtViewCenter_ByButton(ScaleDirection scaleDirection)
 	{
-		_modelView->ZoomAtViewCenter_ByBotton(scaleDirection);
+		auto view = dynamic_pointer_cast<mModelView>(_modelView);
+		if (view)
+		{
+			view->ZoomAtViewCenter_ByBotton(scaleDirection);
+		}
 
 		update();
 	}
@@ -547,7 +607,11 @@ namespace MBaseRend
 		QVector3D ViewCenter = mViewToolClass::NormToModelPosition(QVector3D(0, 0, 0), _modelView->_projection, _modelView->_view, _modelView->_model);
 		//找新的旋转半径
 		float maxRadius = mViewToolClass::GetMaxRadius(_left, _right, _bottom, _top, _back, _front, ViewCenter);
-		_modelView->SetRotateCenterToViewCenter(ViewCenter, maxRadius);
+		auto view = dynamic_pointer_cast<mModelView>(_modelView);
+		if (view)
+		{
+			view->SetRotateCenterToViewCenter(ViewCenter, maxRadius);
+		}
 		_center_now = ViewCenter;
 		//传递旋转中心数据
 		QVector3D centerPos = mViewToolClass::PixelToModelPosition(SCR_WIDTH / 2, SCR_HEIGHT / 2, _modelView->_projection, _modelView->_view, _modelView->_model, SCR_WIDTH, SCR_HEIGHT);
@@ -560,7 +624,11 @@ namespace MBaseRend
 	{
 		ifGetRotateCenter = false;
 		ifRotateAtViewCenter = false;
-		_modelView->SetRotateCenterToModelCenter(_center_model, _maxRadius_model);
+		auto view = dynamic_pointer_cast<mModelView>(_modelView);
+		if (view)
+		{
+			view->SetRotateCenterToModelCenter(_center_model, _maxRadius_model);
+		}
 		_center_now = _center_model;
 		//传递旋转中心数据
 		//_lableRendController_common->appendLableRendData<X_Point_Common>("RotateCenter", { _center_model });
@@ -574,35 +642,71 @@ namespace MBaseRend
 	}
 	void mBaseRend::SetRotate_ByButton(float angle)
 	{
-		_modelView->Rotate_ByBotton(angle);
-		_commonView->Rotate_ByBotton(angle);
+		auto view = dynamic_pointer_cast<mModelView>(_modelView);
+		if (view)
+		{
+			view->Rotate_ByBotton(angle);
+		}
+		auto view1 = dynamic_pointer_cast<mCommonView>(_commonView);
+		if (view1)
+		{
+			view1->Rotate_ByBotton(angle);
+		}
 		update();
 	}
 	//设置视图*视角*类型
 	void mBaseRend::SetPerspective(Perspective pers)
 	{
-		_modelView->SetPerspective(pers);
-		_commonView->SetPerspective(pers);
+		auto view = dynamic_pointer_cast<mModelView>(_modelView);
+		if (view)
+		{
+			view->SetPerspective(pers);
+		}
+		auto view1 = dynamic_pointer_cast<mCommonView>(_commonView);
+		if (view1)
+		{
+			view1->SetPerspective(pers);
+		}
 		update();
 	}
 	void mBaseRend::SaveCurrentView()
 	{
-		_modelView->SaveCurrentView();
-		_commonView->SaveCurrentView();
+		auto view = dynamic_pointer_cast<mModelView>(_modelView);
+		if (view)
+		{
+			view->SaveCurrentView();
+		}
+		auto view1 = dynamic_pointer_cast<mCommonView>(_commonView);
+		if (view1)
+		{
+			view1->SaveCurrentView();
+		}
 		update();
 
 	}
 	void mBaseRend::CallSavedView()
 	{
-		_modelView->CallSavedView();
-		_commonView->CallSavedView();
+		auto view = dynamic_pointer_cast<mModelView>(_modelView);
+		if (view)
+		{
+			view->CallSavedView();
+		}
+		auto view1 = dynamic_pointer_cast<mCommonView>(_commonView);
+		if (view1)
+		{
+			view1->CallSavedView();
+		}
 		//_lableRendController_common->appendLableRendData<X_Point_Common>("RotateCenter", { _modelView->_Center_Saved });
 		update();
 	}
 	//设置视图大小自适应
 	void mBaseRend::FitView()
 	{
-		_modelView->FitView(_center_model);
+		auto view = dynamic_pointer_cast<mModelView>(_modelView);
+		if (view)
+		{
+			view->FitView(_center_model);
+		}
 		update();
 	}
 

@@ -10,7 +10,7 @@
 
 // ”Õº¿‡
 #include "mModelView.h"
-#include "mCommonView.h"
+#include "mViewBase.h"
 
 #include <QMatrix3x3>
 #include <QFileDialog>
@@ -418,7 +418,7 @@ namespace MPostRend
 		}
 	}
 
-	void mPostHighLightRender::updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView)
+	void mPostHighLightRender::updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView)
 	{
 		//_modelRender->setDeformationScale(_oneFrameRendData->getDeformationScale());
 		_facelineStateSet->getUniform("projection")->SetData(modelView->_projection);

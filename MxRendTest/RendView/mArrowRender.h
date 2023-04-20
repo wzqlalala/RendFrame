@@ -73,7 +73,7 @@ namespace MBaseRend
 
 		void clearAllRender();
 
-		void updateUniform(shared_ptr<mModelView> modelView, shared_ptr<mCommonView> commonView) override;
+		void updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView) override;
 
 		void appendCommonArrow(QString key, QVector<QVector3D> pos, QVector<QVector3D> dir, QVector3D color = QVector3D(1,1,1), float size = 1.0);
 		void setCommonArrowIsShow(QString key, bool isShow);
