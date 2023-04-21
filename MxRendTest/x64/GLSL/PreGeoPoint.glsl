@@ -68,18 +68,25 @@ vec3 calculateLightResult(vec3 norm, vec3 color, float AmbientOcclusion, float z
 
 void main()
 {
-    vec3 N;
-    N.xy = gl_PointCoord * 2.0f - 1.0f;
-    
-    float mag = dot(N.xy,N.xy);
     vec4 color = texture(sprite_texture, gl_PointCoord);
-	if(color == vec4(0,0,0,1))
-	{
-		discard;
-	}
+	// if(color == vec4(0,0,0,1))
+	// {
+	// 	discard;
+	// }
+    if(all(lessThan(color.rgb, vec3(0.1))))
+    {
+        discard;
+    }
+    // FragColor.rgb = material;
+    // FragColor.a = 1.0f;
+    // FragColor = color;
+    vec3 N;
+    N.xy = gl_PointCoord * 2.0f - 1.0f; 
+    float mag = dot(N.xy,N.xy);
     N.z = sqrt(1.0f - mag);
 	FragColor.rgb = pow(calculateLightResult(N, material, 1.0, N.z), vec3(1.0 / 2.2));
-    FragColor.a = 1.0;
+    // FragColor.rgb = material;
+    FragColor.a = 1.0f;
 } 
 
 #endif

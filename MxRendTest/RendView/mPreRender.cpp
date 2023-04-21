@@ -43,7 +43,7 @@ namespace MPreRend
 		//qDebug() << "mPreRender" << QString::number(long long int(context), 16);
 
 		_rendStatus = make_shared<mPreRendStatus>();
-		_pointTexture = nullptr;
+		_pointTexture = mTextureManage::GetInstance()->GetTexture("GeoPoint.png", 3);
 		_geoModelData = new mGeoModelData1();
 		_geoModelRender = MakeAsset<mPreGeoModelRender>(parent, _rendStatus, _geoModelData);
 
@@ -129,7 +129,7 @@ namespace MPreRend
 
 		//point
 		_pointStateSet = MakeAsset<StateSet>();
-		shader = mShaderManage::GetInstance()->GetShader("PreMeshPoint");
+		shader = mShaderManage::GetInstance()->GetShader("PreGeoPoint");
 		_pointStateSet->setShader(shader);
 		_pointStateSet->setDrawMode(GL_POINTS);
 		_pointStateSet->setAttributeAndModes(MakeAsset<Depth>(), 1);
@@ -146,7 +146,8 @@ namespace MPreRend
 		_pointStateSet->setUniform(MakeAsset<Uniform>("light.diffuse", _rendStatus->_postLight.diffuse));
 		_pointStateSet->setUniform(MakeAsset<Uniform>("light.specular", _rendStatus->_postLight.specular));
 		_pointStateSet->setUniform(MakeAsset<Uniform>("light.shiness", _rendStatus->_postLight.shiness));
-		_pointStateSet->setUniform(MakeAsset<Uniform>("PointSize", _rendStatus->_pointSize));
+		_pointStateSet->setUniform(MakeAsset<Uniform>("PointSize", 10));
+		_pointStateSet->setTexture("sprite_texture",_pointTexture);
 
 		_geoModelRender->setFaceStateSet(_faceStateSet);
 		_geoModelRender->setIndependentLineStateSet(_independentlineStateSet);
