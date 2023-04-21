@@ -33,7 +33,7 @@ namespace MViewBasic
 
 	#if optimization
 
-	bool mPickToolClass::IsLineIntersectionWithQuad(QVector<QVector2D> Line, QVector<QVector2D> Quad, MeshType meshtype)
+	bool mPickToolClass::IsLineIntersectionWithQuad(const QVector<QVector2D> &Line, const QVector<QVector2D> &Quad, MeshType meshtype)
 	{
 		bool isintersection{ false };
 		const QVector<int> &list = LineIntersectionWithQuadVector.value(meshtype);
@@ -93,7 +93,7 @@ namespace MViewBasic
 		return (d < radius);
 	}
 
-	bool mPickToolClass::IsPointInMesh(const QPoint & pos, QVector<QVector2D> Line1, MeshType meshtype)
+	bool mPickToolClass::IsPointInMesh(const QPoint & pos, const QVector<QVector2D> &Line1, MeshType meshtype)
 	{
 		int Intersection_times = 0;
 		QVector2D ap1, bp1, bp2;
@@ -123,7 +123,7 @@ namespace MViewBasic
 
 	#else
 
-	bool mPickToolClass::IsLineIntersectionWithQuad(QVector<QVector2D> Line, QVector<QVector2D> Quad, MeshType meshtype)
+	bool mPickToolClass::IsLineIntersectionWithQuad(const QVector<QVector2D> &Line, const QVector<QVector2D> &Quad, MeshType meshtype)
 	{
 		bool isintersection{ false };
 		QVector<int> list{};
@@ -196,7 +196,7 @@ namespace MViewBasic
 		return false;
 	}
 
-	bool mPickToolClass::IsQuadPointInMesh(const QPoint & pos, QVector<QVector2D> Line1, MeshType meshtype)
+	bool mPickToolClass::IsQuadPointInMesh(const QPoint & pos, const QVector<QVector2D> &Line1, MeshType meshtype)
 	{
 		int Intersection_times = 0;
 		QVector2D ap1, bp1, bp2;
@@ -248,7 +248,7 @@ namespace MViewBasic
 	}
 
 	#endif
-	bool mPickToolClass::IsMeshPointInQuad(QVector<QVector2D> Line1, int centerX, int centerY, int boxW, int boxH)
+	bool mPickToolClass::IsMeshPointInQuad(const QVector<QVector2D> &Line1, int centerX, int centerY, int boxW, int boxH)
 	{
 		for (int i = 0; i < Line1.size(); ++i)
 		{
@@ -269,7 +269,7 @@ namespace MViewBasic
 		return false;
 	}
 
-	bool mPickToolClass::IsPointInQuad(QVector<QVector2D> Line1, QVector2D boxCenter, QVector2D boxXY_2)
+	bool mPickToolClass::IsPointInQuad(const QVector<QVector2D> &Line1, QVector2D boxCenter, QVector2D boxXY_2)
 	{
 		for (auto point : Line1)
 		{
@@ -281,7 +281,7 @@ namespace MViewBasic
 		return false;
 	}
 
-	bool mPickToolClass::IsAllPointInQuad(QVector<QVector2D> Line1, QVector2D boxCenter, QVector2D boxXY_2)
+	bool mPickToolClass::IsAllPointInQuad(const QVector<QVector2D> &Line1, QVector2D boxCenter, QVector2D boxXY_2)
 	{
 		for (auto point : Line1)
 		{
@@ -293,7 +293,7 @@ namespace MViewBasic
 		return true;
 	}
 
-	bool mPickToolClass::IsPointInPolygon(QVector2D point, QVector2D boxCenter, QVector<QVector2D> polygons)
+	bool mPickToolClass::IsPointInPolygon(QVector2D point, QVector2D boxCenter, const QVector<QVector2D> &polygons)
 	{
 		int n = polygons.size();
 		//QVector<QVector2D> sorted_polygons = polygons;
@@ -317,7 +317,7 @@ namespace MViewBasic
 		return (cnt % 2 == 1);
 	}
 
-	bool mPickToolClass::IsPointInPolygon(QVector<QVector2D> Line1, QVector2D boxCenter, QVector<QVector2D> polygons)
+	bool mPickToolClass::IsPointInPolygon(const QVector<QVector2D> &Line1, QVector2D boxCenter, const QVector<QVector2D> &polygons)
 	{
 		for (auto point : Line1)
 		{
@@ -329,7 +329,7 @@ namespace MViewBasic
 		return false;
 	}
 
-	bool mPickToolClass::IsAllPointInPolygon(QVector<QVector2D> Line1, QVector2D boxCenter, QVector<QVector2D> polygons)
+	bool mPickToolClass::IsAllPointInPolygon(const QVector<QVector2D> &Line1, QVector2D boxCenter, const QVector<QVector2D> &polygons)
 	{
 		for (auto point : Line1)
 		{
@@ -341,7 +341,7 @@ namespace MViewBasic
 		return true;
 	}
 
-	bool mPickToolClass::IsLineIntersectionWithCircle(QVector<QVector2D> Line1, QVector2D circleCenter, double radius)
+	bool mPickToolClass::IsLineIntersectionWithCircle(const QVector<QVector2D> &Line1, QVector2D circleCenter, double radius)
 	{
 		bool isintersection{ false };
 		const QVector<QVector<int>> &list = QuadPointInMeshVector.value(MeshHex);
@@ -424,7 +424,7 @@ namespace MViewBasic
 		return false;
 	}
 
-	bool mPickToolClass::IsPointInRound(QVector<QVector2D> Line1, QVector2D center, float r)
+	bool mPickToolClass::IsPointInRound(const QVector<QVector2D> &Line1, QVector2D center, float r)
 	{
 		for (auto point : Line1)
 		{
@@ -436,7 +436,7 @@ namespace MViewBasic
 		return false;
 	}
 
-	bool mPickToolClass::IsAllPointInRound(QVector<QVector2D> Line1, QVector2D center, float r)
+	bool mPickToolClass::IsAllPointInRound(const QVector<QVector2D> &Line1, QVector2D center, float r)
 	{
 		for (auto point : Line1)
 		{
@@ -448,7 +448,7 @@ namespace MViewBasic
 		return true;
 	}
 
-	bool mPickToolClass::IsMeshCenterInPickQuad(const QPoint& pos, QVector<QVector2D> Line1)
+	bool mPickToolClass::IsMeshCenterInPickQuad(const QPoint& pos, const QVector<QVector2D> &Line1)
 	{
 		QVector2D center;
 		for (int i = 0; i < Line1.size(); ++i)
