@@ -40,8 +40,8 @@ namespace MViewBasic
 		void SetOrthoByRatio(float scr_width, float scr_height) override;				//通过屏幕长宽比设置正交投影
 		void Rotate(float xoffset, float yoffset, RotateType rotateType = Rotate_XY, float sensitivity = 0.25);//旋转
 		void Rotate_ByBotton(float angle);//绕着垂直屏幕的轴旋转固定角度
-		void SaveCurrentView();//保存当前视角
-		void CallSavedView();	//调用保存的视角												//设置PVM矩阵的值
+		void SaveCurrentView() override;//保存当前视角
+		void CallSavedView() override;	//调用保存的视角												//设置PVM矩阵的值
 
 			
 

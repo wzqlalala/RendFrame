@@ -79,14 +79,21 @@ namespace MViewBasic
 		//获取PVM值
 		QMatrix4x4 getPVMValue() { return _projection * _view * _model; };
 
+		virtual void SaveCurrentView() {};//保存当前视角
+		virtual void CallSavedView() {};	//调用保存的视角
+
 		virtual void ZoomAtMouse_Bywheel(int posX, int posY, int yoffset, ScalePerspectice scalePerspectice, float sensitivity = 1.2);
 
 		virtual void ProcessMouseMovement(float xoffset, float yoffset, bool constrainPitch = true);
 
 		//模型发生变化后更新视角（保留上一次的旋转特性）
 		virtual void ResetOrthoAndCamera(QVector3D center, float maxRadius);//传入旋转中心和最大旋转半径
-
-		//旋转 平移 缩放
+		//添加模型顶点后更新视角（视角自适应）
+		virtual void UpdateOrthoAndCamera(QVector<QVector3D> Allvertex, QVector<QVector3D> AddVertex) {};
+		virtual void UpdateOrthoAndCamera(float maxRadius, QVector<QVector3D> AddVertex) {};
+		//添加/删除模型部分顶点后更新视角（视角无自适应）
+		virtual void UpdateOrthoAndCamera(QVector<QVector3D> Allvertex) {};
+		virtual void UpdateOrthoAndCamera(float maxRadius_modelcenter, float maxRadius_nowcenter) {};
 
 
 	};

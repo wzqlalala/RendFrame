@@ -109,19 +109,24 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\RendData\mPostRendStatus.cpp" />
     <ClCompile Include="mArrowRender.cpp" />
     <ClCompile Include="mFontRender.cpp" />
     <ClCompile Include="mPostCuttingPlaneRender.cpp" />
     <ClCompile Include="mPostHighLightRender.cpp" />
+    <ClCompile Include="mPreGeoModelRender.cpp" />
+    <ClCompile Include="mPreRender.cpp" />
     <ClCompile Include="mQuadRender.cpp" />
     <ClCompile Include="tiny_obj_loader.cc" />
-    <ClInclude Include="..\RendData\mPostRendStatus.h" />
     <ClInclude Include="mArrowRender.h" />
     <ClInclude Include="mFontRender.h" />
+    <ClInclude Include="mGroupRender.h" />
     <ClInclude Include="mPostCuttingPlaneRender.h" />
     <QtMoc Include="mQuadRender.h" />
     <ClInclude Include="mPostHighLightRender.h" />
+    <QtMoc Include="mPreRender.h" />
+    <ClInclude Include="mPostRendStatus.h" />
+    <ClInclude Include="mPreGeoModelRender.h" />
+    <ClInclude Include="mPreRendStatus.h" />
     <ClInclude Include="tiny_obj_loader.h" />
     <QtMoc Include="mBackGroundRender.h" />
     <QtMoc Include="mBaseRend.h" />
@@ -148,9 +153,6 @@
     <ClCompile Include="mPostRender.cpp" />
     <ClCompile Include="mPreRend.cpp" />
     <ClCompile Include="mTestRender.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="cpp.hint" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

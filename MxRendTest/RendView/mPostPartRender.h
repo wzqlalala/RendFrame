@@ -16,6 +16,8 @@
 #include "mMeshViewEnum.h"
 #include "mBasicStructor.h"
 
+#include "mGroupRender.h"
+
 namespace mxr
 {
 	class Shader;
@@ -42,131 +44,133 @@ namespace MDataPost
 	class mPostMeshLineData1;
 }
 using namespace MViewBasic;
+using namespace MBaseRend;
+using namespace mxr;
 namespace MPostRend
 {
-	//面网格
-	class RENDVIEW_EXPORT mPostPartFaceRender
-	{
-	public:
-		//0 - 原始坐标；1 - 部件颜色；2 - 部件颜色、纹理值0, 1；3 - 变量值；
-		//4 - 位移值；
-		//QVector3D, GLubyte, GLubyte, float, QVector3D, GLubyte, QVector3D, float
-		std::shared_ptr<mxr::Vec3Array>  _vertex0;
-		std::shared_ptr<mxr::Vec3Array>  _vertex1;
-		std::shared_ptr<mxr::FloatArray> _vertex2;
-		std::shared_ptr<mxr::FloatArray> _vertex3;
-		std::shared_ptr<mxr::Vec3Array>  _vertex4;
-		//std::shared_ptr<mxr::FloatArray> _vertex5;
-		//std::shared_ptr<mxr::Vec3Array>  _vertex6;
-		//std::shared_ptr<mxr::FloatArray> _vertex8;
-		mPostPartFaceRender(std::shared_ptr<mxr::Group> parent);
-		~mPostPartFaceRender();
-		std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
-		void setStateSet(std::shared_ptr<mxr::StateSet> state);
-	private:
-		std::shared_ptr<mxr::Drawable> _drawable;
-		std::shared_ptr<mxr::Group> _parent;
+	////面网格
+	//class RENDVIEW_EXPORT mPostPartFaceRender
+	//{
+	//public:
+	//	//0 - 原始坐标；1 - 部件颜色；2 - 部件颜色、纹理值0, 1；3 - 变量值；
+	//	//4 - 位移值；
+	//	//QVector3D, GLubyte, GLubyte, float, QVector3D, GLubyte, QVector3D, float
+	//	std::shared_ptr<mxr::Vec3Array>  _vertex0;
+	//	std::shared_ptr<mxr::Vec3Array>  _vertex1;
+	//	std::shared_ptr<mxr::FloatArray> _vertex2;
+	//	std::shared_ptr<mxr::FloatArray> _vertex3;
+	//	std::shared_ptr<mxr::Vec3Array>  _vertex4;
+	//	//std::shared_ptr<mxr::FloatArray> _vertex5;
+	//	//std::shared_ptr<mxr::Vec3Array>  _vertex6;
+	//	//std::shared_ptr<mxr::FloatArray> _vertex8;
+	//	mPostPartFaceRender(std::shared_ptr<mxr::Group> parent);
+	//	~mPostPartFaceRender();
+	//	std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
+	//	void setStateSet(std::shared_ptr<mxr::StateSet> state);
+	//private:
+	//	std::shared_ptr<mxr::Drawable> _drawable;
+	//	std::shared_ptr<mxr::Group> _parent;
 
-	};
+	//};
 
-	//透明的面无变形的面
-	class mPostPartFaceTransparentNodeformationRender
-	{
-	public:
-		//meshline stateset
-		std::shared_ptr<mxr::Vec3Array>  _vertex0;
-		//std::shared_ptr<mxr::Vec3Array>  _vertex1;
-		mPostPartFaceTransparentNodeformationRender(std::shared_ptr<mxr::Group> parent);
-		~mPostPartFaceTransparentNodeformationRender();
-		std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
-		void setStateSet(std::shared_ptr<mxr::StateSet> state);
-	private:
-		std::shared_ptr<mxr::Drawable> _drawable;
-		std::shared_ptr<mxr::Group> _parent;
+	////透明的面无变形的面
+	//class mPostPartFaceTransparentNodeformationRender
+	//{
+	//public:
+	//	//meshline stateset
+	//	std::shared_ptr<mxr::Vec3Array>  _vertex0;
+	//	//std::shared_ptr<mxr::Vec3Array>  _vertex1;
+	//	mPostPartFaceTransparentNodeformationRender(std::shared_ptr<mxr::Group> parent);
+	//	~mPostPartFaceTransparentNodeformationRender();
+	//	std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
+	//	void setStateSet(std::shared_ptr<mxr::StateSet> state);
+	//private:
+	//	std::shared_ptr<mxr::Drawable> _drawable;
+	//	std::shared_ptr<mxr::Group> _parent;
 
-	};
+	//};
 
-	//显示的网格线
-	class mPostPartFaceLineRender
-	{
-	public:
-		//meshline stateset
-		std::shared_ptr<mxr::Vec3Array>   _vertex0;
-		std::shared_ptr<mxr::Vec3Array>   _vertex1;
-		std::shared_ptr<mxr::FloatArray>  _vertex2;
-		mPostPartFaceLineRender(std::shared_ptr<mxr::Group> parent);
-		~mPostPartFaceLineRender();
-		std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
-		void setStateSet(std::shared_ptr<mxr::StateSet> state);
-	private:
-		std::shared_ptr<mxr::Drawable> _drawable;
-		std::shared_ptr<mxr::Group> _parent;
+	////显示的网格线
+	//class mPostPartFaceLineRender
+	//{
+	//public:
+	//	//meshline stateset
+	//	std::shared_ptr<mxr::Vec3Array>   _vertex0;
+	//	std::shared_ptr<mxr::Vec3Array>   _vertex1;
+	//	std::shared_ptr<mxr::FloatArray>  _vertex2;
+	//	mPostPartFaceLineRender(std::shared_ptr<mxr::Group> parent);
+	//	~mPostPartFaceLineRender();
+	//	std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
+	//	void setStateSet(std::shared_ptr<mxr::StateSet> state);
+	//private:
+	//	std::shared_ptr<mxr::Drawable> _drawable;
+	//	std::shared_ptr<mxr::Group> _parent;
 
-	};
+	//};
 
-	//线网格
-	class RENDVIEW_EXPORT mPostPartLineRender
-	{
-	public:
-		//0 - 原始坐标；1 - 部件颜色；2 - 部件颜色、纹理值0, 1；3 - 变量值；
-		//4 - 位移值； 5 - 是否有值，没有值的话显示灰色，有值的话按照IsColor判断
-		//QVector3D, GLubyte, GLubyte, float, QVector3D, GLubyte, QVector3D, float
-		std::shared_ptr<mxr::Vec3Array>  _vertex0;
-		std::shared_ptr<mxr::Vec3Array>  _vertex1;
-		std::shared_ptr<mxr::FloatArray> _vertex2;
-		std::shared_ptr<mxr::FloatArray> _vertex3;
-		std::shared_ptr<mxr::Vec3Array>  _vertex4;
-		//std::shared_ptr<mxr::FloatArray> _vertex5;
-		mPostPartLineRender(std::shared_ptr<mxr::Group> parent);
-		~mPostPartLineRender();
-		std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
-		void setStateSet(std::shared_ptr<mxr::StateSet> state);
-	private:
-		std::shared_ptr<mxr::Drawable> _drawable;
-		std::shared_ptr<mxr::Group> _parent;
+	////线网格
+	//class RENDVIEW_EXPORT mPostPartLineRender
+	//{
+	//public:
+	//	//0 - 原始坐标；1 - 部件颜色；2 - 部件颜色、纹理值0, 1；3 - 变量值；
+	//	//4 - 位移值； 5 - 是否有值，没有值的话显示灰色，有值的话按照IsColor判断
+	//	//QVector3D, GLubyte, GLubyte, float, QVector3D, GLubyte, QVector3D, float
+	//	std::shared_ptr<mxr::Vec3Array>  _vertex0;
+	//	std::shared_ptr<mxr::Vec3Array>  _vertex1;
+	//	std::shared_ptr<mxr::FloatArray> _vertex2;
+	//	std::shared_ptr<mxr::FloatArray> _vertex3;
+	//	std::shared_ptr<mxr::Vec3Array>  _vertex4;
+	//	//std::shared_ptr<mxr::FloatArray> _vertex5;
+	//	mPostPartLineRender(std::shared_ptr<mxr::Group> parent);
+	//	~mPostPartLineRender();
+	//	std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
+	//	void setStateSet(std::shared_ptr<mxr::StateSet> state);
+	//private:
+	//	std::shared_ptr<mxr::Drawable> _drawable;
+	//	std::shared_ptr<mxr::Group> _parent;
 
-	};
+	//};
 
-	//点网格
-	class RENDVIEW_EXPORT mPostPartPointRender
-	{
-	public:
-		//0 - 原始坐标；1 - 部件颜色；2 - 部件颜色、纹理值、是否灰色0, 1, 2, 3；3 - 变量值；
-		//4 - 位移值
-		//QVector3D, GLubyte, GLubyte, float, QVector3D, GLubyte, QVector3D, float
-		std::shared_ptr<mxr::Vec3Array>  _vertex0;
-		std::shared_ptr<mxr::Vec3Array>  _vertex1;
-		std::shared_ptr<mxr::FloatArray> _vertex2;
-		std::shared_ptr<mxr::FloatArray> _vertex3;
-		std::shared_ptr<mxr::Vec3Array>  _vertex4;
-		//std::shared_ptr<mxr::FloatArray> _vertex5;
-		mPostPartPointRender(std::shared_ptr<mxr::Group> parent);
-		~mPostPartPointRender();
-		std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
-		void setStateSet(std::shared_ptr<mxr::StateSet> state);
-	private:
-		std::shared_ptr<mxr::Drawable> _drawable;
-		std::shared_ptr<mxr::Group> _parent;
+	////点网格
+	//class RENDVIEW_EXPORT mPostPartPointRender
+	//{
+	//public:
+	//	//0 - 原始坐标；1 - 部件颜色；2 - 部件颜色、纹理值、是否灰色0, 1, 2, 3；3 - 变量值；
+	//	//4 - 位移值
+	//	//QVector3D, GLubyte, GLubyte, float, QVector3D, GLubyte, QVector3D, float
+	//	std::shared_ptr<mxr::Vec3Array>  _vertex0;
+	//	std::shared_ptr<mxr::Vec3Array>  _vertex1;
+	//	std::shared_ptr<mxr::FloatArray> _vertex2;
+	//	std::shared_ptr<mxr::FloatArray> _vertex3;
+	//	std::shared_ptr<mxr::Vec3Array>  _vertex4;
+	//	//std::shared_ptr<mxr::FloatArray> _vertex5;
+	//	mPostPartPointRender(std::shared_ptr<mxr::Group> parent);
+	//	~mPostPartPointRender();
+	//	std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
+	//	void setStateSet(std::shared_ptr<mxr::StateSet> state);
+	//private:
+	//	std::shared_ptr<mxr::Drawable> _drawable;
+	//	std::shared_ptr<mxr::Group> _parent;
 
-	};
+	//};
 
-	//显示的边界线
-	class mPostPartEdgeLineRender
-	{
-	public:
-		//meshline stateset
-		std::shared_ptr<mxr::Vec3Array>   _vertex0;
-		std::shared_ptr<mxr::Vec3Array>   _vertex1;
-		//std::shared_ptr<mxr::FloatArray>   _vertex2;
-		mPostPartEdgeLineRender(std::shared_ptr<mxr::Group> parent);
-		~mPostPartEdgeLineRender();
-		std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
-		void setStateSet(std::shared_ptr<mxr::StateSet> state);
-	private:
-		std::shared_ptr<mxr::Drawable> _drawable;
-		std::shared_ptr<mxr::Group> _parent;
+	////显示的边界线
+	//class mPostPartEdgeLineRender
+	//{
+	//public:
+	//	//meshline stateset
+	//	std::shared_ptr<mxr::Vec3Array>   _vertex0;
+	//	std::shared_ptr<mxr::Vec3Array>   _vertex1;
+	//	//std::shared_ptr<mxr::FloatArray>   _vertex2;
+	//	mPostPartEdgeLineRender(std::shared_ptr<mxr::Group> parent);
+	//	~mPostPartEdgeLineRender();
+	//	std::shared_ptr<mxr::Drawable> getDrawable() { return _drawable; }
+	//	void setStateSet(std::shared_ptr<mxr::StateSet> state);
+	//private:
+	//	std::shared_ptr<mxr::Drawable> _drawable;
+	//	std::shared_ptr<mxr::Group> _parent;
 
-	};
+	//};
 
 	class RENDVIEW_EXPORT mPostPartRender
 	{
@@ -215,12 +219,12 @@ namespace MPostRend
 		shared_ptr<mxr::Group> _parent;//父节点
 		std::shared_ptr<mxr::Geode> _geode;//当前总节点
 
-		std::shared_ptr<mPostPartFaceRender>  _facerend;//面
-		std::shared_ptr<mPostPartFaceTransparentNodeformationRender> _facetransparentnodeformationrend;//变形前透明的面
-		std::shared_ptr<mPostPartEdgeLineRender>  _edgelinerend;//边界线
-		std::shared_ptr<mPostPartFaceLineRender>  _facelinerend;//面线
-		std::shared_ptr<mPostPartLineRender>  _linerend;//线
-		std::shared_ptr<mPostPartPointRender>  _pointrend;//点
+		std::shared_ptr<mGroupRender5<Vec3Array, Vec3Array, FloatArray, FloatArray, Vec3Array>>  _facerend;//面
+		std::shared_ptr<mGroupRender1<Vec3Array>> _facetransparentnodeformationrend;//变形前透明的面
+		std::shared_ptr<mGroupRender2<Vec3Array, Vec3Array>>  _edgelinerend;//边界线
+		std::shared_ptr<mGroupRender3<Vec3Array, Vec3Array, FloatArray>>  _facelinerend;//面线
+		std::shared_ptr<mGroupRender5<Vec3Array, Vec3Array, FloatArray, FloatArray, Vec3Array>>  _linerend;//线
+		std::shared_ptr<mGroupRender5<Vec3Array, Vec3Array, FloatArray, FloatArray, Vec3Array>>  _pointrend;//点
 
 		QVector3D deformationScale;
 		MDataPost::mOneFrameData1 *_oneFrameData;

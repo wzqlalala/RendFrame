@@ -68,6 +68,24 @@
     <ClInclude Include="mPostMeshPickData.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mGeoFaceData1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mGeoLineData1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mGeoModelData1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mGeoPartData1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mGeoPointData1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mGeoSolidData1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mDataPost1.cpp">
@@ -119,6 +137,24 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mPostMeshPickThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mGeoFaceData1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mGeoLineData1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mGeoModelData1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mGeoPartData1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mGeoPointData1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mGeoSolidData1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

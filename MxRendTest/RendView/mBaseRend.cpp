@@ -606,11 +606,11 @@ namespace MBaseRend
 		//获取屏幕中心的坐标
 		QVector3D ViewCenter = mViewToolClass::NormToModelPosition(QVector3D(0, 0, 0), _modelView->_projection, _modelView->_view, _modelView->_model);
 		//找新的旋转半径
-		float maxRadius = mViewToolClass::GetMaxRadius(_left, _right, _bottom, _top, _back, _front, ViewCenter);
+		//float maxRadius = mViewToolClass::GetMaxRadius(_left, _right, _bottom, _top, _back, _front, ViewCenter);
 		auto view = dynamic_pointer_cast<mModelView>(_modelView);
 		if (view)
 		{
-			view->SetRotateCenterToViewCenter(ViewCenter, maxRadius);
+			//view->SetRotateCenterToViewCenter(ViewCenter, maxRadius);
 		}
 		_center_now = ViewCenter;
 		//传递旋转中心数据

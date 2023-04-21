@@ -19,6 +19,7 @@ namespace mxr
 using namespace MBaseRend;
 namespace MPreRend
 {
+	class mPreRender;
 	class RENDVIEW_EXPORT mPreRend : public mBaseRend
 	{
 		Q_OBJECT
@@ -27,6 +28,18 @@ namespace MPreRend
 		mPreRend(const QString& name);
 		~mPreRend();
 
+		shared_ptr<mPreRender> getPreRender() override;
+
+		void GetModelSizePara(bool isModelCenter) override;
+
+	public slots:
+
+		//导入新模型后更新视角
+		void slotResetOrthoAndCamera() override;
+		//模型中添加/删除后更新视角（不自适应）
+		void slotUpdateOrthoAndCamera() override;
+		//模型中添加顶点后更新视角（需要自适应）
+		void slotUpdateOrthoAndCamera(QVector<QVector3D> addVertex) override;
 	public:
 		/*
 		* 重写父类函数

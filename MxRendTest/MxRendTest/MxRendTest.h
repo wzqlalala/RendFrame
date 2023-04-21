@@ -9,11 +9,16 @@
 namespace MPreRend
 {
 	class mPreRend;
+	class mPreRender;
 }
 namespace MPostRend
 {
 	class mPostRend;
 	class mPostRender;
+}
+namespace MDataGeo
+{
+	class mGeoModelData1;
 }
 namespace MDataPost
 {
@@ -37,13 +42,17 @@ protected:
 
 	void keyPressEvent(QKeyEvent *event) override;
 
+	bool getMxDbData(shared_ptr<MDataPost::mDataPost1> dp, MDataPost::mPostOneFrameRendData * oneFrameRendData);
 
-	bool getData(shared_ptr<MDataPost::mDataPost1> dp, MDataPost::mPostOneFrameRendData * oneFrameRendData);
+	bool createGeo(MDataGeo::mGeoModelData1 *geoModelData);
 
 private:
     Ui::MxRendTestClass ui;
 
+	int _id = 0;//奇数为后处理，偶数为前处理
+
 	MPreRend::mPreRend *_preRend;
+	shared_ptr<MPreRend::mPreRender> _preRender;
 
 	MPostRend::mPostRend *_postRend;
 	shared_ptr<MPostRend::mPostRender> _postRender;

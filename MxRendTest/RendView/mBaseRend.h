@@ -12,6 +12,8 @@
 #include"mMeshViewEnum.h"
 #include "app.h"
 
+#include "SpaceTree.h"
+
 namespace MViewBasic
 {
 	class mModelView;
@@ -27,6 +29,10 @@ using namespace MViewBasic;
 namespace MPostRend
 {
 	class mPostRender;
+}
+namespace MPreRend
+{
+	class mPreRender;
 }
 namespace MBaseRend
 {
@@ -75,6 +81,8 @@ namespace MBaseRend
 
 		virtual shared_ptr<MPostRend::mPostRender> getPostRender() { return nullptr; };
 
+		virtual shared_ptr<MPreRend::mPreRender> getPreRender() { return nullptr; };
+
 		void addBeforeRender(shared_ptr<mBaseRender> baseRender);
 
 		void removeBeforeRender(shared_ptr<mBaseRender> baseRender);
@@ -120,10 +128,19 @@ namespace MBaseRend
 
 		virtual bool event(QEvent *e) override;
 
+	public slots:
+
+		//导入新模型后更新视角
+		virtual void slotResetOrthoAndCamera() {};
+		//模型中添加/删除后更新视角（不自适应）
+		virtual void slotUpdateOrthoAndCamera() {};
+		//模型中添加顶点后更新视角（需要自适应）
+		virtual void slotUpdateOrthoAndCamera(QVector<QVector3D> addVertex) {};
+
 	protected:
 		void GetPointDepthAtMouse();
 
-	private:
+	protected:
 		CameraOperateMode getCameraMode(Qt::MouseButton, Qt::KeyboardModifiers);
 
 
@@ -160,6 +177,9 @@ namespace MBaseRend
 
 		//设置自定义角度旋转槽函数
 		void slotSetRotate_ByButton(float angle);
+
+		//获取模型参数
+		virtual void GetModelSizePara(bool isModelCenter) {};//是否以模型几何中心为中心
 
 		//显示隐藏更新视角
 		//void slotUpdateOrthoAndCamera();
@@ -216,7 +236,7 @@ namespace MBaseRend
 		float _maxRadius_model;//最大旋转半径(以模型中心)
 		QVector3D _center_now; //当前旋转中心
 		float _maxRadius_now;//最大旋转半径（以当前中心）
-		float _left, _right, _top, _bottom, _back, _front; //模型在X,Y,Z方向上的最大参数
+		Space::AABB _aabb; //模型在X,Y,Z方向上的最大参数
 
 
 		//鼠标点击功能判断

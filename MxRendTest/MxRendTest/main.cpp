@@ -53,8 +53,10 @@ int main(int argc, char *argv[])
 	//	// context2´´½¨Ê§°Ü
 	//}
 	//context2->setFormat(format);
-	MxRendTest w1(1);
-	w1.show();
+	MxRendTest w0(0);
+	w0.show();
+	//MxRendTest w1(1);
+	//w1.show();
 
 	//MxRendTest w2(2);
 	//w2.show();

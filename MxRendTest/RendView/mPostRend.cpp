@@ -18,9 +18,7 @@ namespace MPostRend
 	{
 		mBaseRend::initializeGL();
 
-		//QOpenGLContext *context = QOpenGLContext::currentContext();
-		QOpenGLContext *context = _app->GLContext();
-		context->makeCurrent(context->surface());
+		makeCurrent();
 
 		shared_ptr<mPostRender> postRender = make_shared<mPostRender>(_app, _root, this);
 		this->addBeforeRender(postRender);	

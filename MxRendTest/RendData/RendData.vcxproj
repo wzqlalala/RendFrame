@@ -106,6 +106,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="mGeoFaceData1.cpp" />
+    <ClCompile Include="mGeoLineData1.cpp" />
+    <ClCompile Include="mGeoModelData1.cpp" />
+    <ClCompile Include="mGeoPartData1.cpp" />
+    <ClCompile Include="mGeoPointData1.cpp" />
+    <ClCompile Include="mGeoSolidData1.cpp" />
     <ClCompile Include="mPostAnimationRendData.cpp" />
     <ClCompile Include="mPostColorTableData.cpp" />
     <ClCompile Include="mPostMeshPickData.cpp" />
@@ -113,6 +119,12 @@
     <ClCompile Include="mPostOneFrameRendData.cpp" />
     <ClCompile Include="SpaceTree.cpp" />
     <ClInclude Include="mDataPost1.h" />
+    <ClInclude Include="mGeoFaceData1.h" />
+    <ClInclude Include="mGeoLineData1.h" />
+    <ClInclude Include="mGeoModelData1.h" />
+    <ClInclude Include="mGeoPartData1.h" />
+    <ClInclude Include="mGeoPointData1.h" />
+    <ClInclude Include="mGeoSolidData1.h" />
     <ClInclude Include="mOneFrameData1.h" />
     <ClInclude Include="mPostAnimationRendData.h" />
     <ClInclude Include="mPostColorTableData.h" />

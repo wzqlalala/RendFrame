@@ -53,8 +53,8 @@ namespace MViewBasic
 		//设置视角																													
 		void SetPerspective(Perspective type);	//设置观察视角
 		void FitView(QVector3D center);		//调整视角使模型充满整个视图
-		void SaveCurrentView();//保存当前视角
-		void CallSavedView();	//调用保存的视角
+		void SaveCurrentView() override;//保存当前视角
+		void CallSavedView() override;	//调用保存的视角
 		
 		//设置旋转中心
 		void SetRotateCenterToPoint(QVector3D center, float maxRadius);	//设置旋转中心为选择的点
@@ -64,11 +64,11 @@ namespace MViewBasic
 		//模型发生变化后更新视角（保留上一次的旋转特性）
 		void ResetOrthoAndCamera(QVector3D center,float maxRadius) override;//传入旋转中心和最大旋转半径
 		//添加模型顶点后更新视角（视角自适应）
-		void UpdateOrthoAndCamera(QVector<QVector3D> Allvertex,QVector<QVector3D> AddVertex);
-		void UpdateOrthoAndCamera(float maxRadius,QVector<QVector3D> AddVertex);
+		void UpdateOrthoAndCamera(QVector<QVector3D> Allvertex,QVector<QVector3D> AddVertex) override;
+		void UpdateOrthoAndCamera(float maxRadius,QVector<QVector3D> AddVertex) override;
 		//添加/删除模型部分顶点后更新视角（视角无自适应）
-		void UpdateOrthoAndCamera(QVector<QVector3D> Allvertex);
-		void UpdateOrthoAndCamera(float maxRadius_modelcenter, float maxRadius_nowcenter);
+		void UpdateOrthoAndCamera(QVector<QVector3D> Allvertex) override;
+		void UpdateOrthoAndCamera(float maxRadius_modelcenter, float maxRadius_nowcenter) override;
 
 		
 	};
