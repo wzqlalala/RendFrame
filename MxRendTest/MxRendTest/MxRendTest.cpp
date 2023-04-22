@@ -501,6 +501,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 	}
 	else//«∞¥¶¿Ì
 	{
+		//qDebug() << event->key();
 		switch (event->key())
 		{
 		case Qt::Key_F1:

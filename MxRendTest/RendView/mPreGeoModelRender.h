@@ -86,7 +86,7 @@ namespace MPreRend
 
 		MDataGeo::mGeoPartData1 *_partData;
 
-		Space::SpaceTree *_spaceTree;
+		//Space::SpaceTree *_spaceTree;
 	};
 	class RENDVIEW_EXPORT mPreGeoModelRender
 	{

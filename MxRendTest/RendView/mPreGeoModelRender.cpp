@@ -236,7 +236,6 @@ namespace MPreRend
 	mPreGeoPartRender::~mPreGeoPartRender()
 	{
 		_parent->removeChild(_geode);
-		Space::destoryTree(_spaceTree);
 	}
 	void mPreGeoPartRender::setFaceStateSet(std::shared_ptr<mxr::StateSet> stateset)
 	{
