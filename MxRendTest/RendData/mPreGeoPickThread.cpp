@@ -44,37 +44,6 @@ namespace MDataGeo
 		return vertexs;
 	}
 
-	void mBasePick::getAABBAndPickToMeshData(Space::SpaceTree * root, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain)
-	{
-		if (root == nullptr)
-		{
-			return;
-		}
-		QVector<QVector2D> ap = getAABBToScreenVertex(root->space.minEdge, root->space.maxEdge);
-		if (isIntersectionAABBAndPick(ap))//相交
-		{
-			if (root->depth != 0)
-			{
-				getAABBAndPickToMeshData(root->topFrontLeft, meshAll, meshContain);
-				getAABBAndPickToMeshData(root->topFrontRight, meshAll, meshContain);
-				getAABBAndPickToMeshData(root->topBackLeft, meshAll, meshContain);
-				getAABBAndPickToMeshData(root->topBackRight, meshAll, meshContain);
-				getAABBAndPickToMeshData(root->bottomFrontLeft, meshAll, meshContain);
-				getAABBAndPickToMeshData(root->bottomFrontRight, meshAll, meshContain);
-				getAABBAndPickToMeshData(root->bottomBackLeft, meshAll, meshContain);
-				getAABBAndPickToMeshData(root->bottomBackRight, meshAll, meshContain);
-			}
-			else if (isAABBPointIsAllInPick(ap))//包含
-			{
-				meshContain.append(root->meshs);
-			}
-			else
-			{
-				meshAll.append(root->meshs);
-			}
-		}
-	}
-
 	QVector<QVector2D> mBasePick::getAABBToScreenVertex(QVector3D minEdge, QVector3D maxEdge)
 	{
 		QVector<QVector2D> ap;
@@ -117,24 +86,7 @@ namespace MDataGeo
 		}
 	}
 
-	bool mQuadPick::getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree)
-	{
-		QVector<QVector2D> ap = getAABBToScreenVertex(spaceTree->space.minEdge, spaceTree->space.maxEdge);
-		if (!mPickToolClass::IsLineIntersectionWithQuad(ap, _multiQuad, MeshHex) && !mPickToolClass::IsPointInQuad(ap, _center, _boxXY_2))
-		{
-			for (auto point : _multiQuad)
-			{
-				if (mPickToolClass::IsPointInMesh(point.toPoint(), ap, MeshHex))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-		return true;
-	}
-
-	bool mQuadPick::get2DAnd3DMeshCenterIsInPick(QVector3D pointCenter)
+	bool mQuadPick::getGeoPointIsInPick(QVector3D pointCenter)
 	{
 		if (mPickToolClass::IsPointInQuad(WorldvertexToScreenvertex(pointCenter), _center, _boxXY_2))
 		{
@@ -143,7 +95,17 @@ namespace MDataGeo
 		return false;
 	}
 
-	bool mQuadPick::get1DMeshIsInPick(QVector<QVector3D> vertexs)
+	bool mQuadPick::getGeoLineIsInPick(QVector<QVector3D> vertexs)
+	{
+		QVector<QVector2D> tempQVector2D = WorldvertexToScreenvertex(vertexs);
+		if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, _multiQuad, MeshBeam) || mPickToolClass::IsPointInQuad(tempQVector2D, _center, _boxXY_2))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	bool mQuadPick::getGeoFaceIsInPick(QVector<QVector3D> vertexs)
 	{
 		QVector<QVector2D> tempQVector2D = WorldvertexToScreenvertex(vertexs);
 		if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, _multiQuad, MeshBeam) || mPickToolClass::IsPointInQuad(tempQVector2D, _center, _boxXY_2))
@@ -178,6 +140,7 @@ namespace MDataGeo
 		return false;
 	}
 
+	/*
 	bool mPolygonPick::getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree)
 	{
 		QVector<QVector2D> ap = getAABBToScreenVertex(spaceTree->space.minEdge, spaceTree->space.maxEdge);
@@ -286,6 +249,7 @@ namespace MDataGeo
 		return false;
 	}
 
+	*/
 	mPreGeoPickThread::mPreGeoPickThread(mGeoModelData1 *geoModelData, mGeoPickData1 *pickData)
 	{
 		_isfinished = false;
@@ -347,10 +311,10 @@ namespace MDataGeo
 		{
 		case MViewBasic::MultiplyPickMode::QuadPick:_pick = make_shared<mQuadPick>(_pvm, _Win_WIDTH, _Win_HEIGHT, pickQuad);
 			break;
-		case MViewBasic::MultiplyPickMode::PolygonPick:_pick = make_shared<mPolygonPick>(_pvm, _Win_WIDTH, _Win_HEIGHT, pickQuad);
-			break;
-		case MViewBasic::MultiplyPickMode::RoundPick:_pick = make_shared<mRoundPick>(_pvm, _Win_WIDTH, _Win_HEIGHT, pickQuad.first(), pickQuad.last(), direction);
-			break;
+		//case MViewBasic::MultiplyPickMode::PolygonPick:_pick = make_shared<mPolygonPick>(_pvm, _Win_WIDTH, _Win_HEIGHT, pickQuad);
+		//	break;
+		//case MViewBasic::MultiplyPickMode::RoundPick:_pick = make_shared<mRoundPick>(_pvm, _Win_WIDTH, _Win_HEIGHT, pickQuad.first(), pickQuad.last(), direction);
+		//	break;
 		default:
 			break;
 		}
@@ -446,25 +410,34 @@ namespace MDataGeo
 
 	void mPreGeoPickThread::doMultiplyPick(mGeoPartData1 *partData)
 	{
-		//if (!_pick->getPickIsIntersectionWithAABB(spaceTree))
-		//{
-		//	return;
-		//}
-		//switch (*_pickFilter)
-		//{
-		//case PickFilter::PickNothing: break;
-		//	//case PickAny:MultiplyPickAny(); break;
-		//	//case PickPoint:MultiplyPickPoint(); break;
-		//case PickFilter::Pick1DMesh:MultiplyPick1DMesh(partName, spaceTree); break;
-		//case PickFilter::Pick2DMesh:MultiplyPick2DMesh(partName, spaceTree); break;
-		//case PickFilter::PickNode:MultiplyPickNode(partName, spaceTree); break;
-		//case PickFilter::PickAnyMesh:MultiplyPickAnyMesh(partName, spaceTree); break;
-		//case PickFilter::PickMeshFace:MultiplyPickMeshFace(partName, spaceTree); break;
-		//	//case PickMeshPart:MultiplyPickMeshPart(); break;
-		//	//case PickNodeByPart:MultiplyPickNodeByPart(); break;
-		//	//case PickAnyMeshByPart:MultiplyPickAnyMeshByPart(); break;
-		//default:break;
-		//}
+		QVector<QVector2D> ap = _pick->getAABBToScreenVertex(partData->getGeoPartAABB().minEdge, partData->getGeoPartAABB().maxEdge);
+		bool isAllIn{ false };
+		bool isIntersetion{ false };
+		if (_pick->isAABBPointIsAllInPick(ap))//拾取到整个部件
+		{
+			isAllIn = true; isIntersetion = true;
+		}
+		else if (_pick->isIntersectionAABBAndPick(ap))//有相交
+		{
+			isIntersetion = true;		
+		}
+		if (isIntersetion)
+		{
+			switch (*_pickFilter)
+			{
+			case PickFilter::PickNothing:; break;
+			case PickFilter::PickGeoPoint:MultiplyPickGeoPoint(partData, isAllIn); break;
+			case PickFilter::PickGeoLine:MultiplyPickGeoLine(partData, isAllIn); break;
+			case PickFilter::PickGeoFace:MultiplyPickGeoFace(partData, isAllIn); break;
+			case PickFilter::PickGeoSolid:MultiplyPickGeoSolid(partData, isAllIn); break;
+			case PickFilter::PickGeoPart:MultiplyPickGeoPart(partData, isAllIn); break;
+			case PickFilter::PickGeoPointByPart:MultiplyPickGeoPointByPart(partData, isAllIn); break;
+			case PickFilter::PickGeoLineByPart:MultiplyPickGeoLineByPart(partData, isAllIn); break;
+			case PickFilter::PickGeoFaceByPart:MultiplyPickGeoFaceByPart(partData, isAllIn); break;
+			case PickFilter::PickGeoSolidByPart:MultiplyPickGeoSolidByPart(partData, isAllIn); break;
+			default:break;
+			}
+		}
 	}
 
 	void mPreGeoPickThread::SoloPickGeoPoint(mGeoPartData1 *partData)
@@ -520,7 +493,7 @@ namespace MDataGeo
 		for (int lineID : lineIDs)
 		{
 			MDataGeo::mGeoLineData1* geoLineData = _geoModelData->getGeoLineDataByID(lineID);
-			for (int j = 0; j < geoLineData->getGeoLineVertex().size() - 1; j++)
+			for (int j = 0; j < geoLineData->getGeoLineVertex().size(); j +=2)
 			{
 				QVector2D ap1 = WorldvertexToScreenvertex(geoLineData->getGeoLineVertex().at(j), depth1);
 				QVector2D ap2 = WorldvertexToScreenvertex(geoLineData->getGeoLineVertex().at(j + 1), depth2);
@@ -873,26 +846,23 @@ namespace MDataGeo
 		return;
 	}
 
-	void mPreGeoPickThread::MultiplyPickGeoPoint(mGeoPartData1 *partData)
+	void mPreGeoPickThread::MultiplyPickGeoPoint(mGeoPartData1 *partData, bool isAllIn)
 	{
 		std::set<int> pickGeoPointIDs;
-		//MDataGeo::mGeoPartData1 *partData = _geoModelData->getGeoPartDataByPartName(_partName);
-		if (partData == nullptr)
-		{
-			return;
-		}
-		if (!partData->getPartVisual())
-		{
-			return;
-		}
 		set<int> pointIDs = partData->getGeoPointIDs();
-		for (int pointID : pointIDs)
+		if (isAllIn)
 		{
-			MDataGeo::mGeoPointData1* geoPointData = _geoModelData->getGeoPointDataByID(pointID);
-			QVector2D ap1 = WorldvertexToScreenvertex(geoPointData->getGeoPointVertex());
-			//if (fabs(ap1.x() - _centerX) <= _boxW / 2.0 && fabs(ap1.y() - _centerY) <= _boxY / 2.0)
+			pickGeoPointIDs = pointIDs;
+		}
+		else
+		{
+			for (int pointID : pointIDs)
 			{
-				pickGeoPointIDs.insert(pointID);
+				MDataGeo::mGeoPointData1* geoPointData = _geoModelData->getGeoPointDataByID(pointID);
+				if(IsMultiplyPickGeoPoint(geoPointData))
+				{
+					pickGeoPointIDs.insert(pointID);
+				}
 			}
 		}
 		if (pickGeoPointIDs.size() == 0)
@@ -904,139 +874,109 @@ namespace MDataGeo
 		pickMutex.unlock();
 	}
 
-	void mPreGeoPickThread::MultiplyPickGeoPart(mGeoPartData1 *partData)
+	void mPreGeoPickThread::MultiplyPickGeoPart(mGeoPartData1 *partData, bool isAllIn)
 	{
-		//MDataGeo::mGeoPartData1 *partData = _geoModelData->getGeoPartDataByPartName(_partName);
-		if (partData == nullptr)
+		if (isAllIn)
 		{
-			return;
+
 		}
-		if (!partData->getPartVisual())
-		{
-			return;
-		}
-		//if (!isMultiplyPickGeoPart(partData))
+		else if (!isMultiplyPickGeoPart(partData))
 		{
 			return;
 		}
 		pickMutex.lock();
-		//_pickData->setMutiplyPickGeoPartData(_partName);
+		_pickData->setMutiplyPickGeoPartData(partData->getPartName());
 		pickMutex.unlock();
 	}
 
-	void mPreGeoPickThread::MultiplyPickGeoPointByPart(mGeoPartData1 *partData)
+	void mPreGeoPickThread::MultiplyPickGeoPointByPart(mGeoPartData1 *partData, bool isAllIn)
 	{
 		//MDataGeo::mGeoPartData1 *partData = _geoModelData->getGeoPartDataByPartName(_partName);
-		if (partData == nullptr)
+		if (isAllIn)
+		{
+
+		}
+		else if (!isMultiplyPickGeoPart(partData))
 		{
 			return;
 		}
-		if (!partData->getPartVisual())
-		{
-			return;
-		}
-		set<int> pointIDs = partData->getGeoPointIDs();
-		//if (!isMultiplyPickGeoPart(partData))
-		{
-			return;
-		}
-		set<int> ids{ pointIDs.begin(),pointIDs.end() };
+		set<int> ids = partData->getGeoPointIDs();
 		pickMutex.lock();
 		_pickData->setMutiplyPickGeoPointData(ids);
 		pickMutex.unlock();
 	}
 
-	void mPreGeoPickThread::MultiplyPickGeoLineByPart(mGeoPartData1 *partData)
+	void mPreGeoPickThread::MultiplyPickGeoLineByPart(mGeoPartData1 *partData, bool isAllIn)
 	{
 		//MDataGeo::mGeoPartData1 *partData = _geoModelData->getGeoPartDataByPartName(_partName);
-		if (partData == nullptr)
+		if (isAllIn)
+		{
+
+		}
+		else if (!isMultiplyPickGeoPart(partData))
 		{
 			return;
 		}
-		if (!partData->getPartVisual())
-		{
-			return;
-		}
-		set<int>lineIDs = partData->getGeoLineIDs();
-		//if (!isMultiplyPickGeoPart(partData))
-		{
-			return;
-		}
-		set<int> ids{ lineIDs.begin(),lineIDs.end() };
+		set<int>ids = partData->getGeoLineIDs();
 		pickMutex.lock();
 		_pickData->setMutiplyPickGeoLineData(ids);
 		pickMutex.unlock();
 	}
 
-	void mPreGeoPickThread::MultiplyPickGeoFaceByPart(mGeoPartData1 *partData)
+	void mPreGeoPickThread::MultiplyPickGeoFaceByPart(mGeoPartData1 *partData, bool isAllIn)
 	{
 		//MDataGeo::mGeoPartData1 *partData = _geoModelData->getGeoPartDataByPartName(_partName);
-		if (partData == nullptr)
+		if (isAllIn)
+		{
+
+		}
+		else if (!isMultiplyPickGeoPart(partData))
 		{
 			return;
 		}
-		if (!partData->getPartVisual())
-		{
-			return;
-		}
-		set<int> faceIDs = partData->getGeoFaceIDs();
-		//if (!isMultiplyPickGeoPart(partData))
-		{
-			return;
-		}
-		set<int> ids{ faceIDs.begin(),faceIDs.end() };
+		set<int> ids = partData->getGeoFaceIDs();
 		pickMutex.lock();
 		_pickData->setMutiplyPickGeoFaceData(ids);
 		pickMutex.unlock();
 	}
 
-	void mPreGeoPickThread::MultiplyPickGeoSolidByPart(mGeoPartData1 *partData)
+	void mPreGeoPickThread::MultiplyPickGeoSolidByPart(mGeoPartData1 *partData, bool isAllIn)
 	{
 		//MDataGeo::mGeoPartData1 *partData = _geoModelData->getGeoPartDataByPartName(_partName);
-		if (partData == nullptr)
+		if (isAllIn)
+		{
+
+		}
+		else if (!isMultiplyPickGeoPart(partData))
 		{
 			return;
 		}
-		if (!partData->getPartVisual())
-		{
-			return;
-		}
-		set<int>solidIDs = partData->getGeoSolidIDs();
-		//if (!isMultiplyPickGeoPart(partData))
-		{
-			return;
-		}
-		set<int> ids{ solidIDs.begin(),solidIDs.end() };
+		set<int>ids = partData->getGeoSolidIDs();
 		pickMutex.lock();
 		_pickData->setMutiplyPickGeoSolidData(ids);
 		pickMutex.unlock();
 	}
 
-	void mPreGeoPickThread::MultiplyPickGeoLine(mGeoPartData1 *partData)
+	void mPreGeoPickThread::MultiplyPickGeoLine(mGeoPartData1 *partData, bool isAllIn)
 	{
 		std::set<int> pickGeoLineIDs;
-		//MDataGeo::mGeoPartData1 *partData = _geoModelData->getGeoPartDataByPartName(_partName);
-		if (partData == nullptr)
-		{
-			return;
-		}
-		if (!partData->getPartVisual())
-		{
-			return;
-		}
 		set<int> lineIDs = partData->getGeoLineIDs();
-		for (int lineID : lineIDs)
+		if (isAllIn)
 		{
-			MDataGeo::mGeoLineData1* geoLineData = _geoModelData->getGeoLineDataByID(lineID);
-			for (int j = 0; j < geoLineData->getGeoLineVertex().size() - 1; j++)
+			pickGeoLineIDs = lineIDs;
+		}
+		else
+		{
+			for (int lineID : lineIDs)
 			{
-				QVector2D ap1 = WorldvertexToScreenvertex(geoLineData->getGeoLineVertex().at(j));
-				QVector2D ap2 = WorldvertexToScreenvertex(geoLineData->getGeoLineVertex().at(j + 1));
-				QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2 };
-				//if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MBasicFunction::MeshBeam) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
+				MDataGeo::mGeoLineData1* geoLineData = _geoModelData->getGeoLineDataByID(lineID);
+				for (int j = 0; j < geoLineData->getGeoLineVertex().size(); j+=2)
 				{
-					pickGeoLineIDs.insert(lineID);
-					break;
+					if(_pick->getGeoLineIsInPick(geoLineData->getGeoLineVertex().mid(j, 2)))			
+					{
+						pickGeoLineIDs.insert(lineID);
+						break;
+					}
 				}
 			}
 		}
@@ -1049,32 +989,23 @@ namespace MDataGeo
 		pickMutex.unlock();
 	}
 
-	void mPreGeoPickThread::MultiplyPickGeoFace(mGeoPartData1 *partData)
+	void mPreGeoPickThread::MultiplyPickGeoFace(mGeoPartData1 *partData, bool isAllIn)
 	{
 		std::set<int> pickGeoFaceIDs;
 		//MDataGeo::mGeoPartData1 *partData = _geoModelData->getGeoPartDataByPartName(_partName);
-		if (partData == nullptr)
-		{
-			return;
-		}
-		if (!partData->getPartVisual())
-		{
-			return;
-		}
 		set<int> faceIDs = partData->getGeoFaceIDs();
-		for (int faceID : faceIDs)
+		if (isAllIn)
 		{
-			MDataGeo::mGeoFaceData1* geoFaceData = _geoModelData->getGeoFaceDataByID(faceID);
-			for (int j = 0; j < geoFaceData->getGeoFaceVertex().size(); j += 3)
+			pickGeoFaceIDs = faceIDs;
+		}
+		else
+		{
+			for (int faceID : faceIDs)
 			{
-				QVector2D ap1 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j));
-				QVector2D ap2 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j + 1));
-				QVector2D ap3 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j + 2));
-				QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-				//if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MBasicFunction::MeshTri) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
+				MDataGeo::mGeoFaceData1* geoFaceData = _geoModelData->getGeoFaceDataByID(faceID);
+				if (IsMultiplyPickGeoFace(geoFaceData))
 				{
 					pickGeoFaceIDs.insert(faceID);
-					break;
 				}
 			}
 		}
@@ -1087,7 +1018,7 @@ namespace MDataGeo
 		pickMutex.unlock();
 	}
 
-	void mPreGeoPickThread::MultiplyPickGeoSolid(mGeoPartData1 *partData)
+	void mPreGeoPickThread::MultiplyPickGeoSolid(mGeoPartData1 *partData, bool isAllIn)
 	{
 		std::set<int> pickGeoSolidIDs;
 		bool isInSolid = false;
@@ -1104,30 +1035,10 @@ namespace MDataGeo
 		for (int solidID : solidIDs)
 		{
 			MDataGeo::mGeoSolidData1* geoSolidData = _geoModelData->getGeoSolidDataByID(solidID);
-			set<int> faceIDs = geoSolidData->getGeoSolidFaceIDs();
-			for (int faceID : faceIDs)
+			if(IsMultiplyPickGeoSolid(geoSolidData))
 			{
-				MDataGeo::mGeoFaceData1* geoFaceData = _geoModelData->getGeoFaceDataByID(faceID);
-				for (int k = 0; k < geoFaceData->getGeoFaceVertex().size(); k += 3)
-				{
-					QVector2D ap1 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(k));
-					QVector2D ap2 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(k + 1));
-					QVector2D ap3 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(k + 2));
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-					//if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, multiQuad, MBasicFunction::MeshTri) || mPickToolClass::IsMeshPointInQuad(tempQVector2D, _centerX, _centerY, _boxW, _boxY))
-					{
-						pickGeoSolidIDs.insert(solidID);
-						isInSolid = true;
-						break;
-					}
-				}
-				if (isInSolid)
-				{
-					isInSolid = false;
-					break;
-				}
-			}
-
+				pickGeoSolidIDs.insert(solidID);
+			}			
 		}
 		if (pickGeoSolidIDs.size() == 0)
 		{
@@ -1143,9 +1054,159 @@ namespace MDataGeo
 		return false;
 	}
 
-	bool mPreGeoPickThread::isMultiplyPickMeshPart(MDataPost::mPostMeshPartData1 * meshPartData)
+	bool mPreGeoPickThread::IsMultiplyPickGeoPoint(MDataGeo::mGeoPointData1 * geoPointData)
 	{
+		if (_pick->getGeoPointIsInPick(geoPointData->getGeoPointVertex()))
+		{
+			return true;
+		}
 		return false;
+	}
+
+	bool mPreGeoPickThread::IsMultiplyPickGeoLine(MDataGeo::mGeoLineData1 * geoLineData)
+	{
+		QVector<QVector2D> ap = _pick->getAABBToScreenVertex(geoLineData->getGeoLineAABB().minEdge, geoLineData->getGeoLineAABB().maxEdge);
+		if (_pick->isAABBPointIsAllInPick(ap))//拾取到整个几何面
+		{
+			return true;
+		}
+		else if (_pick->isIntersectionAABBAndPick(ap))//有相交
+		{
+			for (int j = 0; j < geoLineData->getGeoLineVertex().size(); j += 2)
+			{
+				if (_pick->getGeoLineIsInPick(geoLineData->getGeoLineVertex().mid(j, 2)))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	bool mPreGeoPickThread::IsMultiplyPickGeoFace(MDataGeo::mGeoFaceData1 * geoFaceData)
+	{
+		QVector<QVector2D> ap = _pick->getAABBToScreenVertex(geoFaceData->getGeoFaceAABB().minEdge, geoFaceData->getGeoFaceAABB().maxEdge);
+		if (_pick->isAABBPointIsAllInPick(ap))//拾取到整个几何面
+		{
+			return true;
+		}
+		else if (_pick->isIntersectionAABBAndPick(ap))//有相交
+		{
+			for (int j = 0; j < geoFaceData->getGeoFaceVertex().size(); j += 3)
+			{
+				if (_pick->getGeoFaceIsInPick(geoFaceData->getGeoFaceVertex().mid(j, 3)))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	bool mPreGeoPickThread::IsMultiplyPickGeoSolid(MDataGeo::mGeoSolidData1 * geoSolidData)
+	{
+		QVector<QVector2D> ap = _pick->getAABBToScreenVertex(geoSolidData->getGeoSolidAABB().minEdge, geoSolidData->getGeoSolidAABB().maxEdge);
+		if (_pick->isAABBPointIsAllInPick(ap))//拾取到整个几何体
+		{
+			return true;
+		}
+		else if (_pick->isIntersectionAABBAndPick(ap))//有相交
+		{
+			set<int> faceIDs = geoSolidData->getGeoSolidFaceIDs();
+			for (int faceID : faceIDs)
+			{
+				MDataGeo::mGeoFaceData1* geoFaceData = _geoModelData->getGeoFaceDataByID(faceID);
+				if (IsMultiplyPickGeoFace(geoFaceData))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	bool mPreGeoPickThread::isMultiplyPickGeoPart(MDataGeo::mGeoPartData1 *geoPartData)
+	{
+		switch (geoPartData->getGeoShapeType())
+		{
+			//判断面，线，点即可
+		case 0://混合
+		{
+			set<int> faceIDs = geoPartData->getGeoFaceIDs();
+			for (int faceID : faceIDs)
+			{
+				MDataGeo::mGeoFaceData1* geoFaceData = _geoModelData->getGeoFaceDataByID(faceID);
+				if (IsMultiplyPickGeoFace(geoFaceData))
+				{
+					return true;
+				}
+			}
+			set<int> lineIDs = geoPartData->getGeoLineIDs();
+			for (int lineID : lineIDs)
+			{
+				MDataGeo::mGeoLineData1* geoLineData = _geoModelData->getGeoLineDataByID(lineID);
+				if (IsMultiplyPickGeoLine(geoLineData))
+				{
+					return true;
+				}
+			}
+			set<int> pointIDs = geoPartData->getGeoPointIDs();
+			for (int pointID : pointIDs)
+			{
+				MDataGeo::mGeoPointData1* geoPointData = _geoModelData->getGeoPointDataByID(pointID);
+				if (IsMultiplyPickGeoPoint(geoPointData))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		//判断面即可
+		case 1://多实体
+		case 2://实体
+		case 4://面
+		{
+			set<int> faceIDs = geoPartData->getGeoFaceIDs();
+			for (int faceID : faceIDs)
+			{
+				MDataGeo::mGeoFaceData1* geoFaceData = _geoModelData->getGeoFaceDataByID(faceID);
+				if (IsMultiplyPickGeoFace(geoFaceData))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		//判断线即可
+		case 6://线
+		{
+			set<int> lineIDs = geoPartData->getGeoLineIDs();
+			for (int lineID : lineIDs)
+			{
+				MDataGeo::mGeoLineData1* geoLineData = _geoModelData->getGeoLineDataByID(lineID);
+				if (IsMultiplyPickGeoLine(geoLineData))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		//判断点即可
+		case 7://点
+		{
+			set<int> pointIDs = geoPartData->getGeoPointIDs();
+			for (int pointID : pointIDs)
+			{
+				MDataGeo::mGeoPointData1* geoPointData = _geoModelData->getGeoPointDataByID(pointID);
+				if (IsMultiplyPickGeoPoint(geoPointData))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+		return false;
+		}
 	}
 
 	void mPreGeoPickThread::startPick()
@@ -1159,6 +1220,10 @@ namespace MDataGeo
 			while (iter.hasNext())
 			{
 				iter.next();
+				if (!iter.value()->getPartVisual())
+				{
+					return;
+				}
 				futures.append(QtConcurrent::run(this, &mPreGeoPickThread::doSoloPick, iter.value()));
 			}
 			while (!futures.empty())
@@ -1175,6 +1240,10 @@ namespace MDataGeo
 			while (iter.hasNext())
 			{
 				iter.next();
+				if (!iter.value()->getPartVisual())
+				{
+					return;
+				}
 				futures.append(QtConcurrent::run(this, &mPreGeoPickThread::doMultiplyPick, iter.value()));
 			}
 			while (!futures.empty())

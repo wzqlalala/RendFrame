@@ -20,21 +20,23 @@ using namespace std;
 namespace MDataGeo
 {
 	class mGeoPickData1;
-	class mGeoPartData1;
 	class mGeoModelData1;
+	class mGeoPartData1;
+	class mGeoPointData1;
+	class mGeoLineData1;
+	class mGeoFaceData1;
+	class mGeoSolidData1;
 	class mBasePick
 	{
 	public:
 
 		mBasePick(QMatrix4x4 pvm, int w, int h) { _pvm = pvm; _width = w; _height = h; };
 
-		void getAABBAndPickToMeshData(Space::SpaceTree * spaceTree, QVector<MDataPost::mPostMeshData1*>& meshAll, QVector<MDataPost::mPostMeshData1*>& meshContain);
-
-		virtual bool getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree) = 0;
-
-		virtual bool get2DAnd3DMeshCenterIsInPick(QVector3D pointCenter) = 0;//0维和2维和3维
-
-		virtual bool get1DMeshIsInPick(QVector<QVector3D> vertexs) = 0;//1维
+		virtual bool getGeoPointIsInPick(QVector3D pointCenter) = 0;//0维
+		
+		virtual bool getGeoLineIsInPick(QVector<QVector3D> vertexs) = 0;//1维
+	
+		virtual bool getGeoFaceIsInPick(QVector<QVector3D> vertexs) = 0;//2维
 
 		virtual bool isIntersectionAABBAndPick(QVector<QVector2D> ap) = 0;//判断是否相交
 
@@ -68,11 +70,11 @@ namespace MDataGeo
 			_boxXY_2 = _multiQuad.first() - _center; _boxXY_2[0] = qAbs(_boxXY_2[0]); _boxXY_2[1] = qAbs(_boxXY_2[1]);
 		};
 
-		bool getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree) override;
+		bool getGeoPointIsInPick(QVector3D pointCenter) override;//0维
 
-		bool get2DAnd3DMeshCenterIsInPick(QVector3D pointCenter) override;//0维和2维和3维
+		bool getGeoLineIsInPick(QVector<QVector3D> vertexs) override;//1维
 
-		bool get1DMeshIsInPick(QVector<QVector3D> vertexs) override;//1维
+		bool getGeoFaceIsInPick(QVector<QVector3D> vertexs) override;//2维
 
 		bool isIntersectionAABBAndPick(QVector<QVector2D> ap) override;
 
@@ -85,59 +87,59 @@ namespace MDataGeo
 
 	};
 
-	class mPolygonPick :public mBasePick
-	{
-	public:
-		mPolygonPick(QMatrix4x4 pvm, int w, int h, QVector<QVector2D> multiQuad):mBasePick(pvm, w, h),_multiQuad(multiQuad)
-		{
-			_center = (_multiQuad.first() + _multiQuad.last()) / 2.0;
-		};
+	//class mPolygonPick :public mBasePick
+	//{
+	//public:
+	//	mPolygonPick(QMatrix4x4 pvm, int w, int h, QVector<QVector2D> multiQuad):mBasePick(pvm, w, h),_multiQuad(multiQuad)
+	//	{
+	//		_center = (_multiQuad.first() + _multiQuad.last()) / 2.0;
+	//	};
 
-		bool getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree) override;
+	//	bool getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree) override;
 
-		bool get2DAnd3DMeshCenterIsInPick(QVector3D pointCenter) override;//0维和2维和3维
+	//	bool get2DAnd3DMeshCenterIsInPick(QVector3D pointCenter) override;//0维和2维和3维
 
-		bool get1DMeshIsInPick(QVector<QVector3D> vertexs) override;//1维
+	//	bool get1DMeshIsInPick(QVector<QVector3D> vertexs) override;//1维
 
-		bool isIntersectionAABBAndPick(QVector<QVector2D> ap) override;
+	//	bool isIntersectionAABBAndPick(QVector<QVector2D> ap) override;
 
-		bool isAABBPointIsAllInPick(QVector<QVector2D> ap) override;//判断点是否全部
+	//	bool isAABBPointIsAllInPick(QVector<QVector2D> ap) override;//判断点是否全部
 
-	protected:
-		QVector<QVector2D> _multiQuad;
+	//protected:
+	//	QVector<QVector2D> _multiQuad;
 
-		QVector2D _center;
+	//	QVector2D _center;
 
-	};
+	//};
 
-	class mRoundPick :public mBasePick
-	{
-	public:
-		mRoundPick(QMatrix4x4 pvm, int w, int h, QVector2D p1, QVector2D p2, QVector3D centerDirection)
-			:mBasePick(pvm, w, h)
-		{
-			_screenCenter = (p1 + p2)/2.0;
-			QVector3D Point = ScreenvertexToWorldvertex(p2);//算出圆上一点的坐标
-			_centerPoint = ScreenvertexToWorldvertex(_screenCenter);//算出圆心坐标
-			_radius = _centerPoint.distanceToPoint(Point);
-			_screenRadius = _screenCenter.distanceToPoint(p1);
-			_centerDirection = centerDirection;
-		};
+	//class mRoundPick :public mBasePick
+	//{
+	//public:
+	//	mRoundPick(QMatrix4x4 pvm, int w, int h, QVector2D p1, QVector2D p2, QVector3D centerDirection)
+	//		:mBasePick(pvm, w, h)
+	//	{
+	//		_screenCenter = (p1 + p2)/2.0;
+	//		QVector3D Point = ScreenvertexToWorldvertex(p2);//算出圆上一点的坐标
+	//		_centerPoint = ScreenvertexToWorldvertex(_screenCenter);//算出圆心坐标
+	//		_radius = _centerPoint.distanceToPoint(Point);
+	//		_screenRadius = _screenCenter.distanceToPoint(p1);
+	//		_centerDirection = centerDirection;
+	//	};
 
-		bool getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree) override;
+	//	bool getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree) override;
 
-		bool get2DAnd3DMeshCenterIsInPick(QVector3D pointCenter) override;//0维和2维和3维
+	//	bool get2DAnd3DMeshCenterIsInPick(QVector3D pointCenter) override;//0维和2维和3维
 
-		bool get1DMeshIsInPick(QVector<QVector3D> vertexs) override;//1维
+	//	bool get1DMeshIsInPick(QVector<QVector3D> vertexs) override;//1维
 
-		bool isIntersectionAABBAndPick(QVector<QVector2D> ap) override;
+	//	bool isIntersectionAABBAndPick(QVector<QVector2D> ap) override;
 
-		bool isAABBPointIsAllInPick(QVector<QVector2D> ap) override;//判断点是否全部
+	//	bool isAABBPointIsAllInPick(QVector<QVector2D> ap) override;//判断点是否全部
 
-	protected:
-		QVector3D _centerPoint; QVector3D _centerDirection; double _radius; //空间
-		QVector2D _screenCenter; double _screenRadius;//屏幕
-	};
+	//protected:
+	//	QVector3D _centerPoint; QVector3D _centerDirection; double _radius; //空间
+	//	QVector2D _screenCenter; double _screenRadius;//屏幕
+	//};
 	class RENDDATA_EXPORT mPreGeoPickThread : public QObject
 	{
 		Q_OBJECT
@@ -223,23 +225,35 @@ namespace MDataGeo
 		void SoloPickGeoSolidByPart(mGeoPartData1 *partData);
 
 		//矩形框选拾取
-		void MultiplyPickGeoLine(mGeoPartData1 *partData);
-		void MultiplyPickGeoFace(mGeoPartData1 *partData);
-		void MultiplyPickGeoSolid(mGeoPartData1 *partData);
-		void MultiplyPickGeoPoint(mGeoPartData1 *partData);
-		void MultiplyPickGeoPart(mGeoPartData1 *partData);
-		void MultiplyPickGeoPointByPart(mGeoPartData1 *partData);
-		void MultiplyPickGeoLineByPart(mGeoPartData1 *partData);
-		void MultiplyPickGeoFaceByPart(mGeoPartData1 *partData);
-		void MultiplyPickGeoSolidByPart(mGeoPartData1 *partData);
+		void MultiplyPickGeoLine(mGeoPartData1 *partData, bool isAllIn = false);
+		void MultiplyPickGeoFace(mGeoPartData1 *partData, bool isAllIn = false);
+		void MultiplyPickGeoSolid(mGeoPartData1 *partData, bool isAllIn = false);
+		void MultiplyPickGeoPoint(mGeoPartData1 *partData, bool isAllIn = false);
+		void MultiplyPickGeoPart(mGeoPartData1 *partData, bool isAllIn = false);
+		void MultiplyPickGeoPointByPart(mGeoPartData1 *partData, bool isAllIn = false);
+		void MultiplyPickGeoLineByPart(mGeoPartData1 *partData, bool isAllIn = false);
+		void MultiplyPickGeoFaceByPart(mGeoPartData1 *partData, bool isAllIn = false);
+		void MultiplyPickGeoSolidByPart(mGeoPartData1 *partData, bool isAllIn = false);
 		
 		//判断单选是否拾取到该部件,并且返回他的深度值
 		
 		bool IsSoloPickMeshPart(MDataPost::mPostMeshPartData1 *meshPartData, float &depth);
 
+		/***********框选*********/
+		//判断是否拾取到该几何点
+		bool IsMultiplyPickGeoPoint(MDataGeo::mGeoPointData1* geoPointData);
+
+		//判断是否拾取到该几何线
+		bool IsMultiplyPickGeoLine(MDataGeo::mGeoLineData1* geoLineData);
+
+		//判断是否拾取到该几何面
+		bool IsMultiplyPickGeoFace(MDataGeo::mGeoFaceData1* geoFaceData);
+
+		//判断是否拾取到该几何体
+		bool IsMultiplyPickGeoSolid(MDataGeo::mGeoSolidData1* geoSolidData);
 		
 		//判断框选是否拾取到该部件
-		bool isMultiplyPickMeshPart(MDataPost::mPostMeshPartData1 *meshPartData);
+		bool isMultiplyPickGeoPart(MDataGeo::mGeoPartData1 *geoPartData);
 
 		
 		//将世界坐标转化为屏幕坐标
@@ -254,16 +268,6 @@ namespace MDataGeo
 		 * 将世界坐标转化为屏幕坐标并且返回他的深度值
 		 */
 		void WorldvertexToScreenvertex(QVector<QVector3D> Worldvertexs, QVector<QVector2D> &Screenvertexs, std::set<float> &depths);
-
-		/*
-		* 判断节点是否被平面裁剪,即不能拾取,true代表被裁减了，不能拾取；false代表没有被裁剪，可以拾取
-		*/
-		bool isVertexCuttingByPlane(QVector3D vertex);
-
-		/*
-		* 判断一个单元的所有节点是否被平面裁剪，即只有全部节点都没有被裁减了才能拾取，true代表部分被裁减了，不能拾取；false代表全部没有被裁剪，可以拾取
-		*/
-		bool isVertexCuttingByPlane(QVector<QVector3D> vertexs);
 
 		//获取形心
 		QVector3D getCenter(QVector<QVector3D> vertexs);

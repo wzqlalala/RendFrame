@@ -68,6 +68,8 @@ namespace MDataGeo
 		//获取部件编号
 		int getPartID();
 
+		QString getPartName() { return _partName; };
+
 		//获取几何实体的最值
 		Space::AABB getGeoPartAABB() { return _aabb; };
 
