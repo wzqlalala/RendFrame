@@ -1,12 +1,15 @@
 #include "mGeoPointData1.h"
+#include "mGeoModelData1.h"
 
 namespace MDataGeo
 {
-	mGeoPointData1::mGeoPointData1(QString partName, int ID)
+	mGeoPointData1::mGeoPointData1(mGeoModelData1 *geoModelData, QString partName, int ID)
 	{
+		_geoModelData = geoModelData;
 		_pointProperty = IndependentPoint;
 		_partName = partName;
 		_ID = ID;
+		geoModelData->appendGeoPointData(ID, this);
 	}
 
 	mGeoPointData1::~mGeoPointData1()

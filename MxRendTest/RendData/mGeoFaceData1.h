@@ -5,12 +5,15 @@
 #include <QVector>
 #include <QString>
 
+#include "SpaceTree.h"
+
 namespace MDataGeo
 {
+	class mGeoModelData1;
 	class RENDDATA_EXPORT mGeoFaceData1
 	{
 	public:
-		mGeoFaceData1(QString partName,int ID);
+		mGeoFaceData1(mGeoModelData1 *geoModelData, QString partName,int ID);
 
 		~mGeoFaceData1();
 
@@ -21,7 +24,7 @@ namespace MDataGeo
 		QVector<QVector3D> getGeoFaceVertex();
 
 		//获取几何面的所有法向量
-		QVector<QVector3D> getGeoFaceNormal();
+		//QVector<QVector3D> getGeoFaceNormal();
 
 		//获取几何面的ID
 		int getGeoFaceID();
@@ -32,7 +35,12 @@ namespace MDataGeo
 		//设置部件名称
 		void setPartName(const QString &name);
 
+		//获取几何面的最值
+		Space::AABB getGeoFaceAABB() { return _aabb; };
+
 	private:
+		mGeoModelData1 *_geoModelData;
+
 		int _ID;
 
 		//几何面所在的部件
@@ -41,7 +49,10 @@ namespace MDataGeo
 		bool _isShow;
 
 		QVector<QVector3D> _geoFaceVertex;
-		QVector<QVector3D> _geoFaceNormal;
+		//QVector<QVector3D> _geoFaceNormal;
+
+		//几何面的包围盒
+		Space::AABB _aabb;
 	};
 }
 

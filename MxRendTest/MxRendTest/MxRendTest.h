@@ -85,7 +85,12 @@ private:
 
 	//拾取
 	MultiplyPickMode _multuiplyPickMode = MultiplyPickMode::QuadPick;
+
+	//后处理
 	QVector<PickFilter> _pickfilters{ PickFilter::PickNode, PickFilter::PickAnyMesh, PickFilter::PickMeshFace, PickFilter::Pick1DMesh, PickFilter::Pick2DMesh, PickFilter::PickNodeByLineAngle, PickFilter::PickNodeByFaceAngle, PickFilter::Pick1DMeshByAngle, PickFilter::Pick2DMeshByAngle, PickFilter::PickMeshFaceByAngle };
 	int _pickfilterID = 0;
+
+	//前处理几何
+	QVector<PickFilter> _pickfilters1{ PickFilter::PickGeoPoint, PickFilter::PickGeoLine, PickFilter::PickGeoFace, PickFilter::PickGeoSolid, PickFilter::PickGeoPart, PickFilter::PickGeoPointByPart, PickFilter::PickGeoLineByPart, PickFilter::PickGeoFaceByPart, PickFilter::PickGeoSolidByPart, PickFilter::pickVertexOnGeoLine, PickFilter::pickVertexOnGeoFace };
 
 };

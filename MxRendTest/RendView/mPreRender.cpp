@@ -6,6 +6,10 @@
 #include "mFontRender.h"
 #include "mArrowRender.h"
 
+//MDataGeo
+#include "mGeoPickData1.h"
+#include "mPreGeoPickThread.h"
+
 #include <renderpch.h>
 #include "texture.h"
 #include "Space.h"
@@ -156,7 +160,9 @@ namespace MPreRend
 		_geoModelRender->setPointStateSet(_pointStateSet);
 
 		//初始化高亮渲染
-		//_pickData = new mPostMeshPickData;
+		_pickData = new mGeoPickData1();
+		_geoPickThread = new mPreGeoPickThread(_geoModelData, _pickData);
+		_geoPickThread->setPickFilter(_baseRend->getPickFilter());
 		//_highLightRender = make_shared<mPostHighLightRender>(_rendStatus, _pickData);
 
 		//this->doneCurrent();
@@ -178,32 +184,32 @@ namespace MPreRend
 		{
 			return;
 		}
-		//_pickData->setMeshPickFunction(int(_baseRend->getPickFuntion()));
+		_pickData->setGeoPickFunction(int(_baseRend->getPickFuntion()));
 		//_thread->setCurrentFrameRend(_oneFrameRender->getOneFrameData(), _oneFrameRender->getOneFrameRendData());
-		//_thread->setMatrix(_baseRend->getCamera()->getPVMValue());
-		//_thread->setWidget(_baseRend->getCamera()->SCR_WIDTH, _baseRend->getCamera()->SCR_HEIGHT);
-		//_thread->setPickMode(*_baseRend->getCurrentPickMode(), *_baseRend->getMultiplyPickMode());
+		_geoPickThread->setMatrix(_baseRend->getCamera()->getPVMValue());
+		_geoPickThread->setWidget(_baseRend->getCamera()->SCR_WIDTH, _baseRend->getCamera()->SCR_HEIGHT);
+		_geoPickThread->setPickMode(*_baseRend->getCurrentPickMode(), *_baseRend->getMultiplyPickMode());
 		if (*_baseRend->getCurrentPickMode() == PickMode::SoloPick)
 		{		
 			float depth;
-			QOpenGLContext::currentContext()->functions()->glReadPixels(poses.first().x(), _baseRend->getCamera()->SCR_HEIGHT - poses.first().y(), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-			//_thread->setLocation(poses.first().toPoint(), depth);
+			QOpenGLContext::currentContext()->functions()->glReadPixels(poses.first().x() - 1, _baseRend->getCamera()->SCR_HEIGHT - poses.first().y() - 1, 2, 2, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
+			_geoPickThread->setLocation(poses.first().toPoint(), depth);
 		}
 		else
 		{
-			//_thread->setLocation(poses, (_baseRend->getCamera()->_Center - _baseRend->getCamera()->_Eye).normalized());
+			_geoPickThread->setLocation(poses, (_baseRend->getCamera()->_Center - _baseRend->getCamera()->_Eye).normalized());
 		}
-		//QFuture<void> future; 
-		//future = QtConcurrent::run(_thread, &mPostMeshPickThread::startPick);
-		//QObject::connect(&w, &QFutureWatcher<void>::finished, [this] {
-		//	_highLightRender->updateHighLightRender(_oneFrameRender->getOneFrameData(), _oneFrameRender->getOneFrameRendData());
-		//	//this->
-		//	//set<int> ids = _pickData->getPickNodeIDs();
-		//	//qDebug() << "拾取完成";
-		//	QObject::disconnect(&w, 0, 0, 0);//断开信号
-		//	emit update();
-		//});
-		//w.setFuture(future);
+		QFuture<void> future; 
+		future = QtConcurrent::run(_geoPickThread, &mPreGeoPickThread::startPick);
+		QObject::connect(&w, &QFutureWatcher<void>::finished, [this] {
+			//_highLightRender->updateHighLightRender(_oneFrameRender->getOneFrameData(), _oneFrameRender->getOneFrameRendData());
+			//this->
+			set<int> ids = _pickData->getPickPointIDs();
+			qDebug() << "拾取完成";
+			QObject::disconnect(&w, 0, 0, 0);//断开信号
+			emit update();
+		});
+		w.setFuture(future);
 
 	}
 

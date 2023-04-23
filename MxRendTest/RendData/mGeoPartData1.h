@@ -9,13 +9,14 @@
 
 namespace MDataGeo
 {
+	class mGeoModelData1;
 	class RENDDATA_EXPORT mGeoPartData1
 	{
 
 	public:
-		mGeoPartData1();
+		mGeoPartData1(mGeoModelData1* geoModelData);
 
-		mGeoPartData1(QString name,int ID);
+		mGeoPartData1(mGeoModelData1* geoModelData, QString name,int ID);
 
 		~mGeoPartData1();
 
@@ -67,12 +68,14 @@ namespace MDataGeo
 		//获取部件编号
 		int getPartID();
 
-		//获取部件尺寸的最值
-		Space::AABB getGeoPartSize();
+		//获取几何实体的最值
+		Space::AABB getGeoPartAABB() { return _aabb; };
 
 	private:
 
 		static QList<QVector3D> Color;
+
+		mGeoModelData1 *_geoModelData;
 
 		//部件属性
 		QString _partName;
@@ -94,7 +97,7 @@ namespace MDataGeo
 		std::set<int> _geoSolidIDs;
 
 		//部件的几何尺寸
-		Space::AABB _partSize;
+		Space::AABB _aabb;
 
 	};
 }

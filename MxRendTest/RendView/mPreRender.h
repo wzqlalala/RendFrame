@@ -38,6 +38,8 @@ namespace MViewBasic
 namespace MDataGeo
 {
 	class mGeoModelData1;
+	class mGeoPickData1;
+	class mPreGeoPickThread;
 }
 
 using namespace MViewBasic;
@@ -107,7 +109,11 @@ namespace MPreRend
 
 		shared_ptr<mPreGeoModelRender> _geoModelRender;//几何渲染
 
-		mGeoModelData1 *_geoModelData;
+		mGeoModelData1 *_geoModelData;//模型数据
+
+		mPreGeoPickThread *_geoPickThread;//拾取
+		QFutureWatcher<void> w;
+		mGeoPickData1 *_pickData;//拾取数据
 
 		shared_ptr<mxr::Texture> _pointTexture;
 

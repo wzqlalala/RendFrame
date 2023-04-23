@@ -632,6 +632,42 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 			_preRend->setCameraType(_cameraType);
 			break;
 		}
+		case Qt::Key_Z:
+		{
+			if (_preRend == nullptr)
+			{
+				return;
+			}
+			int id = int(_multuiplyPickMode);
+			if (_multuiplyPickMode == MultiplyPickMode::PolygonPick)
+			{
+				_multuiplyPickMode = MultiplyPickMode::QuadPick;
+			}
+			else
+			{
+				id++;
+				_multuiplyPickMode = MultiplyPickMode(id);
+			}
+			_preRend->setMultiplyPickMode(_multuiplyPickMode);
+			break;
+		}
+		case Qt::Key_X:
+		{
+			if (_preRend == nullptr)
+			{
+				return;
+			}
+			if (_pickfilterID == (_pickfilters1.size() - 1))
+			{
+				_pickfilterID = 0;
+			}
+			else
+			{
+				_pickfilterID++;
+			}
+			_preRend->setPickFilter(_pickfilters1.at(_pickfilterID));
+			break;
+		}
 		}
 
 	}
@@ -738,57 +774,45 @@ bool MxRendTest::createGeo(MDataGeo::mGeoModelData1 * geoModelData)
 	/**********部件*****************************************************************************************/
 	_globalPartId++;
 	QString partName = "part1";
-	mGeoPartData1 *geoPartData = new mGeoPartData1(partName, _globalPartId);
+	mGeoPartData1 *geoPartData = new mGeoPartData1(geoModelData, partName, _globalPartId);
 	/*******************面**************/
 	_globalFaceId++;
-	mGeoFaceData1 *geoFaceData = new mGeoFaceData1(partName, _globalFaceId);
+	mGeoFaceData1 *geoFaceData = new mGeoFaceData1(geoModelData, partName, _globalFaceId);
 	QVector<QVector3D> vertexs{ QVector3D(0,0,0),QVector3D(0,1,0),QVector3D(1,0,0) };
 	geoFaceData->appendGeoFaceData(_globalFaceId, vertexs);
 	geoPartData->appendGeoFaceID(_globalFaceId);
-	geoPartData->setGeoPartSize(Space::AABB(QVector3D(0, 0, 0), QVector3D(1, 1, 0)));
-	geoModelData->appendGeoFaceData(_globalFaceId, geoFaceData);
-	geoModelData->appendGeoPartData(partName, geoPartData);
 
 	/**********部件*****************************************************************************************/
 	_globalPartId++;
 	partName = "part2";
-	geoPartData = new mGeoPartData1(partName, _globalPartId);
+	geoPartData = new mGeoPartData1(geoModelData, partName, _globalPartId);
 	/*******************面**************/
 	_globalFaceId++;
-	geoFaceData = new mGeoFaceData1(partName, _globalFaceId);
+	geoFaceData = new mGeoFaceData1(geoModelData, partName, _globalFaceId);
 	vertexs = QVector<QVector3D>{ QVector3D(1,1,2),QVector3D(2,1,3),QVector3D(0,0,1) };
 	geoFaceData->appendGeoFaceData(_globalFaceId, vertexs);
 	geoPartData->appendGeoFaceID(_globalFaceId);
-	geoPartData->setGeoPartSize(Space::AABB(QVector3D(0, 0, 1), QVector3D(2, 1, 3)));
-	geoModelData->appendGeoFaceData(_globalFaceId, geoFaceData);
-	geoModelData->appendGeoPartData(partName, geoPartData);
 
 	/**********部件*****************************************************************************************/
 	_globalPartId++;
 	partName = "part3";
-	geoPartData = new mGeoPartData1(partName, _globalPartId);
+	geoPartData = new mGeoPartData1(geoModelData, partName, _globalPartId);
 	/*****************线***********/
 	_globalLineId++;
-	mGeoLineData1 *geoLineData = new mGeoLineData1(partName, _globalLineId);
+	mGeoLineData1 *geoLineData = new mGeoLineData1(geoModelData, partName, _globalLineId);
 	vertexs = QVector<QVector3D>{ QVector3D(0,0,0),QVector3D(1,1,1),QVector3D(1,1,1),QVector3D(3,3,3) };
 	geoLineData->appendGeoLineData(_globalLineId, vertexs);
 	geoPartData->appendGeoLineID(_globalLineId);
-	geoPartData->setGeoPartSize(Space::AABB(QVector3D(0, 0, 0), QVector3D(3, 3, 3)));
-	geoModelData->appendGeoLineData(_globalLineId, geoLineData);
-	geoModelData->appendGeoPartData(partName, geoPartData);
 
 	/**********部件*****************************************************************************************/
 	_globalPartId++;
 	partName = "part4";
-	geoPartData = new mGeoPartData1(partName, _globalPartId);
+	geoPartData = new mGeoPartData1(geoModelData, partName, _globalPartId);
 	/*****************点***********/
 	_globalPointId++;
-	mGeoPointData1 *geoPointData = new mGeoPointData1(partName, _globalPointId);
+	mGeoPointData1 *geoPointData = new mGeoPointData1(geoModelData, partName, _globalPointId);
 	geoPointData->setPointData(_globalPointId, QVector3D(1, 2, 3));
 	geoPartData->appendGeoPointID(_globalPointId);
-	geoPartData->setGeoPartSize(Space::AABB(QVector3D(1, 2, 3), QVector3D(1, 2, 3)));
-	geoModelData->appendGeoPointData(_globalPointId, geoPointData);
-	geoModelData->appendGeoPartData(partName, geoPartData);
 
 	return true;
 }

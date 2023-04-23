@@ -1,15 +1,19 @@
 #include "mGeoLineData1.h"
+#include "mGeoModelData1.h"
 
 #include "mContainers.h"
 
 
 namespace MDataGeo
 {
-	mGeoLineData1::mGeoLineData1(QString partName, int ID)
+	mGeoLineData1::mGeoLineData1(mGeoModelData1 *geoModelData, QString partName, int ID)
 	{
+		_geoModelData = geoModelData;
 		_lineProperty = GeoLineProperty::IndependentEdge;
 		_partName = partName;
 		_ID = ID;
+		_aabb = Space::AABB();
+		geoModelData->appendGeoLineData(ID, this);
 		MBasicFunction::_globalLineId = std::max(MBasicFunction::_globalLineId, ID);
 	}
 
@@ -21,6 +25,7 @@ namespace MDataGeo
 	{
 		_ID = ID;
 		_geoLineVertex = vertex;
+		_aabb.push(vertex);
 	}
 
 	void mGeoLineData1::setGeoLineProperty(GeoLineProperty lineProperty)

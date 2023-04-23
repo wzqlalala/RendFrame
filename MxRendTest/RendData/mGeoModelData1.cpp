@@ -246,6 +246,31 @@ namespace MDataGeo
 		return _geoPointData.value(ID);
 	}
 
+	Space::AABB mGeoModelData1::getGeoPartAABBByPartName(QString partName)
+	{
+		return _geoPartData.value(partName)->getGeoPartAABB();
+	}
+
+	Space::AABB mGeoModelData1::getGeoSolidAABBByID(int ID)
+	{
+		return _geoSolidData.value(ID)->getGeoSolidAABB();
+	}
+
+	Space::AABB mGeoModelData1::getGeoFaceAABBByID(int ID)
+	{
+		return _geoFaceData.value(ID)->getGeoFaceAABB();
+	}
+
+	Space::AABB mGeoModelData1::getGeoLineAABBByID(int ID)
+	{
+		return _geoLineData.value(ID)->getGeoLineAABB();
+	}
+
+	Space::AABB mGeoModelData1::getGeoPointAABBByID(int ID)
+	{
+		return _geoPointData.value(ID)->getGeoPointAABB();
+	}
+
 	QList<QString> mGeoModelData1::getAllPartName()
 	{
 		return _geoPartData.keys();
@@ -269,6 +294,11 @@ namespace MDataGeo
 	QList<int> mGeoModelData1::getAllGeoPointID()
 	{
 		return _geoPointData.keys();
+	}
+
+	QHashIterator<QString, mGeoPartData1*> mGeoModelData1::getPartIterator()
+	{
+		return QHashIterator<QString, mGeoPartData1*>(_geoPartData);
 	}
 
 	//void mGeoModelData1::setModelRadiusAndCenter(float modelRadius, QVector3D modelCenter)
@@ -638,7 +668,7 @@ namespace MDataGeo
 				{
 					continue;
 				}
-				aabb.push(iter.value()->getGeoPartSize());
+				aabb.push(iter.value()->getGeoPartAABB());
 			}
 		}
 		

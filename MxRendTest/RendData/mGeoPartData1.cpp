@@ -1,4 +1,5 @@
 #include "mGeoPartData1.h"
+#include "mGeoModelData1.h"
 
 #include <QList>
 
@@ -14,22 +15,28 @@ namespace MDataGeo
 										  QVector3D(0.50f, 0.24f, 0.12f),
 										  QVector3D(0.05f, 0.94f, 0.04f) };
 
-	mGeoPartData1::mGeoPartData1()
+	mGeoPartData1::mGeoPartData1(mGeoModelData1* geoModelData)
 	{
+		_geoModelData = geoModelData;
 		_partName = "";
 		_isShow = true;
 		_partID = 0;
 		int num = (_partID - 1) % Color.size();
 		_partColor = Color.at(num);
+		_aabb = Space::AABB();
+		geoModelData->appendGeoPartData(_partName, this);
 	}
 
-	mGeoPartData1::mGeoPartData1(QString name,int ID)
+	mGeoPartData1::mGeoPartData1(mGeoModelData1* geoModelData, QString name,int ID)
 	{
+		_geoModelData = geoModelData;
 		_partName = name;
 		_isShow = true;
 		_partID = ID;
 		int num = (_partID - 1) % Color.size();
 		_partColor = Color.at(num);
+		_aabb = Space::AABB();
+		geoModelData->appendGeoPartData(_partName, this);
 	}
 
 	mGeoPartData1::~mGeoPartData1()
@@ -38,7 +45,7 @@ namespace MDataGeo
 
 	void mGeoPartData1::setGeoPartSize(Space::AABB partSize)
 	{
-		_partSize = partSize;
+		_aabb = partSize;
 	}
 
 	void mGeoPartData1::setPartColor(QVector3D color)
@@ -58,22 +65,34 @@ namespace MDataGeo
 
 	void mGeoPartData1::appendGeoPointID(int geoPointID)
 	{
-		_geoPointIDs.insert(geoPointID);
+		if (_geoPointIDs.insert(geoPointID).second)
+		{
+			_aabb.push(_geoModelData->getGeoPointAABBByID(geoPointID));
+		}
 	}
 
 	void mGeoPartData1::appendGeoLineID(int geoLineID)
 	{
-		_geoLineIDs.insert(geoLineID);
+		if (_geoLineIDs.insert(geoLineID).second)
+		{
+			_aabb.push(_geoModelData->getGeoLineAABBByID(geoLineID));
+		}
 	}
 
 	void mGeoPartData1::appendGeoFaceID(int geoFaceID)
 	{
-		_geoFaceIDs.insert(geoFaceID);
+		if (_geoFaceIDs.insert(geoFaceID).second)
+		{
+			_aabb.push(_geoModelData->getGeoFaceAABBByID(geoFaceID));
+		}
 	}
 
 	void mGeoPartData1::appendGeoSolidID(int geoSolidID)
 	{
-		_geoSolidIDs.insert(geoSolidID);
+		if (_geoSolidIDs.insert(geoSolidID).second)
+		{
+			_aabb.push(_geoModelData->getGeoSolidAABBByID(geoSolidID));
+		}
 	}
 	int mGeoPartData1::getGeoShapeType()
 	{
@@ -106,10 +125,5 @@ namespace MDataGeo
 	int mGeoPartData1::getPartID()
 	{
 		return _partID;
-	}
-
-	Space::AABB mGeoPartData1::getGeoPartSize()
-	{
-		return _partSize;
 	}
 }

@@ -71,12 +71,22 @@ namespace MDataGeo
 		mGeoLineData1* getGeoLineDataByID(int ID);
 		mGeoPointData1* getGeoPointDataByID(int ID);
 
+		//通过ID(名称)获取相应的包围盒
+		Space::AABB getGeoPartAABBByPartName(QString partName);
+		Space::AABB getGeoSolidAABBByID(int ID);
+		Space::AABB getGeoFaceAABBByID(int ID);
+		Space::AABB getGeoLineAABBByID(int ID);
+		Space::AABB getGeoPointAABBByID(int ID);
+
 		//获取相应数据所有的ID(名称)
 		QList<QString> getAllPartName();
 		QList<int> getAllGeoSolidID();
 		QList<int> getAllGeoFaceID();
 		QList<int> getAllGeoLineID();
 		QList<int> getAllGeoPointID();
+
+		//获取模型的所有部件迭代器
+		QHashIterator<QString, mGeoPartData1*> getPartIterator();
 
 		////设置模型的最大半径和中心
 		//void setModelRadiusAndCenter(float modelRadius, QVector3D modelCenter);

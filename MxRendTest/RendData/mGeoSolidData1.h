@@ -5,12 +5,16 @@
 #include <QString>
 #include <set>
 
+#include "SpaceTree.h"
+
 namespace MDataGeo
 {
+	class mGeoModelData1;
+	class mGeoFaceData1;
 	class RENDDATA_EXPORT mGeoSolidData1
 	{
 	public:
-		mGeoSolidData1(QString partName, int ID);
+		mGeoSolidData1(mGeoModelData1 *geoModelData, QString partName, int ID);
 
 		~mGeoSolidData1();
 
@@ -29,7 +33,12 @@ namespace MDataGeo
 		//设置部件名称
 		void setPartName(const QString &name);
 
+		//获取几何实体的最值
+		Space::AABB getGeoSolidAABB() { return _aabb; };
+
 	private:
+		mGeoModelData1 *_geoModelData;
+
 		//几何实体的ID
 		int _ID;
 
@@ -41,6 +50,9 @@ namespace MDataGeo
 
 		//几何实体上的所有几何面ID
 		std::set<int> _geoFaceIDs;
+
+		//几何实体的包围盒
+		Space::AABB _aabb;
 	};
 }
 

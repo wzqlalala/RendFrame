@@ -3,6 +3,8 @@
 #include <QVector3D>
 #include <QString>
 
+#include "SpaceTree.h"
+
 namespace MDataGeo
 {
 	enum PointProperty
@@ -10,10 +12,11 @@ namespace MDataGeo
 		IndependentPoint,//独立点
 		PointOnEdge//边上的点
 	};
+	class mGeoModelData1;
 	class RENDDATA_EXPORT mGeoPointData1
 	{
 	public:
-		mGeoPointData1(QString partName, int ID);
+		mGeoPointData1(mGeoModelData1 *geoModelData, QString partName, int ID);
 
 		~mGeoPointData1();
 
@@ -38,7 +41,12 @@ namespace MDataGeo
 		//设置部件名称
 		void setPartName(const QString &name);
 
+		//获取几何点的最值
+		Space::AABB getGeoPointAABB() { return Space::AABB(_geoPointVertex); };
+
 	private:
+		mGeoModelData1 *_geoModelData;
+
 		//几何点ID
 		int _ID;
 

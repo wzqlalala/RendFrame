@@ -1,5 +1,6 @@
 #include "mPreGeoModelRender.h"
 
+//MDataGeo
 #include "mGeoModelData1.h"
 #include "mGeoPartData1.h"
 #include "mGeoSolidData1.h"
@@ -261,7 +262,7 @@ namespace MPreRend
 	}
 	Space::AABB mPreGeoPartRender::getPartAABB()
 	{
-		return _partData->getGeoPartSize();
+		return _partData->getGeoPartAABB();
 	}
 
 	void mPreGeoPartRender::appendPart(mGeoModelData1 *geoModelData)

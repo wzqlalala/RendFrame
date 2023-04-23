@@ -29,12 +29,14 @@ namespace Space
 		QVector3D maxEdge;
 		QVector3D minEdge;
 		AABB();
+		AABB(QVector3D p);
 		AABB(QVector3D p1, QVector3D p2);
 		void init(QVector3D p);
 		bool ContainPoint(QVector3D p1);
 		void push(AABB aabb);
 		void push(QVector3D p1, QVector3D p2);
 		void push(QVector3D p1);
+		void push(QVector<QVector3D> p1);
 		bool empty();
 		bool intersects(QVector3D origin, QVector3D dir, QVector3D &ptOnPlane);
 		bool isContain(AABB aabb);

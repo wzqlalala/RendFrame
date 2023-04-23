@@ -110,6 +110,7 @@
     <ClCompile Include="mGeoLineData1.cpp" />
     <ClCompile Include="mGeoModelData1.cpp" />
     <ClCompile Include="mGeoPartData1.cpp" />
+    <ClCompile Include="mGeoPickData1.cpp" />
     <ClCompile Include="mGeoPointData1.cpp" />
     <ClCompile Include="mGeoSolidData1.cpp" />
     <ClCompile Include="mPostAnimationRendData.cpp" />
@@ -117,12 +118,14 @@
     <ClCompile Include="mPostMeshPickData.cpp" />
     <ClCompile Include="mPostMeshPickThread.cpp" />
     <ClCompile Include="mPostOneFrameRendData.cpp" />
+    <ClCompile Include="mPreGeoPickThread.cpp" />
     <ClCompile Include="SpaceTree.cpp" />
     <ClInclude Include="mDataPost1.h" />
     <ClInclude Include="mGeoFaceData1.h" />
     <ClInclude Include="mGeoLineData1.h" />
     <ClInclude Include="mGeoModelData1.h" />
     <ClInclude Include="mGeoPartData1.h" />
+    <ClInclude Include="mGeoPickData1.h" />
     <ClInclude Include="mGeoPointData1.h" />
     <ClInclude Include="mGeoSolidData1.h" />
     <ClInclude Include="mOneFrameData1.h" />
@@ -136,6 +139,7 @@
     <ClInclude Include="mPostMeshPickData.h" />
     <QtMoc Include="mPostMeshPickThread.h" />
     <ClInclude Include="mPostOneFrameRendData.h" />
+    <QtMoc Include="mPreGeoPickThread.h" />
     <ClInclude Include="SpaceTree.h" />
     <QtMoc Include="mPostMeshVisualControl.h" />
     <QtMoc Include="mPostMeshVisualThread.h" />

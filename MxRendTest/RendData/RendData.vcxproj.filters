@@ -86,6 +86,9 @@
     <ClInclude Include="mGeoSolidData1.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mGeoPickData1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mDataPost1.cpp">
@@ -157,6 +160,12 @@
     <ClCompile Include="mGeoSolidData1.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mPreGeoPickThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mGeoPickData1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="mPostMeshVisualControl.h">
@@ -166,6 +175,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="mPostMeshPickThread.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="mPreGeoPickThread.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

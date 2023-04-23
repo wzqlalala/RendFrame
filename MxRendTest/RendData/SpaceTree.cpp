@@ -5,6 +5,11 @@
 #include <qdebug.h>
 namespace Space
 {
+	AABB::AABB(QVector3D p)
+	{
+		maxEdge = minEdge = p;
+	}
+
 	AABB::AABB(QVector3D p1, QVector3D p2)
 	{
 		maxEdge.setX( std::max(p1.x(), p2.x()) );
@@ -66,6 +71,14 @@ namespace Space
 		minEdge.setX( std::min(p1.x(), minEdge.x()) );
 		minEdge.setY( std::min(p1.y(), minEdge.y()) );
 		minEdge.setZ( std::min(p1.z(), minEdge.z()) );
+	}
+
+	void AABB::push(QVector<QVector3D> p1)
+	{
+		for (auto p : p1)
+		{
+			this->push(p);
+		}
 	}
 
 	bool AABB::empty()
