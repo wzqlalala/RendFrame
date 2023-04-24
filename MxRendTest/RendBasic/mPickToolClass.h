@@ -27,7 +27,7 @@ namespace MViewBasic
 		/*
 		 * 判断点是否在网格内部
 		 */
-		static bool IsPointInMesh(const QPoint & pos, const QVector<QVector2D> &Line1, MBasicFunction::MeshType meshtype);
+		static bool IsPointInMesh(const QVector2D & pos, const QVector<QVector2D> &Line1, MBasicFunction::MeshType meshtype);
 
 		/*
 		 * 判断网格的点是否在拾取矩形框内部

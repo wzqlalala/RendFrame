@@ -206,7 +206,7 @@ namespace MDataPost
 		/*
 		 * 设置单选位置
 		 */
-		void setLocation(const QPoint & pos, float depth);
+		void setLocation(const QVector2D & pos, float depth);
 
 		/*
 		* 设置位置(矩形或者多边形框选)
@@ -375,7 +375,7 @@ namespace MDataPost
 		/*
 		 * 点选位置
 		 */
-		QPoint _pos;
+		QVector2D _pos;
 		float _depth;
 
 		/*********/

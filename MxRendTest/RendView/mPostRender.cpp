@@ -339,7 +339,7 @@ namespace MPostRend
 		{		
 			float depth;
 			QOpenGLContext::currentContext()->functions()->glReadPixels(poses.first().x(), _baseRend->getCamera()->SCR_HEIGHT - poses.first().y(), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-			_thread->setLocation(poses.first().toPoint(), depth);
+			_thread->setLocation(poses.first(), depth);
 		}
 		else
 		{

@@ -108,7 +108,7 @@ namespace MDataGeo
 	bool mQuadPick::getGeoFaceIsInPick(QVector<QVector3D> vertexs)
 	{
 		QVector<QVector2D> tempQVector2D = WorldvertexToScreenvertex(vertexs);
-		if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, _multiQuad, MeshBeam) || mPickToolClass::IsPointInQuad(tempQVector2D, _center, _boxXY_2))
+		if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, _multiQuad, MeshBeam) || mPickToolClass::IsPointInQuad(tempQVector2D, _center, _boxXY_2) || mPickToolClass::IsPointInMesh(_center, tempQVector2D, MeshTri))
 		{
 			return true;
 		}
@@ -119,13 +119,10 @@ namespace MDataGeo
 	{
 		if (!mPickToolClass::IsLineIntersectionWithQuad(ap, _multiQuad, MeshHex) && !mPickToolClass::IsPointInQuad(ap, _center, _boxXY_2))
 		{
-			for (auto point : _multiQuad)
+			if (mPickToolClass::IsPointInMesh(_center, ap, MeshHex))
 			{
-				if (mPickToolClass::IsPointInMesh(point.toPoint(), ap, MeshHex))
-				{
-					return true;
-				}
-			}
+				return true;
+			}	
 			return false;
 		}
 		return true;
@@ -148,7 +145,7 @@ namespace MDataGeo
 		{
 			for (auto point : _multiQuad)
 			{
-				if (mPickToolClass::IsPointInMesh(point.toPoint(), ap, MeshHex))
+				if (mPickToolClass::IsPointInMesh(point, ap, MeshHex))
 				{
 					return true;
 				}
@@ -183,7 +180,7 @@ namespace MDataGeo
 		{
 			for (auto point : _multiQuad)
 			{
-				if (mPickToolClass::IsPointInMesh(point.toPoint(), ap, MeshHex))
+				if (mPickToolClass::IsPointInMesh(point, ap, MeshHex))
 				{
 					return true;
 				}

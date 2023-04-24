@@ -128,7 +128,7 @@ namespace MDataPost
 		{
 			for (auto point : _multiQuad)
 			{
-				if (mPickToolClass::IsPointInMesh(point.toPoint(), ap, MeshHex))
+				if (mPickToolClass::IsPointInMesh(point, ap, MeshHex))
 				{
 					return true;
 				}
@@ -163,7 +163,7 @@ namespace MDataPost
 		{
 			for (auto point : _multiQuad)
 			{
-				if (mPickToolClass::IsPointInMesh(point.toPoint(), ap, MeshHex))
+				if (mPickToolClass::IsPointInMesh(point, ap, MeshHex))
 				{
 					return true;
 				}
@@ -189,7 +189,7 @@ namespace MDataPost
 		{
 			for (auto point : _multiQuad)
 			{
-				if (mPickToolClass::IsPointInMesh(point.toPoint(), ap, MeshHex))
+				if (mPickToolClass::IsPointInMesh(point, ap, MeshHex))
 				{
 					return true;
 				}
@@ -224,7 +224,7 @@ namespace MDataPost
 		{
 			for (auto point : _multiQuad)
 			{
-				if (mPickToolClass::IsPointInMesh(point.toPoint(), ap, MeshHex))
+				if (mPickToolClass::IsPointInMesh(point, ap, MeshHex))
 				{
 					return true;
 				}
@@ -345,7 +345,7 @@ namespace MDataPost
 		_pvm = pvm;
 	}
 
-	void mPostMeshPickThread::setLocation(const QPoint& pos, float depth)
+	void mPostMeshPickThread::setLocation(const QVector2D& pos, float depth)
 	{
 		_pos = pos;
 		soloQuad = QVector<QVector2D>{ QVector2D(pos.x() + 3,pos.y() + 3),QVector2D(pos.x() + 3,pos.y() - 3),QVector2D(pos.x() - 3,pos.y() - 3),QVector2D(pos.x() - 3,pos.y() + 3) };

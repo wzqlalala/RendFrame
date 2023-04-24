@@ -93,7 +93,7 @@ namespace MViewBasic
 		return (d < radius);
 	}
 
-	bool mPickToolClass::IsPointInMesh(const QPoint & pos, const QVector<QVector2D> &Line1, MeshType meshtype)
+	bool mPickToolClass::IsPointInMesh(const QVector2D & pos, const QVector<QVector2D> &Line1, MeshType meshtype)
 	{
 		int Intersection_times = 0;
 		QVector2D ap1, bp1, bp2;
