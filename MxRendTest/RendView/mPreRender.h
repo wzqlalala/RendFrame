@@ -52,7 +52,7 @@ namespace MPreRend
 	class mPreRend;
 	class mPreGeoModelRender;
 	class mPreRendStatus;
-	class mPreHighLightRender;
+	class mPreGeoHighLightRender;
 	class RENDVIEW_EXPORT mPreRender :public mBaseRender
 	{
 		Q_OBJECT
@@ -113,7 +113,8 @@ namespace MPreRend
 
 		mPreGeoPickThread *_geoPickThread;//拾取
 		QFutureWatcher<void> w;
-		mGeoPickData1 *_pickData;//拾取数据
+		mGeoPickData1 *_geoPickData;//拾取数据
+		shared_ptr<mPreGeoHighLightRender> _geoHighLightRender;
 
 		shared_ptr<mxr::Texture> _pointTexture;
 

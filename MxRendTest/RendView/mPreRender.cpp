@@ -2,7 +2,7 @@
 #include "mPreRend.h"
 #include "mPreRendStatus.h"
 #include "mPreGeoModelRender.h"
-//#include "mPostHighLightRender.h"
+#include "mPreGeoHighLightRender.h"
 #include "mFontRender.h"
 #include "mArrowRender.h"
 
@@ -160,10 +160,10 @@ namespace MPreRend
 		_geoModelRender->setPointStateSet(_pointStateSet);
 
 		//初始化高亮渲染
-		_pickData = new mGeoPickData1();
-		_geoPickThread = new mPreGeoPickThread(_geoModelData, _pickData);
+		_geoPickData = new mGeoPickData1();
+		_geoPickThread = new mPreGeoPickThread(_geoModelData, _geoPickData);
 		_geoPickThread->setPickFilter(_baseRend->getPickFilter());
-		//_highLightRender = make_shared<mPostHighLightRender>(_rendStatus, _pickData);
+		_geoHighLightRender = make_shared<mPreGeoHighLightRender>(_rendStatus, _geoPickData, _geoModelData);
 
 		//this->doneCurrent();
 	}
@@ -184,7 +184,7 @@ namespace MPreRend
 		{
 			return;
 		}
-		_pickData->setGeoPickFunction(int(_baseRend->getPickFuntion()));
+		_geoPickData->setGeoPickFunction(int(_baseRend->getPickFuntion()));
 		//_thread->setCurrentFrameRend(_oneFrameRender->getOneFrameData(), _oneFrameRender->getOneFrameRendData());
 		_geoPickThread->setMatrix(_baseRend->getCamera()->getPVMValue());
 		_geoPickThread->setWidget(_baseRend->getCamera()->SCR_WIDTH, _baseRend->getCamera()->SCR_HEIGHT);
@@ -202,9 +202,9 @@ namespace MPreRend
 		QFuture<void> future; 
 		future = QtConcurrent::run(_geoPickThread, &mPreGeoPickThread::startPick);
 		QObject::connect(&w, &QFutureWatcher<void>::finished, [this] {
-			//_highLightRender->updateHighLightRender(_oneFrameRender->getOneFrameData(), _oneFrameRender->getOneFrameRendData());
+			_geoHighLightRender->updateHighLightRender();
 			//this->
-			set<int> ids = _pickData->getPickPointIDs();
+			set<int> ids = _geoPickData->getPickPointIDs();
 			qDebug() << "拾取完成";
 			QObject::disconnect(&w, 0, 0, 0);//断开信号
 			emit update();
@@ -231,8 +231,8 @@ namespace MPreRend
 	void mPreRender::updateHighLightRender()
 	{
 		this->makeCurrent();
-		//if (_highLightRender)
-		//	_highLightRender->updateHighLightRender(_oneFrameRender->getOneFrameData(), _oneFrameRender->getOneFrameRendData());
+		if (_geoHighLightRender)
+			_geoHighLightRender->updateHighLightRender();
 	}
 	void mPreRender::updateModelOperate(QPair<MBasicFunction::ModelOperateEnum, std::set<QString>> modelOperates)
 	{
@@ -302,7 +302,7 @@ namespace MPreRend
 
 		////初始化部件拾取多线程
 		//set<QString> partNames = _dataPost->getAllPostPartNames();
-		//_thread = new mPostMeshPickThread(_pickData);
+		//_thread = new mPostMeshPickThread(_geoPickData);
 		//_thread->setPickFilter(_baseRend->getPickFilter());
 		//for (QString partName : partNames)
 		//{
@@ -360,6 +360,6 @@ namespace MPreRend
 			_baseRend->slotUpdateOrthoAndCamera();
 		}
 
-		//_highLightRender->updateUniform(modelView, commonView);
+		_geoHighLightRender->updateUniform(modelView, commonView);
 	}
 }

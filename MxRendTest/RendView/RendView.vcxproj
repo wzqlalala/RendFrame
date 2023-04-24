@@ -113,6 +113,7 @@
     <ClCompile Include="mFontRender.cpp" />
     <ClCompile Include="mPostCuttingPlaneRender.cpp" />
     <ClCompile Include="mPostHighLightRender.cpp" />
+    <ClCompile Include="mPreGeoHighLightRender.cpp" />
     <ClCompile Include="mPreGeoModelRender.cpp" />
     <ClCompile Include="mPreRender.cpp" />
     <ClCompile Include="mQuadRender.cpp" />
@@ -125,6 +126,7 @@
     <ClInclude Include="mPostHighLightRender.h" />
     <QtMoc Include="mPreRender.h" />
     <ClInclude Include="mPostRendStatus.h" />
+    <ClInclude Include="mPreGeoHighLightRender.h" />
     <ClInclude Include="mPreGeoModelRender.h" />
     <ClInclude Include="mPreRendStatus.h" />
     <ClInclude Include="tiny_obj_loader.h" />

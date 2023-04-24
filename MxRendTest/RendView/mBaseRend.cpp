@@ -159,6 +159,8 @@ namespace MBaseRend
 		_commonView->SetOrthoByRatio(w, h);
 
 		FBO = new QOpenGLFramebufferObject(size(), format);
+
+		update();
 	}
 	void mBaseRend::mousePressEvent(QMouseEvent *event)
 	{

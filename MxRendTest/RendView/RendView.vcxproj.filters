@@ -68,6 +68,9 @@
     <ClInclude Include="mGroupRender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="mPreGeoHighLightRender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mBackGroundRender.cpp">
@@ -128,6 +131,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="mPreGeoModelRender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mPreGeoHighLightRender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
