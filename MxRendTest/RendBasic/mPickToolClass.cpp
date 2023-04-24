@@ -341,7 +341,71 @@ namespace MViewBasic
 		return true;
 	}
 
-	bool mPickToolClass::IsLineIntersectionWithCircle(const QVector<QVector2D> &Line1, QVector2D circleCenter, double radius)
+	bool mPickToolClass::IsTriIntersectionWithCircle(const QVector<QVector2D>& Line1, QVector2D circleCenter, double radius)
+	{
+		bool isintersection{ false };
+		const QVector<QVector<int>> &list = QuadPointInMeshVector.value(MeshTri);
+		QVector2D ap1, ap2, bp1, bp2;
+		QVector<QVector2D> res;
+		for (int j = 0; j < list.size(); j++)
+		{
+			ap1 = Line1.at(list.at(j).at(0));
+			ap2 = Line1.at(list.at(j).at(1));
+
+			QVector2D line = (ap2 - ap1).normalized();
+			for (int k = 2; k < list.at(j).size(); k += 2)
+			{
+				bp1 = Line1.at(list.at(j).at(k));
+				bp2 = Line1.at(list.at(j).at(k + 1));
+
+				QVector2D line1 = (bp2 - bp1).normalized();
+				float sintheta = line.x() * line1.y() - line1.x() * line.y();//叉乘
+
+				res.append(bp1 + (line - line1) * radius / sintheta);
+				line = (bp2 - bp1).normalized();
+			}
+
+			bp1 = Line1.at(list.at(j).at(0));
+			bp2 = Line1.at(list.at(j).at(1));
+
+			QVector2D line1 = (bp2 - bp1).normalized();
+			float sintheta = line.x() * line1.y() - line1.x() * line.y();//叉乘
+
+			res.append(bp1 + (line - line1) * radius / sintheta);
+		}
+		ap1 = circleCenter;
+		int Intersection_times = 0;
+
+		for (int k = 0; k < 2; k++)
+		{
+			bp1 = res.at(k);
+			bp2 = res.at(k + 1);
+			//判断点是否在另一个多边形的内部
+			double tempx = (bp1.x() - bp2.x()) / (bp1.y() - bp2.y())*(ap1.y() - bp2.y()) + bp2.x();
+			if (((bp1.y() < ap1.y() && ap1.y() < bp2.y()) || (bp2.y() < ap1.y() && ap1.y() < bp1.y())) && tempx >= ap1.x())
+			{
+				Intersection_times++;//被裁减的点在裁剪多边形一条线段的左边
+			}
+		}
+		bp1 = res.at(2);
+		bp2 = res.at(0);
+		//判断点是否在另一个多边形的内部
+		double tempx = (bp1.x() - bp2.x()) / (bp1.y() - bp2.y())*(ap1.y() - bp2.y()) + bp2.x();
+		if (((bp1.y() < ap1.y() && ap1.y() < bp2.y()) || (bp2.y() < ap1.y() && ap1.y() < bp1.y())) && tempx >= ap1.x())
+		{
+			Intersection_times++;//被裁减的点在裁剪多边形一条线段的左边
+		}
+		if (Intersection_times % 2 != 0)
+		{
+			return true;
+		}
+
+
+		return false;
+	}
+
+	
+	bool mPickToolClass::IsAABBIntersectionWithCircle(const QVector<QVector2D> &Line1, QVector2D circleCenter, double radius)
 	{
 		bool isintersection{ false };
 		const QVector<QVector<int>> &list = QuadPointInMeshVector.value(MeshHex);
@@ -377,7 +441,7 @@ namespace MViewBasic
 		int Intersection_times = 0;
 		for (int i = 0; i < 6; i++)
 		{
-			for (int k = 0; k < 3; k ++)
+			for (int k = 0; k < 3; k++)
 			{
 				bp1 = res.at(4 * i + k);
 				bp2 = res.at(4 * i + k + 1);
@@ -401,10 +465,10 @@ namespace MViewBasic
 				return true;
 			}
 		}
-		
-
+	
 		return false;
 	}
+	
 
 	bool mPickToolClass::IsPointInRound(QVector3D point, QVector3D center, QVector3D direction, float r)
 	{

@@ -246,7 +246,7 @@ namespace MDataPost
 	bool mRoundPick::getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree)
 	{
 		QVector<QVector2D> ap = getAABBToScreenVertex(spaceTree->space.minEdge, spaceTree->space.maxEdge);
-		if (mPickToolClass::IsPointInRound(ap, _screenCenter, _screenRadius) || mPickToolClass::IsLineIntersectionWithCircle(ap, _screenCenter, _screenRadius))
+		if (mPickToolClass::IsPointInRound(ap, _screenCenter, _screenRadius) || mPickToolClass::IsAABBIntersectionWithCircle(ap, _screenCenter, _screenRadius))
 		{
 			return true;
 		}
@@ -274,7 +274,7 @@ namespace MDataPost
 
 	bool mRoundPick::isIntersectionAABBAndPick(QVector<QVector2D> ap)
 	{
-		if (mPickToolClass::IsPointInRound(ap, _screenCenter, _screenRadius) || mPickToolClass::IsLineIntersectionWithCircle(ap, _screenCenter, _screenRadius))
+		if (mPickToolClass::IsPointInRound(ap, _screenCenter, _screenRadius) || mPickToolClass::IsAABBIntersectionWithCircle(ap, _screenCenter, _screenRadius))
 		{
 			return true;
 		}

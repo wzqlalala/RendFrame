@@ -108,7 +108,7 @@ namespace MDataGeo
 	bool mQuadPick::getGeoFaceIsInPick(QVector<QVector3D> vertexs)
 	{
 		QVector<QVector2D> tempQVector2D = WorldvertexToScreenvertex(vertexs);
-		if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, _multiQuad, MeshBeam) || mPickToolClass::IsPointInQuad(tempQVector2D, _center, _boxXY_2) || mPickToolClass::IsPointInMesh(_center, tempQVector2D, MeshTri))
+		if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, _multiQuad, MeshTri) || mPickToolClass::IsPointInQuad(tempQVector2D, _center, _boxXY_2) || mPickToolClass::IsPointInMesh(_center, tempQVector2D, MeshTri))
 		{
 			return true;
 		}
@@ -137,25 +137,8 @@ namespace MDataGeo
 		return false;
 	}
 
-	/*
-	bool mPolygonPick::getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree)
-	{
-		QVector<QVector2D> ap = getAABBToScreenVertex(spaceTree->space.minEdge, spaceTree->space.maxEdge);
-		if (!mPickToolClass::IsLineIntersectionWithQuad(ap, _multiQuad, MeshHex) && !mPickToolClass::IsPointInPolygon(ap, _center, _multiQuad))
-		{
-			for (auto point : _multiQuad)
-			{
-				if (mPickToolClass::IsPointInMesh(point, ap, MeshHex))
-				{
-					return true;
-				}
-			}
-			return false;
-		}
-		return true;
-	}
-
-	bool mPolygonPick::get2DAnd3DMeshCenterIsInPick(QVector3D pointCenter)
+	
+	bool mPolygonPick::getGeoPointIsInPick(QVector3D pointCenter)
 	{
 		if (mPickToolClass::IsPointInPolygon(WorldvertexToScreenvertex(pointCenter), _center, _multiQuad))
 		{
@@ -164,10 +147,20 @@ namespace MDataGeo
 		return false;
 	}
 
-	bool mPolygonPick::get1DMeshIsInPick(QVector<QVector3D> vertexs)
+	bool mPolygonPick::getGeoLineIsInPick(QVector<QVector3D> vertexs)
 	{
 		QVector<QVector2D> tempQVector2D = WorldvertexToScreenvertex(vertexs);
 		if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, _multiQuad, MeshBeam) || mPickToolClass::IsPointInPolygon(tempQVector2D, _center, _multiQuad))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	bool mPolygonPick::getGeoFaceIsInPick(QVector<QVector3D> vertexs)
+	{
+		QVector<QVector2D> tempQVector2D = WorldvertexToScreenvertex(vertexs);
+		if (mPickToolClass::IsLineIntersectionWithQuad(tempQVector2D, _multiQuad, MeshTri) || mPickToolClass::IsPointInPolygon(tempQVector2D, _center, _multiQuad) || mPickToolClass::IsPointInMesh(_center, tempQVector2D, MeshTri))
 		{
 			return true;
 		}
@@ -178,12 +171,9 @@ namespace MDataGeo
 	{
 		if (!mPickToolClass::IsLineIntersectionWithQuad(ap, _multiQuad, MeshHex) && !mPickToolClass::IsPointInPolygon(ap, _center, _multiQuad))
 		{
-			for (auto point : _multiQuad)
+			if (mPickToolClass::IsPointInMesh(_center, ap, MeshHex))
 			{
-				if (mPickToolClass::IsPointInMesh(point, ap, MeshHex))
-				{
-					return true;
-				}
+				return true;
 			}
 			return false;
 		}
@@ -199,17 +189,7 @@ namespace MDataGeo
 		return false;
 	}
 
-	bool mRoundPick::getPickIsIntersectionWithAABB(Space::SpaceTree * spaceTree)
-	{
-		QVector<QVector2D> ap = getAABBToScreenVertex(spaceTree->space.minEdge, spaceTree->space.maxEdge);
-		if (mPickToolClass::IsPointInRound(ap, _screenCenter, _screenRadius) || mPickToolClass::IsLineIntersectionWithCircle(ap, _screenCenter, _screenRadius))
-		{
-			return true;
-		}
-		return false;
-	}
-
-	bool mRoundPick::get2DAnd3DMeshCenterIsInPick(QVector3D pointCenter)
+	bool mRoundPick::getGeoPointIsInPick(QVector3D pointCenter)
 	{
 		if (mPickToolClass::IsPointInRound(pointCenter, _centerPoint, _centerDirection, _radius))
 		{
@@ -218,7 +198,7 @@ namespace MDataGeo
 		return false;
 	}
 
-	bool mRoundPick::get1DMeshIsInPick(QVector<QVector3D> vertexs)
+	bool mRoundPick::getGeoLineIsInPick(QVector<QVector3D> vertexs)
 	{
 		QVector<QVector2D> tempQVector2D = WorldvertexToScreenvertex(vertexs);
 		if (mPickToolClass::IsLineIntersectionWithRound(tempQVector2D.first(), tempQVector2D.last(), _screenCenter, _screenRadius))
@@ -228,9 +208,19 @@ namespace MDataGeo
 		return false;
 	}
 
+	bool mRoundPick::getGeoFaceIsInPick(QVector<QVector3D> vertexs)
+	{
+		QVector<QVector2D> tempQVector2D = WorldvertexToScreenvertex(vertexs);
+		if (mPickToolClass::IsTriIntersectionWithCircle(tempQVector2D, _screenCenter, _screenRadius))
+		{
+			return true;
+		}
+		return false;
+	}
+
 	bool mRoundPick::isIntersectionAABBAndPick(QVector<QVector2D> ap)
 	{
-		if (mPickToolClass::IsPointInRound(ap, _screenCenter, _screenRadius) || mPickToolClass::IsLineIntersectionWithCircle(ap, _screenCenter, _screenRadius))
+		if (mPickToolClass::IsPointInRound(ap, _screenCenter, _screenRadius) || mPickToolClass::IsAABBIntersectionWithCircle(ap, _screenCenter, _screenRadius))
 		{
 			return true;
 		}
@@ -246,7 +236,7 @@ namespace MDataGeo
 		return false;
 	}
 
-	*/
+	
 	mPreGeoPickThread::mPreGeoPickThread(mGeoModelData1 *geoModelData, mGeoPickData1 *pickData)
 	{
 		_isfinished = false;
@@ -308,10 +298,10 @@ namespace MDataGeo
 		{
 		case MViewBasic::MultiplyPickMode::QuadPick:_pick = make_shared<mQuadPick>(_pvm, _Win_WIDTH, _Win_HEIGHT, pickQuad);
 			break;
-		//case MViewBasic::MultiplyPickMode::PolygonPick:_pick = make_shared<mPolygonPick>(_pvm, _Win_WIDTH, _Win_HEIGHT, pickQuad);
-		//	break;
-		//case MViewBasic::MultiplyPickMode::RoundPick:_pick = make_shared<mRoundPick>(_pvm, _Win_WIDTH, _Win_HEIGHT, pickQuad.first(), pickQuad.last(), direction);
-		//	break;
+		case MViewBasic::MultiplyPickMode::PolygonPick:_pick = make_shared<mPolygonPick>(_pvm, _Win_WIDTH, _Win_HEIGHT, pickQuad);
+			break;
+		case MViewBasic::MultiplyPickMode::RoundPick:_pick = make_shared<mRoundPick>(_pvm, _Win_WIDTH, _Win_HEIGHT, pickQuad.first(), pickQuad.last(), direction);
+			break;
 		default:
 			break;
 		}

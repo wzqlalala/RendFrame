@@ -49,9 +49,12 @@ namespace MViewBasic
 		static bool IsAllPointInPolygon(const QVector<QVector2D> &Line1, QVector2D boxCenter, const QVector<QVector2D> &polygons);//全部在内部
 
 		/*
-		* 判断多边形是否和圆形选择框相交
+		* 判断网格的多边形是否和圆形选择框相交
 		*/
-		static bool IsLineIntersectionWithCircle(const QVector<QVector2D> &Line1, QVector2D circleCenter, double radius);
+		static bool IsTriIntersectionWithCircle(const QVector<QVector2D> &Line1, QVector2D circleCenter, double radius);
+
+		/*判断包围盒是否与圆形选择框相交*/
+		static bool IsAABBIntersectionWithCircle(const QVector<QVector2D> &Line1, QVector2D circleCenter, double radius);
 
 		/*
 		* 判断点是否全在圆形内部
