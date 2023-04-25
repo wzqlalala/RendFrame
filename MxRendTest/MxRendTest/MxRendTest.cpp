@@ -93,7 +93,7 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 			}
 			_postRender->setPostData(dp);
 			_postRender->setRendCurrentFrameData(oneFrameRendData);
-			_postRend->addBeforeRender(_postRender);
+			//_postRend->addBeforeRender(_postRender);
 			Space::AABB aabb = _postRender->getOneFrameRender()->getModelRender()->getModelAABB();
 			QVector3D center = (aabb.maxEdge + aabb.minEdge) / 2.0;
 			float radius = (aabb.maxEdge - aabb.minEdge).length() / 2.0;

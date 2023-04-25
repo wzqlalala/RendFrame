@@ -163,7 +163,7 @@ namespace MPreRend
 		_geoPickData = new mGeoPickData1();
 		_geoPickThread = new mPreGeoPickThread(_geoModelData, _geoPickData);
 		_geoPickThread->setPickFilter(_baseRend->getPickFilter());
-		_geoHighLightRender = make_shared<mPreGeoHighLightRender>(_rendStatus, _geoPickData, _geoModelData);
+		_geoHighLightRender = make_shared<mPreGeoHighLightRender>(_parent ,_rendStatus, _geoPickData, _geoModelData);
 
 		//this->doneCurrent();
 	}

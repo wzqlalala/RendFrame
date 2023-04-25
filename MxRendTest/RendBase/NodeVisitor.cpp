@@ -563,9 +563,25 @@ namespace mxr
 
 		}
 
-
-
 		//排序
+		std::sort(nodrawAttributes.begin(), nodrawAttributes.end(), [](const OnceDrawAttribute &d1, const OnceDrawAttribute &d2)//offset中的factor从大到小排序
+		{
+			//if (d1._state->getModes(StateAttribute::POLYGON_OFFSET_FILL) && d2._state->getModes(StateAttribute::POLYGON_OFFSET_FILL))
+			//{
+			//	
+			//}
+			//else if ()
+			//{
+
+			//}
+			if (d1._state != nullptr && d2._state !=nullptr)
+			{
+				return (d1._state->whichIsBeforeRend(d2._state));
+			}
+			return false;
+		});
+
+		//分类
 		std::vector<OnceDrawAttribute> noblendAttributes;
 		std::vector<OnceDrawAttribute> blendAttributes;
 		for (int i = 0; i < nodrawAttributes.size(); i++)

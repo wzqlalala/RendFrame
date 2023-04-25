@@ -91,6 +91,16 @@ namespace mxr
 		glPolygonMode(_face, _mode);
 	}
 
+	bool PolygonMode::whichIsBeforeRend(asset_ref<StateAttribute> attribute)
+	{
+		auto polygonMode = std::dynamic_pointer_cast<PolygonMode>(attribute);
+		if (polygonMode)
+		{
+			return this->_mode < polygonMode->_mode;
+		}
+		return false;
+	}
+
 
 	
 	PolygonOffset::PolygonOffset()
@@ -115,6 +125,36 @@ namespace mxr
 	PolygonOffset::~PolygonOffset()
 	{
 
+	}
+
+	bool PolygonOffset::whichIsBeforeRend(asset_ref<StateAttribute> attribute)
+	{
+		auto polygonOffset = std::dynamic_pointer_cast<PolygonOffset>(attribute);
+		if (polygonOffset)
+		{
+			if (_factor == polygonOffset->_factor)
+			{
+				if (_factor < 0)
+				{
+					return this->_units < polygonOffset->_units;
+				}
+				else
+				{
+					return this->_units > polygonOffset->_units;
+				}
+
+			}
+			return this->_factor > polygonOffset->_factor;
+		}
+		else
+		{
+			if (_factor > 0)
+			{
+				return true;
+			}
+			return false;
+		}
+		return false;
 	}
 	
 
@@ -145,6 +185,11 @@ namespace mxr
 			glDisable(GL_POLYGON_OFFSET_FILL);
 		}
 	}
+
+	//bool PolygonOffsetFill::whichIsBeforeRend(asset_ref<StateAttribute> attribute)
+	//{
+	//	return false;
+	//}
 
 	void ClipDistance::apply()
 	{

@@ -20,6 +20,7 @@ namespace mxr
 
 		void setAttributeAndModes(asset_ref<StateAttribute> attribute, int state);
 		void removeAttribute(asset_ref<StateAttribute> attribute);
+		asset_ref<StateAttribute> getAttribute(StateAttribute::Type _mode);
 		int getModes(StateAttribute::Type _mode);
 		void removeMode(StateAttribute::Type _mode);
 

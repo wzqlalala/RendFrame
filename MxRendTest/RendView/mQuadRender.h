@@ -8,6 +8,8 @@
 
 #include "mMeshViewEnum.h"
 
+#include "mBaseRender.h"
+
 namespace mxr
 {
 	class Drawable;
@@ -18,24 +20,26 @@ namespace mxr
 using namespace MViewBasic;
 namespace MBaseRend
 {
-	class mQuadRender : public QObject
+	class mQuadRender : public mBaseRender
 	{
 		Q_OBJECT
 	public:
-		mQuadRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> root, CameraOperateMode *cameraMode, PickMode *pickMode, MultiplyPickMode *multiplyPickMode);
+		mQuadRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> root, mBaseRend *baseRend);
 
 		~mQuadRender();
 
-		void draw(QVector<QVector2D> poses, int w, int h);
+		void updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView) override;
+
+		//void draw(QVector<QVector2D> poses, int w, int h);
 
 	protected:
-		void makeCurrent() { _app->GLContext()->makeCurrent(_app->GLContext()->surface()); };
+		//void makeCurrent() { _app->GLContext()->makeCurrent(_app->GLContext()->surface()); };
 
-		void doneCurrent() { _app->GLContext()->doneCurrent(); };
+		//void doneCurrent() { _app->GLContext()->doneCurrent(); };
 
 	protected:
-		std::shared_ptr<mxr::Application> _app;
-		std::shared_ptr<mxr::Group> _parent;
+		//std::shared_ptr<mxr::Application> _app;
+		//std::shared_ptr<mxr::Group> _parent;
 
 		std::shared_ptr<mxr::Drawable> _drawable;
 		std::shared_ptr<mxr::StateSet> _stateSet;

@@ -15,6 +15,7 @@ void main()
 {
 	FragPos = vec3(model * vec4(aPos, 1.0));
 	gl_Position = projection * view * vec4(FragPos, 1.0);
+    gl_Position.z = gl_Position.z - 0.0001;
 	gl_PointSize = PointSize;
 }
 #endif
@@ -77,10 +78,10 @@ void main()
     // FragColor.a = 1.0f;
     // FragColor = color;
     vec3 N;
-    N.xy = gl_PointCoord * 2.0f - 1.0f; 
-    float mag = dot(N.xy,N.xy);
-    N.z = sqrt(1.0f - mag);
-	FragColor.rgb = pow(calculateLightResult(N, showColor, 1.0, N.z), vec3(1.0 / 2.2));
+    // N.xy = gl_PointCoord * 2.0f - 1.0f; 
+    // float mag = dot(N.xy,N.xy);
+    // N.z = sqrt(1.0f - mag);
+	FragColor.rgb = pow(calculateLightResult(N, showColor, 1.0, 1.0), vec3(1.0 / 2.2));
     // FragColor.rgb = material;
     FragColor.a = 1.0f;
 } 

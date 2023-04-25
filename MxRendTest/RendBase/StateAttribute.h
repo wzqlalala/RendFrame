@@ -9,7 +9,7 @@
 namespace mxr
 {
 	class StateSet;
-	class StateAttribute :protected QOpenGLFunctions_4_5_Core
+	class MXR_EXPORT StateAttribute :protected QOpenGLFunctions_4_5_Core
 	{
 	public:
 
@@ -35,6 +35,7 @@ namespace mxr
 		virtual void apply() {}
 		virtual Type getType() const { return UNTYPE; }
 		virtual void setEnable(bool enable) { _enable = enable; }
+		virtual bool whichIsBeforeRend(asset_ref<StateAttribute> attribute) { return false; };
 	protected:
 		bool _enable;
 		StateAttribute();
@@ -165,6 +166,7 @@ namespace mxr
 		Mode getMode(Face face) const;
 		virtual Type getType() const { return POLYGON_MODE; }
 		virtual void apply();
+		bool whichIsBeforeRend(asset_ref<StateAttribute> attribute) override;
 	protected:
 		Face _face;
 		Mode _mode;
@@ -172,7 +174,7 @@ namespace mxr
 
 
 
-	class PolygonOffset :public StateAttribute
+	class MXR_EXPORT PolygonOffset :public StateAttribute
 	{
 	public:
 		PolygonOffset();
@@ -183,6 +185,7 @@ namespace mxr
 		inline void  setUnits(float units) { _units = units; }
 		inline float getUnits() const { return _units; }
 		virtual void apply() ;
+		bool whichIsBeforeRend(asset_ref<StateAttribute> attribute) override;
 	protected:
 		float       _factor;
 		float       _units;
@@ -198,6 +201,7 @@ namespace mxr
 		virtual Type getType() const { return POLYGON_OFFSET_LINE; }
 		virtual void apply();
 
+
 	};
 
 	class MXR_EXPORT PolygonOffsetFill :public PolygonOffset
@@ -207,6 +211,7 @@ namespace mxr
 		PolygonOffsetFill(float factor, float units) :PolygonOffset(factor, units) {};
 		virtual Type getType() const { return POLYGON_OFFSET_FILL; }
 		virtual void apply();
+		//bool whichIsBeforeRend(asset_ref<StateAttribute> attribute) override;
 
 	};
 

@@ -21,7 +21,7 @@ namespace MPostRend
 		makeCurrent();
 
 		shared_ptr<mPostRender> postRender = make_shared<mPostRender>(_app, _root, this);
-		this->addBeforeRender(postRender);	
+		this->addRender(postRender);	
 
 		_fontRender->appendGloabalAxisFont();
 		_arrowRender->appendGloabalAxisArrow();
@@ -69,7 +69,7 @@ namespace MPostRend
 	}
 	shared_ptr<mPostRender> mPostRend::getPostRender()
 	{
-		for (auto render : _beforeRenderArray)
+		for (auto render : _renderArray)
 		{
 			auto post = dynamic_pointer_cast<mPostRender>(render);
 			if (post)

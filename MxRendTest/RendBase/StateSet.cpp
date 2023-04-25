@@ -6,6 +6,8 @@ namespace mxr
 	StateSet::StateSet()
 	{
 		_drawmode = GL_TRIANGLES;
+		asset_ref<PolygonMode> polygonMode = MakeAsset<PolygonMode>();
+		this->setAttributeAndModes(polygonMode, 1);
 	}
 
 
@@ -19,6 +21,15 @@ namespace mxr
 	{
 		_modelist.erase(attribute->getType());
 		_attributeList.erase(attribute->getType());
+	}
+
+	asset_ref<StateAttribute> StateSet::getAttribute(StateAttribute::Type _mode)
+	{
+		if (_attributeList.find(_mode) == _attributeList.end())
+		{
+			return 0;
+		}
+		return _attributeList[_mode];
 	}
 
 	int StateSet::getModes(StateAttribute::Type _mode)

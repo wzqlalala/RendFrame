@@ -41,6 +41,7 @@ namespace MBaseRend
 		//_app->setContext(context);
 		mxr::ApplicationInstance::GetInstance().appendApplication(name, _app);
 	
+		_beforeroot = MakeAsset<mxr::Group>();
 		_root = MakeAsset<mxr::Group>();
 		_afterroot = MakeAsset<mxr::Group>();
 
@@ -71,18 +72,24 @@ namespace MBaseRend
 		_commonView = MakeAsset<mCommonView>();
 		
 		mxr::Log::Init();
+
+		_beforeviewer = MakeAsset<mxr::Viewer>();
+		_beforeviewer->setSceneData(_beforeroot);
+		_bgRend = MakeAsset<mBackGroundRender>(_app, _beforeroot);
+
 		_viewer = MakeAsset<mxr::Viewer>();
 		_viewer->setSceneData(_root);
-		_bgRend = MakeAsset<mBackGroundRender>(_app, _root);
 
 		_afterviewer = MakeAsset<mxr::Viewer>();
 		_afterviewer->setSceneData(_afterroot);
-		_quadRender = MakeAsset<mQuadRender>(_app, _afterroot, _cameraMode, _pickMode, _multiplyPickMode);
 
 		_fontRender = MakeAsset<mFontRender>(_app, _root, this);
 		this->addBeforeRender(_fontRender);
 		_arrowRender = MakeAsset<mArrowRender>(_app, _root, this);
 		this->addBeforeRender(_arrowRender);
+
+		_quadRender = MakeAsset<mQuadRender>(_app, _afterroot, this);
+		this->addAfterRender(_quadRender);
 		
 		makeCurrent();
 		GLenum error = QOpenGLContext::currentContext()->functions()->glGetError();
@@ -122,7 +129,6 @@ namespace MBaseRend
 			qDebug() << error;
 		}
 		
-		_viewer->run();
 		//glClearColor(0, 0, 0, 1);
 		//glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		error = QOpenGLContext::currentContext()->functions()->glGetError();
@@ -134,12 +140,19 @@ namespace MBaseRend
 		{
 			baseRender->updateUniform(_modelView, _commonView);
 		}
-		_quadRender->draw(_polygonVertexs, SCR_WIDTH, SCR_HEIGHT);
-		_afterviewer->noClearRun();
+		_beforeviewer->run();
+
+		for (auto baseRender : _renderArray)
+		{
+			baseRender->updateUniform(_modelView, _commonView);
+		}
+		_viewer->noClearRun();
+
 		for (auto baseRender : _afterRenderArray)
 		{
 			baseRender->updateUniform(_modelView, _commonView);
 		}
+		_afterviewer->noClearRun();
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, QOpenGLContext::currentContext()->defaultFramebufferObject());
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, FBO->handle());
 		glBlitFramebuffer(0, 0, width(), height(), 0, 0, FBO->width(), FBO->height(), GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);	
@@ -183,6 +196,14 @@ namespace MBaseRend
 				if (*_pickMode == PickMode::SoloPick)
 				{
 					for (auto render : _beforeRenderArray)
+					{
+						if (render->getIsDragSomething(QVector2D(nowX, nowY)))
+						{
+							*_pickMode = PickMode::DragPick;
+							break;
+						}
+					}
+					for (auto render : _renderArray)
 					{
 						if (render->getIsDragSomething(QVector2D(nowX, nowY)))
 						{
@@ -256,6 +277,13 @@ namespace MBaseRend
 						render->startPick(_polygonVertexs);
 						FBO->release();
 					}
+					for (auto render : _renderArray)
+					{
+						makeCurrent();
+						FBO->bind();
+						render->startPick(_polygonVertexs);
+						FBO->release();
+					}
 					for (auto render : _afterRenderArray)
 					{
 						makeCurrent();
@@ -267,6 +295,10 @@ namespace MBaseRend
 				else if (*_pickMode == PickMode::MultiplyPick)
 				{
 					for (auto render : _beforeRenderArray)
+					{
+						render->startPick(_polygonVertexs);
+					}
+					for (auto render : _renderArray)
 					{
 						render->startPick(_polygonVertexs);
 					}
@@ -336,6 +368,10 @@ namespace MBaseRend
 				if (*_pickMode == PickMode::DragPick)
 				{
 					for (auto render : _beforeRenderArray)
+					{
+						render->dragSomething(QVector2D(nowX, nowY));
+					}
+					for (auto render : _renderArray)
 					{
 						render->dragSomething(QVector2D(nowX, nowY));
 					}
@@ -437,6 +473,21 @@ namespace MBaseRend
 		_beforeRenderArray.removeOne(baseRender);
 		baseRender.reset();
 	}
+	void mBaseRend::addRender(shared_ptr<mBaseRender> baseRender)
+	{
+		if (_renderArray.contains(baseRender))
+		{
+			return;
+		}
+		mBaseRender *t = baseRender.get();
+		QObject::connect(t, SIGNAL(update()), this, SLOT(update()));
+		_renderArray.append(baseRender);
+	}
+	void mBaseRend::removeRender(shared_ptr<mBaseRender> baseRender)
+	{
+		_renderArray.removeOne(baseRender);
+		baseRender.reset();
+	}
 	void mBaseRend::addAfterRender(shared_ptr<mBaseRender> baseRender)
 	{
 		if (_afterRenderArray.contains(baseRender))
@@ -458,11 +509,17 @@ namespace MBaseRend
 		{
 			baseRender.reset();
 		}
+		for (auto baseRender : _renderArray)
+		{
+			baseRender.reset();
+		}
 		for (auto baseRender : _afterRenderArray)
 		{
 			baseRender.reset();
 		}
 		_beforeRenderArray.clear();
+		_renderArray.clear();
+		_afterRenderArray.clear();
 	}
 	void mBaseRend::setCameraKeys(QPair<Qt::MouseButton, Qt::KeyboardModifiers> buttons, CameraOperateMode cameraOperateMode)
 	{

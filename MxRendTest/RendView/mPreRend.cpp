@@ -25,7 +25,7 @@ namespace MPreRend
 		makeCurrent();
 
 		shared_ptr<mPreRender> preRender = make_shared<mPreRender>(_app, _root, this);
-		this->addBeforeRender(preRender);
+		this->addRender(preRender);
 
 		_fontRender->appendGloabalAxisFont();
 		_arrowRender->appendGloabalAxisArrow();
@@ -65,7 +65,7 @@ namespace MPreRend
 	}
 	shared_ptr<mPreRender> mPreRend::getPreRender()
 	{
-		for (auto render : _beforeRenderArray)
+		for (auto render : _renderArray)
 		{
 			auto pre = dynamic_pointer_cast<mPreRender>(render);
 			if (pre)

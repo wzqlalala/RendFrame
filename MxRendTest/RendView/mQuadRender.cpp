@@ -1,4 +1,5 @@
 #include "mQuadRender.h"
+#include "mBaseRend.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -9,8 +10,7 @@ using namespace mxr;
 using namespace std;
 namespace MBaseRend
 {
-	mQuadRender::mQuadRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> root, CameraOperateMode *cameraMode, PickMode *pickMode, MultiplyPickMode *multiplyPickMode):
-		_app(app),_parent(root),_cameraMode(cameraMode),_pickMode(pickMode),_multiplyPickMode(multiplyPickMode)
+	mQuadRender::mQuadRender(std::shared_ptr<mxr::Application> app, std::shared_ptr<mxr::Group> root, mBaseRend *baseRend):mBaseRender(app, root, baseRend)
 	{
 		this->makeCurrent();
 		_stateSet = MakeAsset<StateSet>();
@@ -25,6 +25,11 @@ namespace MBaseRend
 		_drawable->setStateSet(_stateSet);
 		//_parent->addChild(_drawable);
 
+		
+		_cameraMode = _baseRend->getCameraOperateMode();
+		_pickMode = _baseRend->getCurrentPickMode();
+		_multiplyPickMode = _baseRend->getMultiplyPickMode();
+
 	}
 	mQuadRender::~mQuadRender()
 	{
@@ -34,17 +39,18 @@ namespace MBaseRend
 		}
 	}
 
-	void mQuadRender::draw(QVector<QVector2D> poses, int w, int h)
+	void mQuadRender::updateUniform(shared_ptr<mViewBase> modelView, shared_ptr<mViewBase> commonView)
 	{
 		_parent->removeChild(_drawable);
+		const QVector<QVector2D> poses = _baseRend->getPickPolygonVertexs();
 		if (poses.size() < 2)
 		{
 			_drawable.reset();
 			return;
 		}
 		this->makeCurrent();
-		_stateSet->getUniform("width")->SetData(w);
-		_stateSet->getUniform("height")->SetData(h);
+		_stateSet->getUniform("width")->SetData(_baseRend->width());
+		_stateSet->getUniform("height")->SetData(_baseRend->height());
 		QVector<QVector2D> vertexs;
 		if (*_cameraMode == CameraOperateMode::Zoom)//画多段开线
 		{
@@ -68,7 +74,7 @@ namespace MBaseRend
 					vertexs.append(QVector2D(roundCenter.x() + distance * cos(2 * i * M_PI / 20.0), roundCenter.y() + distance * sin(2 * i * M_PI / 20.0)));
 				}
 			}
-			else if(*_multiplyPickMode == MultiplyPickMode::PolygonPick)//画多段开线
+			else if (*_multiplyPickMode == MultiplyPickMode::PolygonPick)//画多段开线
 			{
 				vertexs = poses;
 				_stateSet->setDrawMode(GL_LINE_STRIP);
@@ -82,8 +88,13 @@ namespace MBaseRend
 		_drawable->setStateSet(_stateSet);
 		_drawable->setVertexAttribArray(0, MakeAsset<Vec2Array>(vertexs));
 		_parent->addChild(_drawable);
-
 	}
+
+	//void mQuadRender::draw(QVector<QVector2D> poses, int w, int h)
+	//{
+	//	
+
+	//}
 
 
 

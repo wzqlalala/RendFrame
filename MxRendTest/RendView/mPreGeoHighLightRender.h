@@ -49,7 +49,7 @@ namespace MPreRend
 	{
 	public:
 
-		mPreGeoHighLightRender(shared_ptr<mPreRendStatus> rendStatus, mGeoPickData1 *meshPickData, mGeoModelData1 *geoModelRend);
+		mPreGeoHighLightRender(shared_ptr<mxr::Group> parent, shared_ptr<mPreRendStatus> rendStatus, mGeoPickData1 *meshPickData, mGeoModelData1 *geoModelRend);
 
 		~mPreGeoHighLightRender();
 
@@ -66,6 +66,8 @@ namespace MPreRend
 
 		void initial();
 	private:
+		shared_ptr<mxr::Group> _parent;//父节点
+
 		std::shared_ptr<mxr::Geode> _geode;//当前总节点
 
 		std::shared_ptr<mPreRendStatus> _rendStatus;
@@ -82,7 +84,7 @@ namespace MPreRend
 		std::shared_ptr<mGroupRender1<mxr::Vec3Array>> _pointRender;
 		std::shared_ptr<mGroupRender1<mxr::Vec3Array>> _faceRender;
 
-		std::shared_ptr<mxr::Viewer> _viewer;
+		//std::shared_ptr<mxr::Viewer> _viewer;
 	};
 	
 }

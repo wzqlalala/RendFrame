@@ -30,19 +30,20 @@ using namespace mxr;
 using namespace std;
 namespace MPreRend
 {
-	mPreGeoHighLightRender::mPreGeoHighLightRender(shared_ptr<mPreRendStatus> rendStatus, mGeoPickData1 *geoPickData, mGeoModelData1 *geoModelData):_rendStatus(rendStatus), _geoPickData(geoPickData),_geoModelData(geoModelData)
+	mPreGeoHighLightRender::mPreGeoHighLightRender(shared_ptr<mxr::Group> parent, shared_ptr<mPreRendStatus> rendStatus, mGeoPickData1 *geoPickData, mGeoModelData1 *geoModelData):_rendStatus(rendStatus), _geoPickData(geoPickData),_geoModelData(geoModelData)
 	{
+		_parent = parent;
 		_geode = MakeAsset<Geode>();
-		_viewer = nullptr;
+		//_viewer = nullptr;
 		_faceRender = nullptr;
 		_lineRender = nullptr;
 		_pointRender = nullptr;
-
+		_parent->addChild(_geode);
 		this->initial();
 	}
 	mPreGeoHighLightRender::~mPreGeoHighLightRender()
 	{
-		
+		_parent->removeChild(_geode);
 	}
 
 	void mPreGeoHighLightRender::updateHighLightRender()
@@ -244,18 +245,21 @@ namespace MPreRend
 		_pointStateSet->getUniform("view")->SetData(modelView->_view);
 		_pointStateSet->getUniform("model")->SetData(modelView->_model);
 
+		_faceStateSet->getUniform("viewPos")->SetData(modelView->_Eye);
 		_pointStateSet->getUniform("viewPos")->SetData(modelView->_Eye);
 
 		if (_rendStatus->_lightIsDependOnCamera)
 		{
+			_faceStateSet->getUniform("light.position")->SetData(2 * modelView->_Eye - modelView->_Center);
 			_pointStateSet->getUniform("light.position")->SetData(2 * modelView->_Eye - modelView->_Center);
 		}
 		else
 		{
+			_faceStateSet->getUniform("light.position")->SetData(_rendStatus->_postLight.lightPosition);
 			_pointStateSet->getUniform("light.position")->SetData(_rendStatus->_postLight.lightPosition);
 		}
 
-		_viewer->noClearRun();
+		//_viewer->noClearRun();
 	}
 
 
@@ -285,23 +289,30 @@ namespace MPreRend
 
 	void mPreGeoHighLightRender::initial()
 	{
-		if (!_viewer)
-		{
-			_viewer = MakeAsset<mxr::Viewer>();
-			_viewer->setSceneData(_geode);
-		}
+		//if (!_viewer)
+		//{
+		//	_viewer = MakeAsset<mxr::Viewer>();
+		//	_viewer->setSceneData(_geode);
+		//}
 
 		_faceStateSet = MakeAsset<StateSet>();
 		shared_ptr<Shader> facelineshader = mShaderManage::GetInstance()->GetShader("PreHighLightGeoMeshFace");
 		_faceStateSet->setShader(facelineshader);
 		_faceStateSet->setDrawMode(GL_TRIANGLES);
-		_faceStateSet->setAttributeAndModes(MakeAsset<Depth>(), 0);
+		_faceStateSet->setAttributeAndModes(MakeAsset<Depth>(), 1);
 		_faceStateSet->setAttributeAndModes(MakeAsset<PolygonMode>(PolygonMode::FRONT_AND_BACK, PolygonMode::FILL), 1);
-		_faceStateSet->setAttributeAndModes(MakeAsset<PolygonOffsetLine>(-1, -1), 1);
+		_faceStateSet->setAttributeAndModes(MakeAsset<PolygonOffsetFill>(-1, -1), 1);
 
 		_faceStateSet->setUniform(MakeAsset<Uniform>("model", QMatrix4x4()));
 		_faceStateSet->setUniform(MakeAsset<Uniform>("view", QMatrix4x4()));
 		_faceStateSet->setUniform(MakeAsset<Uniform>("projection", QMatrix4x4()));
+		_faceStateSet->setUniform(MakeAsset<Uniform>("lightIsOn", int(1)));
+		_faceStateSet->setUniform(MakeAsset<Uniform>("viewPos", QVector3D()));
+		_faceStateSet->setUniform(MakeAsset<Uniform>("light.position", _rendStatus->_postLight.lightPosition));
+		_faceStateSet->setUniform(MakeAsset<Uniform>("light.ambient", _rendStatus->_postLight.ambient));
+		_faceStateSet->setUniform(MakeAsset<Uniform>("light.diffuse", _rendStatus->_postLight.diffuse));
+		_faceStateSet->setUniform(MakeAsset<Uniform>("light.specular", _rendStatus->_postLight.specular));
+		_faceStateSet->setUniform(MakeAsset<Uniform>("light.shiness", _rendStatus->_postLight.shiness));
 		_faceStateSet->setUniform(MakeAsset<Uniform>("showColor", QVector3D(1,1,1)));
 
 		//edgeline
@@ -309,8 +320,9 @@ namespace MPreRend
 		shared_ptr<Shader> meshlineshader = mShaderManage::GetInstance()->GetShader("PreHighLightGeoMeshLine");
 		_lineStateSet->setShader(meshlineshader);
 		_lineStateSet->setDrawMode(GL_LINES);
-		_lineStateSet->setAttributeAndModes(MakeAsset<Depth>(), 0);
+		_lineStateSet->setAttributeAndModes(MakeAsset<Depth>(), 1);
 		_lineStateSet->setAttributeAndModes(MakeAsset<PolygonMode>(mxr::PolygonMode::FRONT_AND_BACK, mxr::PolygonMode::FILL), 1);
+		_lineStateSet->setAttributeAndModes(MakeAsset<PolygonOffsetFill>(-1, -1), 1);
 
 		_lineStateSet->setUniform(MakeAsset<Uniform>("model", QMatrix4x4()));
 		_lineStateSet->setUniform(MakeAsset<Uniform>("view", QMatrix4x4()));
@@ -321,8 +333,9 @@ namespace MPreRend
 		shared_ptr<Shader> pointshader = mShaderManage::GetInstance()->GetShader("PreHighLightGeoPoint");
 		_pointStateSet->setShader(pointshader);
 		_pointStateSet->setDrawMode(GL_POINTS);
-		_pointStateSet->setAttributeAndModes(MakeAsset<Depth>(), 0);
+		_pointStateSet->setAttributeAndModes(MakeAsset<Depth>(), 1);
 		_pointStateSet->setAttributeAndModes(MakeAsset<PolygonMode>(mxr::PolygonMode::FRONT_AND_BACK, mxr::PolygonMode::FILL), 1);
+		_pointStateSet->setAttributeAndModes(MakeAsset<PolygonOffsetFill>(-1, -1), 1);
 
 		_pointStateSet->setUniform(MakeAsset<Uniform>("model", QMatrix4x4()));
 		_pointStateSet->setUniform(MakeAsset<Uniform>("view", QMatrix4x4()));
@@ -334,7 +347,7 @@ namespace MPreRend
 		_pointStateSet->setUniform(MakeAsset<Uniform>("light.diffuse", _rendStatus->_postLight.diffuse));
 		_pointStateSet->setUniform(MakeAsset<Uniform>("light.specular", _rendStatus->_postLight.specular));
 		_pointStateSet->setUniform(MakeAsset<Uniform>("light.shiness", _rendStatus->_postLight.shiness));
-		_pointStateSet->setUniform(MakeAsset<Uniform>("PointSize", 10));
+		_pointStateSet->setUniform(MakeAsset<Uniform>("PointSize", 15));
 		_pointStateSet->setUniform(MakeAsset<Uniform>("showColor", QVector3D(1, 1, 1)));
 		_pointStateSet->setTexture("sprite_texture", mTextureManage::GetInstance()->GetTexture("GeoPoint.png", 3));
 	}

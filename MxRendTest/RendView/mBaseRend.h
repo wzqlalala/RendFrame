@@ -68,9 +68,16 @@ namespace MBaseRend
 			return nullptr;
 		};
 
+		shared_ptr<mBaseRender> getFirstRender() {
+			if (!_renderArray.empty()) {
+				return _renderArray.first();
+			}
+			return nullptr;
+		};
+
 		shared_ptr<mBaseRender> getFirstAfterRender() {
-			if (!_beforeRenderArray.empty()) {
-				return _beforeRenderArray.first();
+			if (!_afterRenderArray.empty()) {
+				return _afterRenderArray.first();
 			}
 			return nullptr;
 		};
@@ -79,6 +86,8 @@ namespace MBaseRend
 
 		shared_ptr<mArrowRender> getArrowRender() { return _arrowRender; };
 
+		QVector<QVector2D> getPickPolygonVertexs() { return _polygonVertexs; };
+
 		virtual shared_ptr<MPostRend::mPostRender> getPostRender() { return nullptr; };
 
 		virtual shared_ptr<MPreRend::mPreRender> getPreRender() { return nullptr; };
@@ -86,6 +95,10 @@ namespace MBaseRend
 		void addBeforeRender(shared_ptr<mBaseRender> baseRender);
 
 		void removeBeforeRender(shared_ptr<mBaseRender> baseRender);
+
+		void addRender(shared_ptr<mBaseRender> baseRender);
+
+		void removeRender(shared_ptr<mBaseRender> baseRender);
 
 		void addAfterRender(shared_ptr<mBaseRender> baseRender);
 
@@ -100,6 +113,8 @@ namespace MBaseRend
 		void setMultiplyPickMode(MultiplyPickMode multiplyPickMode);
 
 		void setPickFilter(MViewBasic::PickFilter pickFilter);
+
+		CameraOperateMode *getCameraOperateMode() { return _cameraMode; };
 
 		PickMode *getCurrentPickMode() { return _pickMode; };//当前拾取模式
 
@@ -192,12 +207,6 @@ namespace MBaseRend
 
 		std::shared_ptr<mxr::Application> _app;
 
-		std::shared_ptr<mxr::Group> _root;
-		std::shared_ptr<mxr::Viewer> _viewer;
-
-		std::shared_ptr<mxr::Group> _afterroot;
-		std::shared_ptr<mxr::Viewer> _afterviewer;
-
 		std::shared_ptr< mBackGroundRender> _bgRend;
 
 		std::shared_ptr<mViewBase> _modelView;
@@ -207,8 +216,16 @@ namespace MBaseRend
 		std::shared_ptr<mViewBase> _commonView;
 
 		RenderArray _beforeRenderArray;
+		std::shared_ptr<mxr::Group> _beforeroot;
+		std::shared_ptr<mxr::Viewer> _beforeviewer;
+
+		RenderArray _renderArray;
+		std::shared_ptr<mxr::Group> _root;
+		std::shared_ptr<mxr::Viewer> _viewer;
 
 		RenderArray _afterRenderArray;
+		std::shared_ptr<mxr::Group> _afterroot;
+		std::shared_ptr<mxr::Viewer> _afterviewer;
 
 		//文字渲染
 		std::shared_ptr<mFontRender> _fontRender;
