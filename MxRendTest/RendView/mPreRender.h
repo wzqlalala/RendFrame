@@ -70,7 +70,7 @@ namespace MPreRend
 
 		mGeoModelData1 *getGeoModelData() { return _geoModelData; }; 
 
-		//mPreMeshPickData *getMeshPickData() { return _pickData; };
+		mGeoPickData1 *getGeoPickData() { return _geoPickData; };
 
 		//更新高亮渲染
 		void updateHighLightRender();
@@ -121,7 +121,7 @@ namespace MPreRend
 		/*********************************模型*****************************************************/
 		std::shared_ptr<mxr::StateSet> _faceStateSet;//渲染面的状态
 		std::shared_ptr<mxr::StateSet> _independentlineStateSet;//渲染独立线的状态
-		std::shared_ptr<mxr::StateSet> _dotlineStateSet;//渲染线的状态
+		std::shared_ptr<mxr::StateSet> _dotlineStateSet;//渲染虚线的状态
 		std::shared_ptr<mxr::StateSet> _edgelineStateSet;//渲染边界线的状态
 		std::shared_ptr<mxr::StateSet> _pointStateSet;//渲染点的状态
 		std::shared_ptr<mxr::StateSet> _facelineStateSet;//渲染面线的状态

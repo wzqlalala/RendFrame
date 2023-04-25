@@ -130,6 +130,7 @@ namespace MPreRend
 		_dotlineStateSet->setUniform(MakeAsset<Uniform>("model", QMatrix4x4()));
 		_dotlineStateSet->setUniform(MakeAsset<Uniform>("view", QMatrix4x4()));
 		_dotlineStateSet->setUniform(MakeAsset<Uniform>("projection", QMatrix4x4()));
+		_dotlineStateSet->setUniform(MakeAsset<Uniform>("showColor", QVector3D(0.5,0.5,0.5)));
 
 		//point
 		_pointStateSet = MakeAsset<StateSet>();
@@ -233,6 +234,7 @@ namespace MPreRend
 		this->makeCurrent();
 		if (_geoHighLightRender)
 			_geoHighLightRender->updateHighLightRender();
+		emit update();
 	}
 	void mPreRender::updateModelOperate(QPair<MBasicFunction::ModelOperateEnum, std::set<QString>> modelOperates)
 	{

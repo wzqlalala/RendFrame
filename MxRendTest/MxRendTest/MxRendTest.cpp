@@ -31,6 +31,7 @@
 #include "mGeoFaceData1.h"
 #include "mGeoLineData1.h"
 #include "mGeoPointData1.h"
+#include "mGeoPickData1.h"
 
 #include <QFileDialog>
 #include <QFile>
@@ -583,6 +584,22 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 				return;
 			}
 			_preRend->FitView();
+			break;
+		}
+		case Qt::Key_4:
+		{
+			if (_preRend == nullptr)
+			{
+				return;
+			}
+			set<int> ids = _preRender->getGeoPickData()->getPickLineIDs();
+			if (ids.size() == 0)
+			{
+				return;
+			}
+			_preRender->getGeoModelData()->setGeoLineProperty(ids, GeoLineProperty::DottedTopology);
+			_preRender->getGeoPickData()->clearAllPickData();
+			_preRender->updateHighLightRender();
 			break;
 		}
 		case Qt::Key_7:
