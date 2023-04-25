@@ -3,6 +3,8 @@
 
 #include "mContainers.h"
 
+#include <QDebug>
+
 
 namespace MDataGeo
 {
@@ -15,6 +17,7 @@ namespace MDataGeo
 		_aabb = Space::AABB();
 		geoModelData->appendGeoLineData(ID, this);
 		MBasicFunction::_globalLineId = std::max(MBasicFunction::_globalLineId, ID);
+		//qDebug() << _globalLineId;
 	}
 
 	mGeoLineData1::~mGeoLineData1()

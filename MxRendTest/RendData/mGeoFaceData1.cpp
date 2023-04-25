@@ -15,7 +15,7 @@ namespace MDataGeo
 		_ID = ID;
 		_aabb = Space::AABB();
 		geoModelData->appendGeoFaceData(ID, this);
-		MBasicFunction::_globalLineId = std::max(MBasicFunction::_globalFaceId, ID);
+		MBasicFunction::_globalFaceId = std::max(MBasicFunction::_globalFaceId, ID);
 	}
 
 	mGeoFaceData1::~mGeoFaceData1()

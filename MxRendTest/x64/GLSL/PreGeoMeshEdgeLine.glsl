@@ -16,6 +16,7 @@ void main()
 {
     vs_out.pos = aPos;
 	gl_Position = projection * view * model * vec4(vs_out.pos, 1.0f);
+    // gl_Position.z = gl_Position.z - 0.00001;
 }
 #endif
 

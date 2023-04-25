@@ -79,6 +79,8 @@ namespace MPreRend
 		_edgelineStateSet->setShader(shader);
 		_edgelineStateSet->setDrawMode(GL_LINES);
 		_edgelineStateSet->setAttributeAndModes(MakeAsset<Depth>(), 1);
+		_edgelineStateSet->setAttributeAndModes(MakeAsset<PolygonMode>(), 1);
+		_edgelineStateSet->setAttributeAndModes(MakeAsset<BlendFunc>(), 0);
 		_edgelineStateSet->setAttributeAndModes(MakeAsset<PolygonMode>(mxr::PolygonMode::FRONT_AND_BACK, mxr::PolygonMode::FILL), 1);
 		_edgelineStateSet->setAttributeAndModes(MakeAsset<BlendFunc>(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA), 1);
 

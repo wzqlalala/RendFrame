@@ -321,8 +321,10 @@ namespace MPreRend
 		_lineStateSet->setShader(meshlineshader);
 		_lineStateSet->setDrawMode(GL_LINES);
 		_lineStateSet->setAttributeAndModes(MakeAsset<Depth>(), 1);
-		_lineStateSet->setAttributeAndModes(MakeAsset<PolygonMode>(mxr::PolygonMode::FRONT_AND_BACK, mxr::PolygonMode::FILL), 1);
+		//_lineStateSet->setAttributeAndModes(MakeAsset<PolygonMode>(mxr::PolygonMode::FRONT_AND_BACK, mxr::PolygonMode::FILL), 1);
 		_lineStateSet->setAttributeAndModes(MakeAsset<PolygonOffsetFill>(-1, -1), 1);
+		_lineStateSet->setAttributeAndModes(MakeAsset<PolygonMode>(mxr::PolygonMode::FRONT_AND_BACK, mxr::PolygonMode::FILL), 1);
+		//_lineStateSet->setAttributeAndModes(MakeAsset<BlendFunc>(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA), 1);
 
 		_lineStateSet->setUniform(MakeAsset<Uniform>("model", QMatrix4x4()));
 		_lineStateSet->setUniform(MakeAsset<Uniform>("view", QMatrix4x4()));
