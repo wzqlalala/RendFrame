@@ -345,11 +345,13 @@ namespace MDataPost
 		_pvm = pvm;
 	}
 
-	void mPostMeshPickThread::setLocation(const QVector2D& pos, float depth)
+	void mPostMeshPickThread::setLocation(const QVector2D& pos, float depth, QVector3D direction)
 	{
 		_pos = pos;
 		soloQuad = QVector<QVector2D>{ QVector2D(pos.x() + 3,pos.y() + 3),QVector2D(pos.x() + 3,pos.y() - 3),QVector2D(pos.x() - 3,pos.y() - 3),QVector2D(pos.x() - 3,pos.y() + 3) };
 		_depth = depth;
+		_p = ScreenvertexToWorldvertex(QVector3D(pos, depth));
+		_dir = direction;
 		//_pickSoloOrMutiply = MViewBasic::SoloPick;
 	}
 
@@ -784,7 +786,7 @@ namespace MDataPost
 	{
 		int _pickMeshid = 0;
 		float _meshdepth = 1;
-		float depth = 1.0;
+		float depth = FLT_MAX;
 		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
 		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
 		{
@@ -816,12 +818,24 @@ namespace MDataPost
 					{
 						continue;
 					}
-					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
-					if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri:MeshQuad ) && *depthlist.begin() < _meshdepth)
+
+					float uv[2];
+					float t;
+					if (mPickToolClass::rayTriangleIntersect(_p, _dir, vertexs, uv, t))
 					{
-						_meshdepth = *depthlist.begin();
-						_pickMeshid = meshID;
+						if (t < depth)
+						{
+							_meshdepth = t;
+							_pickMeshid = meshID;
+						}
 					}
+
+					//WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+					//if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri:MeshQuad ) && *depthlist.begin() < _meshdepth)
+					//{
+					//	_meshdepth = *depthlist.begin();
+					//	_pickMeshid = meshID;
+					//}
 				}
 			}
 
@@ -845,12 +859,22 @@ namespace MDataPost
 				{
 					continue;
 				}
-				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
-				if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
+				float uv[2];
+				float t;
+				if (mPickToolClass::rayTriangleIntersect(_p, _dir, vertexs, uv, t))
 				{
-					_meshdepth = *depthlist.begin();
-					_pickMeshid = meshID;
+					if (t < depth)
+					{
+						_meshdepth = t;
+						_pickMeshid = meshID;
+					}
 				}
+				//WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+				//if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
+				//{
+				//	_meshdepth = *depthlist.begin();
+				//	_pickMeshid = meshID;
+				//}
 
 			}
 

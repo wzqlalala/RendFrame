@@ -206,7 +206,7 @@ namespace MDataPost
 		/*
 		 * 设置单选位置
 		 */
-		void setLocation(const QVector2D & pos, float depth);
+		void setLocation(const QVector2D & pos, float depth, QVector3D direction = QVector3D());
 
 		/*
 		* 设置位置(矩形或者多边形框选)
@@ -377,6 +377,8 @@ namespace MDataPost
 		 */
 		QVector2D _pos;
 		float _depth;
+		QVector3D _p;
+		QVector3D _dir;
 
 		/*********/
 		std::shared_ptr<mBasePick> _pick;

@@ -322,8 +322,11 @@ namespace MPostRend
 	{
 		//拖拽物体并更新物体
 	}
+	QTime time;
 	void mPostRender::startPick(QVector<QVector2D> poses)
 	{
+		QTime time;
+		time.start();
 		makeCurrent();
 		//开始拾取操作
 		if (!_oneFrameRender)
@@ -339,7 +342,7 @@ namespace MPostRend
 		{		
 			float depth;
 			QOpenGLContext::currentContext()->functions()->glReadPixels(poses.first().x(), _baseRend->getCamera()->SCR_HEIGHT - poses.first().y(), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-			_thread->setLocation(poses.first(), depth);
+			_thread->setLocation(poses.first(), depth, (_baseRend->getCamera()->_Center - _baseRend->getCamera()->_Eye).normalized());
 		}
 		else
 		{
@@ -347,7 +350,8 @@ namespace MPostRend
 		}
 		QFuture<void> future; 
 		future = QtConcurrent::run(_thread, &mPostMeshPickThread::startPick);
-		QObject::connect(&w, &QFutureWatcher<void>::finished, [this] {
+		QObject::connect(&w, &QFutureWatcher<void>::finished, [this, time] {
+			qDebug() << "拾取消耗时间" << time.elapsed();
 			_highLightRender->updateHighLightRender(_oneFrameRender->getOneFrameData(), _oneFrameRender->getOneFrameRendData());
 			//this->
 			//set<int> ids = _pickData->getPickNodeIDs();

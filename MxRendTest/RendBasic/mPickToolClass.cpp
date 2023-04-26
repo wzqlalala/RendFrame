@@ -553,4 +553,58 @@ namespace MViewBasic
 		float depth = (depth1 * distance2 + depth2 * distance1)/distance;
 		return depth;
 	}
+
+	bool mPickToolClass::rayTriangleIntersect(const QVector3D & orig, const QVector3D & dir, const QVector<QVector3D>& tri, float uv[2], float & tnear)
+	{
+		QVector3D edge1 = tri[1] - tri[0];
+		QVector3D edge2 = tri[2] - tri[0];
+		QVector3D pvec = QVector3D::crossProduct(dir, edge2);
+		float det = QVector3D::dotProduct(edge1, pvec);
+		if (det == 0 || det < 0)
+			return false;
+
+		QVector3D tvec = orig - tri[0];
+		uv[0] = QVector3D::dotProduct(tvec, pvec);
+		if (uv[0] < 0 || uv[0] > det)
+			return false;
+
+		QVector3D qvec = QVector3D::crossProduct(tvec, edge1);
+		uv[1] = QVector3D::dotProduct(dir, qvec);
+		if (uv[1] < 0 || uv[0] + uv[1] > det)
+			return false;
+
+		float invDet = 1 / det;
+
+		tnear = QVector3D::dotProduct(edge2, qvec) * invDet;
+		uv[0] *= invDet;
+		uv[1] *= invDet;
+
+		return true;
+	}
+
+	//const float eps = 0.0000001;
+	//bool mPickToolClass::rayTriangleIntersect(const QVector3D & p, const QVector3D & dir, const QVector<QVector3D> &tri, float b[3], float & t)
+	//{
+	//	// Edge vectors
+	//	const QVector3D& e_1 = tri[1] - tri[0];
+	//	const QVector3D& e_2 = tri[2] - tri[0];
+	//	// Face normal
+	//	const QVector3D& n = QVector3D::normal(e_1, e_2);
+	//	const QVector3D& q = QVector3D::crossProduct(dir, e_2);
+	//	const float a = QVector3D::dotProduct(e_1, q);
+	//	// Backfacing or nearly parallel?
+	//	if (QVector3D::dotProduct(n, dir) >= 0 || (abs(a) <= eps))
+	//		return false;
+	//	const QVector3D& s = (p - tri[0]) / a;
+	//	const QVector3D& r = QVector3D::crossProduct(s, e_1);
+	//	b[0] = QVector3D::dotProduct(s, q);
+	//	b[1] = QVector3D::dotProduct(r, dir);
+	//	b[2] = 1.0f - b[0] - b[1];
+	//	// Intersected outside triangle?
+	//	if ((b[0] < 0.0f) || (b[1] < 0.0f) || (b[2] <
+	//		0.0f)) return false;
+
+	//	t = QVector3D::dotProduct(e_2, r);
+	//	return (t >= 0.0f);
+	//}
 }
