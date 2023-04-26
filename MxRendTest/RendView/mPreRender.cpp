@@ -196,7 +196,7 @@ namespace MPreRend
 		{		
 			float depth;
 			QOpenGLContext::currentContext()->functions()->glReadPixels(poses.first().x() - 1, _baseRend->getCamera()->SCR_HEIGHT - poses.first().y() - 1, 2, 2, GL_DEPTH_COMPONENT, GL_FLOAT, &depth);
-			_geoPickThread->setLocation(poses.first().toPoint(), depth);
+			_geoPickThread->setLocation(poses.first(), depth);
 		}
 		else
 		{

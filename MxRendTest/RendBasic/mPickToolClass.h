@@ -77,7 +77,7 @@ namespace MViewBasic
 		/*
 		 * 计算线内部点的深度值
 		 */
-		static float CaculatePointInLineDepth(QVector2D ap1, QVector2D ap2, QPoint pos, float depth1, float depth2);
+		static float CaculatePointInLineDepth(QVector2D ap1, QVector2D ap2, QVector2D pos, float depth1, float depth2);
 
 		//判断射线与三角形是否相交
 		static bool rayTriangleIntersect(const QVector3D & orig, const QVector3D & dir, const QVector<QVector3D>& tri, float uv[2], float & t);

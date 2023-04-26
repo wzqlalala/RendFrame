@@ -272,11 +272,14 @@ namespace MDataGeo
 		_pvm = pvm;
 	}
 
-	void mPreGeoPickThread::setLocation(const QPoint& pos, float depth)
+	void mPreGeoPickThread::setLocation(const QVector2D& pos, float depth)
 	{
 		_pos = pos;
 		soloQuad = QVector<QVector2D>{ QVector2D(pos.x() + 5,pos.y() + 5),QVector2D(pos.x() + 5,pos.y() - 5),QVector2D(pos.x() - 5,pos.y() - 5),QVector2D(pos.x() - 5,pos.y() + 5) };
 		_depth = depth;
+		_p = ScreenvertexToWorldvertex(QVector3D(pos, depth));
+		_origin = ScreenvertexToWorldvertex(QVector3D(pos, -1.0));
+		_dir = (_p - _origin).normalized();
 		//_pickSoloOrMutiply = MViewBasic::SoloPick;
 	}
 
@@ -338,45 +341,8 @@ namespace MDataGeo
 	{
 		//判断该部件是否存在碰撞
 		//判断点选是否在部件的包围盒内
-		QVector3D worldVertex = ScreenvertexToWorldvertex(QVector3D(_pos.x(), _pos.y(), _depth));
-		Space::AABB aabb(partData->getGeoPartAABB().maxEdge, partData->getGeoPartAABB().minEdge);
-		if (!qFuzzyCompare(aabb.maxEdge.x(), aabb.minEdge.x()))
-		{
-			float f = (aabb.maxEdge.x() - aabb.minEdge.x()) * 1e-2;
-			aabb.maxEdge[0] += f;
-			aabb.minEdge[0] -= f;
-		}
-		else
-		{
-			aabb.maxEdge[0] += 0.1;
-			aabb.minEdge[0] -= 0.1;
-		}
-		if (!qFuzzyCompare(aabb.maxEdge.y(), aabb.minEdge.y()))
-		{
-			float f = (aabb.maxEdge.y() - aabb.minEdge.y()) * 1e-2;
-			aabb.maxEdge[1] += f;
-			aabb.minEdge[1] -= f;
-		}
-		else
-		{
-			aabb.maxEdge[1] += 0.1;
-			aabb.minEdge[1] -= 0.1;
-		}
-		if (!qFuzzyCompare(aabb.maxEdge.z(), aabb.minEdge.z()))
-		{
-			float f = (aabb.maxEdge.z() - aabb.minEdge.z()) * 1e-2;
-			aabb.maxEdge[2] += f;
-			aabb.minEdge[2] -= f;
-		}
-		else
-		{
-			aabb.maxEdge[2] += 0.1;
-			aabb.minEdge[2] -= 0.1;
-		}
-		if(!aabb.ContainPoint(worldVertex))
-		{
-			return;
-		}
+		QVector3D worldVertex = _pos;
+		if (partData->getGeoPartAABB().ContainPoint(_pos));
 		switch (*_pickFilter)
 		{
 		case PickFilter::PickNothing:; break;
@@ -513,8 +479,10 @@ namespace MDataGeo
 	void mPreGeoPickThread::SoloPickGeoFace(mGeoPartData1 *partData)
 	{
 		int id = 0;
-		float depth = 1.0;
-		float depth1 = 1.0f, depth2 = 1.0f, depth3 = 1.0f;
+		float depth = FLT_MAX;
+		float uv[2];
+		float t;
+		//float depth1 = 1.0f, depth2 = 1.0f, depth3 = 1.0f;
 		////MDataGeo::mGeoPartData1 *partData = _geoModelData->getGeoPartDataByPartName(_partName);
 		if (partData == nullptr)
 		{
@@ -530,21 +498,26 @@ namespace MDataGeo
 			MDataGeo::mGeoFaceData1* geoFaceData = _geoModelData->getGeoFaceDataByID(faceID);
 			for (int j = 0; j < geoFaceData->getGeoFaceVertex().size(); j += 3)
 			{
-				QVector2D ap1 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j), depth1);
-				QVector2D ap2 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j + 1), depth2);
-				QVector2D ap3 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j + 2), depth3);
-				QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-				//if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MBasicFunction::MeshTri))
+				if (mPickToolClass::rayTriangleIntersect(_origin, _dir, geoFaceData->getGeoFaceVertex().mid(j, 3), uv, t))
 				{
-					//根据三角形面积计算被点击的点的深度值
-					float d = mPickToolClass::CaculatePointInTriDepth(ap1, ap2, ap3, _pos, depth1, depth2, depth3);
-					if (d < depth)
-					{
-						id = faceID;
-						depth = d;
-						//break;
-					}
+					id = faceID;
+					depth = t;
 				}
+				//QVector2D ap1 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j), depth1);
+				//QVector2D ap2 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j + 1), depth2);
+				//QVector2D ap3 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j + 2), depth3);
+				//QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
+				//if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MBasicFunction::MeshTri))
+				//{
+				//	//根据三角形面积计算被点击的点的深度值
+				//	float d = mPickToolClass::CaculatePointInTriDepth(ap1, ap2, ap3, _pos, depth1, depth2, depth3);
+				//	if (d < depth)
+				//	{
+				//		id = faceID;
+				//		depth = d;
+				//		//break;
+				//	}
+				//}
 			}
 
 		}
@@ -562,8 +535,10 @@ namespace MDataGeo
 	{
 		int id = 0;
 		bool isInSolid = false;
-		float depth = 1.0;
-		float depth1 = 1.0f, depth2 = 1.0f, depth3 = 1.0f;
+		float depth = FLT_MAX;
+		float uv[2];
+		float t;
+		//float depth1 = 1.0f, depth2 = 1.0f, depth3 = 1.0f;
 		//MDataGeo::mGeoPartData1 *partData = _geoModelData->getGeoPartDataByPartName(_partName);
 		if (partData == nullptr)
 		{
@@ -583,19 +558,18 @@ namespace MDataGeo
 				MDataGeo::mGeoFaceData1* geoFaceData = _geoModelData->getGeoFaceDataByID(faceID);
 				for (int k = 0; k < geoFaceData->getGeoFaceVertex().size(); k += 3)
 				{
-					QVector2D ap1 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(k), depth1);
-					QVector2D ap2 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(k + 1), depth2);
-					QVector2D ap3 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(k + 2), depth3);
-					QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
+					//QVector2D ap1 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(k), depth1);
+					//QVector2D ap2 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(k + 1), depth2);
+					//QVector2D ap3 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(k + 2), depth3);
+					//QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
 					//if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MBasicFunction::MeshTri))
 					{
 						//根据三角形面积计算被点击的点的深度值
-						float d = mPickToolClass::CaculatePointInTriDepth(ap1, ap2, ap3, _pos, depth1, depth2, depth3);
-						if (d < depth)
+						if (mPickToolClass::rayTriangleIntersect(_origin, _dir, geoFaceData->getGeoFaceVertex().mid(k, 3), uv, t))
 						{
 							id = solidID;
 							//isInSolid = true;
-							depth = d;
+							depth = t;
 							//break;
 						}
 					}
@@ -693,8 +667,9 @@ namespace MDataGeo
 	{
 		int id = 0;
 		QVector3D vertex;
-		float depth = 1.0;
-		float depth1 = 1.0f, depth2 = 1.0f, depth3 = 1.0f;
+		float depth = FLT_MAX;
+		float uv[2];
+		float t;
 		//MDataGeo::mGeoPartData1 *partData = _geoModelData->getGeoPartDataByPartName(_partName);
 		if (partData == nullptr)
 		{
@@ -710,21 +685,26 @@ namespace MDataGeo
 			MDataGeo::mGeoFaceData1* geoFaceData = _geoModelData->getGeoFaceDataByID(faceID);
 			for (int j = 0; j < geoFaceData->getGeoFaceVertex().size(); j += 3)
 			{
-				QVector2D ap1 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j), depth1);
-				QVector2D ap2 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j + 1), depth2);
-				QVector2D ap3 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j + 2), depth3);
-				QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
-				//if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MBasicFunction::MeshTri))
+				if (mPickToolClass::rayTriangleIntersect(_origin, _dir, geoFaceData->getGeoFaceVertex().mid(j, 3), uv, t))
 				{
-					//根据三角形面积计算被点击的点的深度值
-					float d = mPickToolClass::CaculatePointInTriDepth(ap1, ap2, ap3, _pos, depth1, depth2, depth3);
-					if (d < depth)
-					{
-						//vertex = ScreenvertexToWorldvertex(QVector2D(_pos.x(), _pos.y()), d);
-						id = faceID;
-						depth = d;
-					}
+					id = faceID;
+					depth = t;
 				}
+				//QVector2D ap1 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j), depth1);
+				//QVector2D ap2 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j + 1), depth2);
+				//QVector2D ap3 = WorldvertexToScreenvertex(geoFaceData->getGeoFaceVertex().at(j + 2), depth3);
+				//QVector<QVector2D> tempQVector2D = QVector<QVector2D>{ ap1, ap2, ap3 };
+				//if (mPickToolClass::IsQuadPointInMesh(_pos, tempQVector2D, MBasicFunction::MeshTri))
+				//{
+				//	//根据三角形面积计算被点击的点的深度值
+				//	float d = mPickToolClass::CaculatePointInTriDepth(ap1, ap2, ap3, _pos, depth1, depth2, depth3);
+				//	if (d < depth)
+				//	{
+				//		//vertex = ScreenvertexToWorldvertex(QVector2D(_pos.x(), _pos.y()), d);
+				//		id = faceID;
+				//		depth = d;
+				//	}
+				//}
 			}
 		}
 		if (id == 0)

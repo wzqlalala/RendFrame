@@ -545,7 +545,7 @@ namespace MViewBasic
 		return depth;
 	}
 
-	float mPickToolClass::CaculatePointInLineDepth(QVector2D ap1, QVector2D ap2, QPoint pos, float depth1, float depth2)
+	float mPickToolClass::CaculatePointInLineDepth(QVector2D ap1, QVector2D ap2, QVector2D pos, float depth1, float depth2)
 	{
 		float distance = ap1.distanceToPoint(ap2);
 		float distance1 = ap1.distanceToPoint(QVector2D(pos));

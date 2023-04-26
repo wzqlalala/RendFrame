@@ -347,7 +347,7 @@ namespace MDataPost
 		_pvm = pvm;
 	}
 
-	void mPostMeshPickThread::setLocation(const QVector2D& pos, float depth, QVector3D direction)
+	void mPostMeshPickThread::setLocation(const QVector2D& pos, float depth)
 	{
 		_pos = pos;
 		soloQuad = QVector<QVector2D>{ QVector2D(pos.x() + 3,pos.y() + 3),QVector2D(pos.x() + 3,pos.y() - 3),QVector2D(pos.x() - 3,pos.y() - 3),QVector2D(pos.x() - 3,pos.y() + 3) };
@@ -355,7 +355,7 @@ namespace MDataPost
 		_p = ScreenvertexToWorldvertex(QVector3D(pos, depth));
 		_origin = ScreenvertexToWorldvertex(QVector3D(pos, -1.0));
 		//QVector3D dir = (_p - origin).normalized();
-		_dir = direction;
+		_dir = (_p - _origin).normalized();
 		//_pickSoloOrMutiply = MViewBasic::SoloPick;
 	}
 
