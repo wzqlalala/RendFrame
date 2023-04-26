@@ -41,7 +41,7 @@ namespace Space
 		bool intersects(QVector3D origin, QVector3D dir, QVector3D &ptOnPlane);
 		bool isContain(AABB aabb);
 		bool IsIntersect(AABB aabb);
-		
+		float getLongestEdge();
 	};
 
 

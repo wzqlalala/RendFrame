@@ -81,5 +81,8 @@ namespace MViewBasic
 
 		//判断射线与三角形是否相交
 		static bool rayTriangleIntersect(const QVector3D & orig, const QVector3D & dir, const QVector<QVector3D>& tri, float uv[2], float & t);
+
+		//判断射线与四边形是否相交
+		static bool rayQuadIntersect(const QVector3D & orig, const QVector3D & dir, const QVector<QVector3D>& tri, float uv[2], float & t);
 	};
 }

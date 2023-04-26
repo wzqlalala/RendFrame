@@ -14,12 +14,12 @@ namespace MBasicFunction
 		IDDepthBuffer()
 		{
 			id = 0;
-			depth = 1;
+			depth = FLT_MAX;
 		}
 		void initial()
 		{
 			id = 0;
-			depth = 1;
+			depth = FLT_MAX;
 		}
 	};
 
@@ -29,12 +29,12 @@ namespace MBasicFunction
 		float depth;
 		IDSetDepthBuffer()
 		{
-			depth = 1;
+			depth = FLT_MAX;
 		}
 		void initial()
 		{
 			ids.clear();
-			depth = 1;
+			depth = FLT_MAX;
 		}
 	};
 
@@ -45,12 +45,12 @@ namespace MBasicFunction
 		NameDepthBuffer()
 		{
 			name = "";
-			depth = 1;
+			depth = FLT_MAX;
 		}
 		void initial()
 		{
 			name = "";
-			depth = 1;
+			depth = FLT_MAX;
 		}
 	};
 
@@ -63,13 +63,13 @@ namespace MBasicFunction
 		{
 			geoLineID = 0;
 			vertex = QVector3D();
-			depth = 1;
+			depth = FLT_MAX;
 		}
 		void initial()
 		{
 			geoLineID = 0;
 			vertex = QVector3D();
-			depth = 1;
+			depth = FLT_MAX;
 		}
 	};
 
@@ -82,13 +82,13 @@ namespace MBasicFunction
 		{
 			geoFaceID = 0;
 			vertex = QVector3D();
-			depth = 1;
+			depth = FLT_MAX;
 		}
 		void initial()
 		{
 			geoFaceID = 0;
 			vertex = QVector3D();
-			depth = 1;
+			depth = FLT_MAX;
 		}
 	};
 
@@ -101,13 +101,13 @@ namespace MBasicFunction
 		{
 			id = 0;
 			partName = "";
-			depth = 1;
+			depth = FLT_MAX;
 		}
 		void initial()
 		{
 			id = 0;
 			partName = "";
-			depth = 1;
+			depth = FLT_MAX;
 		}
 	};
 

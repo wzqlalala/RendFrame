@@ -26,6 +26,8 @@
 #include <QFuture>
 #include <math.h>
 
+#define optimition true
+
 using namespace MViewBasic;
 using namespace MDataPost;
 namespace MDataPost
@@ -351,6 +353,8 @@ namespace MDataPost
 		soloQuad = QVector<QVector2D>{ QVector2D(pos.x() + 3,pos.y() + 3),QVector2D(pos.x() + 3,pos.y() - 3),QVector2D(pos.x() - 3,pos.y() - 3),QVector2D(pos.x() - 3,pos.y() + 3) };
 		_depth = depth;
 		_p = ScreenvertexToWorldvertex(QVector3D(pos, depth));
+		_origin = ScreenvertexToWorldvertex(QVector3D(pos, -1.0));
+		//QVector3D dir = (_p - origin).normalized();
 		_dir = direction;
 		//_pickSoloOrMutiply = MViewBasic::SoloPick;
 	}
@@ -413,47 +417,12 @@ namespace MDataPost
 	{
 		//判断该部件是否存在碰撞
 		//判断点选是否在部件的包围盒内
-		QVector3D worldVertex = ScreenvertexToWorldvertex(QVector3D(_pos.x(), _pos.y(), _depth));
-		Space::AABB aabb(spaceTree->space.maxEdge, spaceTree->space.minEdge);
-		if (!qFuzzyCompare(aabb.maxEdge.x(), aabb.minEdge.x()))
-		{
-			float f = (aabb.maxEdge.x() - aabb.minEdge.x()) * 1e-2;
-			aabb.maxEdge[0] += f;
-			aabb.minEdge[0] -= f;
-		}
-		else
-		{
-			aabb.maxEdge[0] += 0.1;
-			aabb.minEdge[0] -= 0.1;
-		}
-		if (!qFuzzyCompare(aabb.maxEdge.y(), aabb.minEdge.y()))
-		{
-			float f = (aabb.maxEdge.y() - aabb.minEdge.y()) * 1e-2;
-			aabb.maxEdge[1] += f;
-			aabb.minEdge[1] -= f;
-		}
-		else
-		{
-			aabb.maxEdge[1] += 0.1;
-			aabb.minEdge[1] -= 0.1;
-		}
-		if (!qFuzzyCompare(aabb.maxEdge.z(), aabb.minEdge.z()))
-		{
-			float f = (aabb.maxEdge.z() - aabb.minEdge.z()) * 1e-2;
-			aabb.maxEdge[2] += f;
-			aabb.minEdge[2] -= f;
-		}
-		else
-		{
-			aabb.maxEdge[2] += 0.1;
-			aabb.minEdge[2] -= 0.1;
-		}
-		if (worldVertex.x() > aabb.maxEdge.x() || worldVertex.x() < aabb.minEdge.x()
-			|| worldVertex.y() > aabb.maxEdge.y() || worldVertex.y() < aabb.minEdge.y()
-			|| worldVertex.z() > aabb.maxEdge.z() || worldVertex.z() < aabb.minEdge.z())
+		QVector3D worldVertex = _p; /*ScreenvertexToWorldvertex(QVector3D(_pos.x(), _pos.y(), _depth));*/
+		//Space::AABB aabb(spaceTree->space.maxEdge, spaceTree->space.minEdge);
+		if (!spaceTree->space.ContainPoint(worldVertex))
 		{
 			return;
-		}
+		}	
 		switch (*_pickFilter)
 		{
 		case PickFilter::PickNothing: break;
@@ -726,8 +695,10 @@ namespace MDataPost
 	void mPostMeshPickThread::SoloPick2DMesh(QString partName)
 	{
 		int _pickMeshid = 0;
-		float _meshdepth = 1;
-		float depth = 1.0;
+		float _meshdepth = FLT_MAX;
+		float depth = FLT_MAX;
+		float uv[2];
+		float t;
 		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
 		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
 		//for (QString _partName : _partNames)
@@ -763,12 +734,23 @@ namespace MDataPost
 				{
 					continue;
 				}
+#if optimition
+				if (meshData->getMeshType() == MeshTri ? mPickToolClass::rayTriangleIntersect(_origin, _dir, vertexs, uv, t) : mPickToolClass::rayQuadIntersect(_origin, _dir, vertexs, uv, t))
+				{
+					if (t < _meshdepth)
+					{
+						_meshdepth = t;
+						_pickMeshid = meshID;
+					}
+				}
+#else
 				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
 				if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
 				{
 					_meshdepth = *depthlist.begin();
 					_pickMeshid = meshID;
 				}
+#endif
 
 			}
 		}
@@ -785,8 +767,10 @@ namespace MDataPost
 	void mPostMeshPickThread::SoloPickAnyMesh(QString partName)
 	{
 		int _pickMeshid = 0;
-		float _meshdepth = 1;
+		float _meshdepth = FLT_MAX;
 		float depth = FLT_MAX;
+		float uv[2];
+		float t;
 		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
 		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
 		{
@@ -819,23 +803,25 @@ namespace MDataPost
 						continue;
 					}
 
-					float uv[2];
-					float t;
-					if (mPickToolClass::rayTriangleIntersect(_p, _dir, vertexs, uv, t))
+#if optimition
+					if (meshFaceData->getNodeIndex().size() == 3 ? mPickToolClass::rayTriangleIntersect(_origin, _dir, vertexs, uv, t): mPickToolClass::rayQuadIntersect(_origin, _dir, vertexs, uv, t))
 					{
-						if (t < depth)
+						if (t < _meshdepth)
 						{
 							_meshdepth = t;
 							_pickMeshid = meshID;
 						}
 					}
 
-					//WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
-					//if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri:MeshQuad ) && *depthlist.begin() < _meshdepth)
-					//{
-					//	_meshdepth = *depthlist.begin();
-					//	_pickMeshid = meshID;
-					//}
+#else
+
+					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+					if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri:MeshQuad ) && *depthlist.begin() < _meshdepth)
+					{
+						_meshdepth = *depthlist.begin();
+						_pickMeshid = meshID;
+					}
+#endif // optimition
 				}
 			}
 
@@ -859,23 +845,23 @@ namespace MDataPost
 				{
 					continue;
 				}
-				float uv[2];
-				float t;
-				if (mPickToolClass::rayTriangleIntersect(_p, _dir, vertexs, uv, t))
+#if optimition
+				if (meshData->getMeshType() == MeshTri ? mPickToolClass::rayTriangleIntersect(_origin, _dir, vertexs, uv, t) : mPickToolClass::rayQuadIntersect(_origin, _dir, vertexs, uv, t))
 				{
-					if (t < depth)
+					if (t < _meshdepth)
 					{
 						_meshdepth = t;
 						_pickMeshid = meshID;
 					}
 				}
-				//WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
-				//if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
-				//{
-				//	_meshdepth = *depthlist.begin();
-				//	_pickMeshid = meshID;
-				//}
-
+#else
+				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+				if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
+				{
+					_meshdepth = *depthlist.begin();
+					_pickMeshid = meshID;
+				}
+#endif
 			}
 
 			//一维网格
@@ -957,8 +943,9 @@ namespace MDataPost
 	void mPostMeshPickThread::SoloPickMeshFace(QString partName)
 	{
 		int _pickMeshFaceid = 0;
-		float _meshFacedepth = 1;
-		float depth1 = 1.0, depth2 = 1.0, depth3 = 1.0, depth4 = 1.0, depth5 = 1.0, depth6 = 1.0, depth7 = 1.0, depth8 = 1.0;
+		float _meshFacedepth = FLT_MAX;
+		float uv[2];
+		float t;
 		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
 		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
 		//for (QString _partName : _partNames)
@@ -986,12 +973,24 @@ namespace MDataPost
 					{
 						continue;
 					}
+#if optimition
+					if (meshFaceData->getNodeIndex().size() == 3 ? mPickToolClass::rayTriangleIntersect(_origin, _dir, vertexs, uv, t) : mPickToolClass::rayQuadIntersect(_origin, _dir, vertexs, uv, t))
+					{
+						if (t < _meshFacedepth)
+						{
+							_meshFacedepth = t;
+							_pickMeshFaceid = meshFaceData->getMeshFaceID();
+						}
+					}
+
+#else
 					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
 					if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad) && *depthlist.begin() < _meshFacedepth)
 					{
 						_meshFacedepth = *depthlist.begin();
 						_pickMeshFaceid = meshFaceData->getMeshFaceID();
 					}
+#endif
 				}
 			}
 		}
@@ -1064,13 +1063,15 @@ namespace MDataPost
 	void mPostMeshPickThread::SoloPickNodeByFaceAngle(QString partName)
 	{
 		int _pickMeshid = 0;
-		float _meshdepth = 1;
+		float _meshdepth = FLT_MAX;
 		QString partName1;
 		//表面网格
 		int _pickMeshFaceid = 0;
-		float _meshFacedepth = 1;
+		float _meshFacedepth = FLT_MAX;
 		QString partName2;
-		float depth = 1.0;
+		float depth = FLT_MAX;
+		float uv[2];
+		float t;
 		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
 		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
 		//for (QString _partName : _partNames)
@@ -1101,13 +1102,25 @@ namespace MDataPost
 				{
 					continue;
 				}
+#if optimition
+				if (meshData->getMeshType() == MeshTri ? mPickToolClass::rayTriangleIntersect(_origin, _dir, vertexs, uv, t) : mPickToolClass::rayQuadIntersect(_origin, _dir, vertexs, uv, t))
+				{
+					if (t < _meshdepth)
+					{
+						_meshdepth = t;
+						_pickMeshid = meshID;
+						partName2 = partName;
+					}
+				}
+#else
 				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
 				if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
 				{
 					_meshdepth = *depthlist.begin();
 					_pickMeshid = meshID;
-					partName1 = partName;
-				}				
+					partName2 = partName;
+				}
+#endif
 			}
 
 
@@ -1130,14 +1143,27 @@ namespace MDataPost
 					{
 						continue;
 					}
-					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+#if optimition
+					if (vertexs.size() == 3 ? mPickToolClass::rayTriangleIntersect(_origin, _dir, vertexs, uv, t) : mPickToolClass::rayQuadIntersect(_origin, _dir, vertexs, uv, t))
+					{
+						if (t < _meshFacedepth)
+						{
+							_meshFacedepth = t;
+							_pickMeshFaceid = meshFaceData->getMeshFaceID();
+							partName2 = partName;
+						}
+					}
 
-					if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad))
+#else
+					WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+					if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad) && *depthlist.begin() < _meshFacedepth)
 					{
 						_meshFacedepth = *depthlist.begin();
 						_pickMeshFaceid = meshFaceData->getMeshFaceID();
 						partName2 = partName;
+
 					}
+#endif	
 				}
 			}
 		}
@@ -1216,8 +1242,10 @@ namespace MDataPost
 	void mPostMeshPickThread::SoloPick2DMeshByAngle(QString partName)
 	{
 		int _pickMeshid = 0;
-		float _meshdepth = 1;
-		float depth = 1.0;
+		float _meshdepth = FLT_MAX;
+		float depth = FLT_MAX;
+		float uv[2];
+		float t;
 		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
 		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
 		mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partName);
@@ -1248,13 +1276,23 @@ namespace MDataPost
 			{
 				continue;
 			}
+#if optimition
+			if (meshData->getMeshType() == MeshTri ? mPickToolClass::rayTriangleIntersect(_origin, _dir, vertexs, uv, t) : mPickToolClass::rayQuadIntersect(_origin, _dir, vertexs, uv, t))
+			{
+				if (t < _meshdepth)
+				{
+					_meshdepth = t;
+					_pickMeshid = meshID;
+				}
+			}
+#else
 			WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
 			if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshData->getMeshType()) && *depthlist.begin() < _meshdepth)
 			{
 				_meshdepth = *depthlist.begin();
 				_pickMeshid = meshID;
-				//partName = _partName;
 			}
+#endif
 		}
 
 		if (_pickMeshid == 0)
@@ -1271,7 +1309,9 @@ namespace MDataPost
 	{
 		//表面网格
 		int _pickMeshFaceid = 0;
-		float _meshFacedepth = 1;
+		float _meshFacedepth = FLT_MAX;
+		float uv[2];
+		float t;
 		const QHash<int, QVector3D> &dis = _oneFrameRendData->getNodeDisplacementData();
 		QVector3D deformationScale = _oneFrameRendData->getDeformationScale();
 		mPostMeshPartData1 *partData = _oneFrameData->getMeshPartDataByPartName(partName);
@@ -1299,14 +1339,25 @@ namespace MDataPost
 				{
 					continue;
 				}
-				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+#if optimition
+				if (vertexs.size() == 3 ? mPickToolClass::rayTriangleIntersect(_origin, _dir, vertexs, uv, t) : mPickToolClass::rayQuadIntersect(_origin, _dir, vertexs, uv, t))
+				{
+					if (t < _meshFacedepth)
+					{
+						_meshFacedepth = t;
+						_pickMeshFaceid = meshFaceData->getMeshFaceID();
+					}
+				}
 
-				if (*depthlist.begin() < _meshFacedepth && mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad))
+#else
+				WorldvertexToScreenvertex(vertexs, tempQVector2D, depthlist);
+				if (mPickToolClass::IsPointInMesh(_pos, tempQVector2D, meshFaceData->getNodeIndex().size() == 3 ? MeshTri : MeshQuad) && *depthlist.begin() < _meshFacedepth)
 				{
 					_meshFacedepth = *depthlist.begin();
 					_pickMeshFaceid = meshFaceData->getMeshFaceID();
-					//partName = _partName;
+
 				}
+#endif	
 			}
 		}
 

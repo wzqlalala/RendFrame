@@ -556,30 +556,71 @@ namespace MViewBasic
 
 	bool mPickToolClass::rayTriangleIntersect(const QVector3D & orig, const QVector3D & dir, const QVector<QVector3D>& tri, float uv[2], float & tnear)
 	{
-		QVector3D edge1 = tri[1] - tri[0];
-		QVector3D edge2 = tri[2] - tri[0];
-		QVector3D pvec = QVector3D::crossProduct(dir, edge2);
-		float det = QVector3D::dotProduct(edge1, pvec);
-		if (det == 0 || det < 0)
-			return false;
+		bool isIn = false;
+		QVector3D E1 = tri[1] - tri[0];
+		QVector3D E2 = tri[2] - tri[0];
+		QVector3D S = orig - tri[0];
+		QVector3D S1 = QVector3D::crossProduct(dir, E2);
+		QVector3D S2 = QVector3D::crossProduct(S, E1);
 
-		QVector3D tvec = orig - tri[0];
-		uv[0] = QVector3D::dotProduct(tvec, pvec);
-		if (uv[0] < 0 || uv[0] > det)
-			return false;
+		// 共同系数
+		float coeff = 1.0f / QVector3D::dotProduct(S1, E1);
+		tnear = coeff * QVector3D::dotProduct(S2, E2);
+		uv[0] = coeff * QVector3D::dotProduct(S1, S);
+		uv[1] = coeff * QVector3D::dotProduct(S2, dir);
 
-		QVector3D qvec = QVector3D::crossProduct(tvec, edge1);
-		uv[1] = QVector3D::dotProduct(dir, qvec);
-		if (uv[1] < 0 || uv[0] + uv[1] > det)
-			return false;
+		if (tnear >= 0 && uv[0] >= 0 && uv[1] >= 0 && (1 - uv[0] - uv[1]) >= 0)
+		{
+			isIn = true;
+		}
 
-		float invDet = 1 / det;
+		return isIn;
 
-		tnear = QVector3D::dotProduct(edge2, qvec) * invDet;
-		uv[0] *= invDet;
-		uv[1] *= invDet;
 
-		return true;
+		//QVector3D edge1 = tri[1] - tri[0];
+		//QVector3D edge2 = tri[2] - tri[0];
+		//QVector3D pvec = QVector3D::crossProduct(dir, edge2);
+		//float det = QVector3D::dotProduct(edge1, pvec);
+
+		//// 检查是否平行，如果平行则没有交点
+		//if (det == 0)
+		//	return false;
+
+		//// 对 det 进行取绝对值
+		//float absDet = std::abs(det);
+
+		//QVector3D tvec = orig - tri[0];
+		//uv[0] = QVector3D::dotProduct(tvec, pvec);
+		//if (uv[0] < 0 || uv[0] > absDet)
+		//	return false;
+
+		//QVector3D qvec = QVector3D::crossProduct(tvec, edge1);
+		//uv[1] = QVector3D::dotProduct(dir, qvec);
+		//if (uv[1] < 0 || uv[0] + uv[1] > absDet)
+		//	return false;
+
+		//float invDet = 1 / det;
+
+		//tnear = QVector3D::dotProduct(edge2, qvec) * invDet;
+		//uv[0] *= invDet;
+		//uv[1] *= invDet;
+
+		//return true;
+	}
+
+
+	bool mPickToolClass::rayQuadIntersect(const QVector3D & orig, const QVector3D & dir, const QVector<QVector3D>& tri, float uv[2], float & t)
+	{
+		//分割成两个三角形
+		if (rayTriangleIntersect(orig, dir, QVector<QVector3D>{tri[0], tri[1], tri[2]}, uv, t))
+		{
+			return true;
+		}
+		if (rayTriangleIntersect(orig, dir, QVector<QVector3D>{tri[0], tri[2], tri[3]}, uv, t))
+		{
+			return true;
+		}
+		return false;
 	}
 
 	//const float eps = 0.0000001;

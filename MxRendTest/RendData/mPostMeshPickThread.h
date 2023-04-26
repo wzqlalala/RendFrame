@@ -378,6 +378,7 @@ namespace MDataPost
 		QVector2D _pos;
 		float _depth;
 		QVector3D _p;
+		QVector3D _origin;
 		QVector3D _dir;
 
 		/*********/

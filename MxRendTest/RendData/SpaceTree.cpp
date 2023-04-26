@@ -33,11 +33,91 @@ namespace Space
 
 	bool AABB::ContainPoint(QVector3D p1)
 	{
+		AABB aabb(this->minEdge, this->maxEdge);
+		float longestEdge = aabb.getLongestEdge();
+		float Edge = aabb.maxEdge.x() - aabb.minEdge.x();
+		if ((longestEdge / Edge)>1000)
+		{
+			aabb.maxEdge[0] += longestEdge * 1e-2;
+			aabb.minEdge[0] -= longestEdge * 1e-2;
+		}
+		else
+		{
+			aabb.maxEdge[0] += Edge * 1e-2;
+			aabb.minEdge[0] -= Edge * 1e-2;
+		}
+		Edge = aabb.maxEdge.y() - aabb.minEdge.y();
+		if ((longestEdge / Edge) > 1000)
+		{
+			aabb.maxEdge[1] += longestEdge * 1e-2;
+			aabb.minEdge[1] -= longestEdge * 1e-2;
+		}
+		else
+		{
+			aabb.maxEdge[1] += Edge * 1e-2;
+			aabb.minEdge[1] -= Edge * 1e-2;
+		}
+		Edge = aabb.maxEdge.z() - aabb.minEdge.z();
+		if ((longestEdge / Edge) > 1000)
+		{
+			aabb.maxEdge[2] += longestEdge * 1e-2;
+			aabb.minEdge[2] -= longestEdge * 1e-2;
+		}
+		else
+		{
+			aabb.maxEdge[2] += Edge * 1e-2;
+			aabb.minEdge[2] -= Edge * 1e-2;
+		}
+		if (aabb.minEdge.x() < p1.x() && aabb.minEdge.y() < p1.y() && aabb.minEdge.z() < p1.z() &&
+			aabb.maxEdge.x() > p1.x() && aabb.maxEdge.y() > p1.y() && aabb.maxEdge.z() > p1.z())
+		{
+			return true;
+		}
+		return false;
+		/*if (!qFuzzyCompare(aabb.maxEdge.x(), aabb.minEdge.x()))
+		{
+			float f = (aabb.maxEdge.x() - aabb.minEdge.x()) * 1e-2;
+			aabb.maxEdge[0] += f;
+			aabb.minEdge[0] -= f;
+		}
+		else
+		{
+			aabb.maxEdge[0] += 0.1;
+			aabb.minEdge[0] -= 0.1;
+		}
+		if (!qFuzzyCompare(aabb.maxEdge.y(), aabb.minEdge.y()))
+		{
+			float f = (aabb.maxEdge.y() - aabb.minEdge.y()) * 1e-2;
+			aabb.maxEdge[1] += f;
+			aabb.minEdge[1] -= f;
+		}
+		else
+		{
+			aabb.maxEdge[1] += 0.1;
+			aabb.minEdge[1] -= 0.1;
+		}
+		if (!qFuzzyCompare(aabb.maxEdge.z(), aabb.minEdge.z()))
+		{
+			float f = (aabb.maxEdge.z() - aabb.minEdge.z()) * 1e-2;
+			aabb.maxEdge[2] += f;
+			aabb.minEdge[2] -= f;
+		}
+		else
+		{
+			aabb.maxEdge[2] += 0.1;
+			aabb.minEdge[2] -= 0.1;
+		}
+		if (worldVertex.x() > aabb.maxEdge.x() || worldVertex.x() < aabb.minEdge.x()
+			|| worldVertex.y() > aabb.maxEdge.y() || worldVertex.y() < aabb.minEdge.y()
+			|| worldVertex.z() > aabb.maxEdge.z() || worldVertex.z() < aabb.minEdge.z())
+		{
+			return;
+		}
 		if (minEdge.x() < p1.x() && minEdge.y() < p1.y() && minEdge.z() < p1.z() &&
 			maxEdge.x() > p1.x() && maxEdge.y() > p1.y() && maxEdge.z() > p1.z())
 		{
 			return true;
-		}
+		}*/
 		return false;
 	}
 
@@ -190,6 +270,11 @@ namespace Space
 			return false;
 		}
 		return true;
+	}
+
+	float AABB::getLongestEdge()
+	{
+		return max(maxEdge.x() - minEdge.x(), max(maxEdge.y() - minEdge.y(), maxEdge.z() - minEdge.z()));
 	}
 
 	SpaceTree::SpaceTree(AABB aabb)
