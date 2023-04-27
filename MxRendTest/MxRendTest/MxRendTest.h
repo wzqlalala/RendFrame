@@ -1,5 +1,6 @@
 #pragma once
-
+//解决中文乱码
+#pragma execution_character_set("utf-8")
 #include <QtWidgets/QMainWindow>
 #include <QKeyEvent>
 #include "ui_MxRendTest.h"
@@ -45,6 +46,8 @@ protected:
 	bool getMxDbData(shared_ptr<MDataPost::mDataPost1> dp, MDataPost::mPostOneFrameRendData * oneFrameRendData);
 
 	bool createGeo(MDataGeo::mGeoModelData1 *geoModelData);
+
+	bool readTxtFile();
 
 private:
     Ui::MxRendTestClass ui;

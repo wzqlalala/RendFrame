@@ -258,6 +258,7 @@ namespace MPreRend
 		//	_oneFrameRender.reset();
 		//}
 		//deleteAnimation();
+		_geoModelData->deleteAllGeoPart();
 		_baseRend->getFontRender()->clearAllRender();
 		_baseRend->getArrowRender()->clearAllRender();
 	}

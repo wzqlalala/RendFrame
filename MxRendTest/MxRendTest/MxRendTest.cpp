@@ -568,6 +568,21 @@ void MxRendTest::keyPressEvent(QKeyEvent * event)
 			}
 			break;
 		}
+		case Qt::Key_F3://读一个文件，其中有面和矢量信息
+		{
+			if (_preRend == nullptr)
+			{
+				return;
+			}
+			//_postRender = make_shared<MPostRend::mPostRender>(_postRend->getApplication(), _postRend->getRoot());
+			_preRender = _preRend->getPreRender();
+			if (readTxtFile())
+			{
+				return;
+			}
+			//_preRend->slotResetOrthoAndCamera();
+			break;
+		}
 		case Qt::Key_0:
 		{
 			if (_preRend == nullptr)
@@ -896,5 +911,92 @@ bool MxRendTest::createGeo(MDataGeo::mGeoModelData1 * geoModelData)
 	//geoPointData->setPointData(_globalPointId, QVector3D(1, 2, 3));
 	//geoPartData->appendGeoPointID(_globalPointId);
 	
+	return true;
+}
+
+bool MxRendTest::readTxtFile()
+{
+	QString name = QFileDialog::getOpenFileName(this, "选择txt文件", qApp->applicationDirPath(), "*.txt");
+
+	QFileInfo info(name);
+	if (!info.exists())
+	{
+		return false;
+	}
+
+	QFile file(name);
+	QString currentline;
+	QStringList linelist;
+	QString partName;
+	shared_ptr<mArrowRender> fontRender = _preRend->getArrowRender();
+	MDataGeo::mGeoModelData1 * geoModelData = _preRender->getGeoModelData();
+	mGeoPartData1 *geoPartData = nullptr;
+	mGeoFaceData1 *geoFaceData = nullptr;
+	QVector<QVector3D> faceVertexs;
+	if (!file.open(QIODevice::ReadOnly | QIODevice::Text))//以读的方式打开文件
+	{
+		return false;
+	}
+	
+	while (!file.atEnd())//文件没到末尾就执行循环体内容
+	{
+		if (currentline.contains("*part"))
+		{
+			linelist = currentline.split("=");
+			if (linelist.size() == 2)
+			{
+				partName = linelist.at(1);
+				_globalPartId++;
+				geoPartData = new mGeoPartData1(geoModelData, partName, _globalPartId);
+			}
+			currentline = file.readLine().simplified();
+		}
+		else if (currentline.contains("*face"))
+		{
+			_globalFaceId++;
+			geoFaceData = new mGeoFaceData1(geoModelData, partName, _globalFaceId);
+			currentline = file.readLine().simplified();
+			while (!file.atEnd())
+			{
+				linelist = currentline.split(",");
+				if (linelist.size() == 9)
+				{
+					faceVertexs.append(QVector<QVector3D>{ QVector3D(linelist.at(0).toFloat(), linelist.at(1).toFloat(), linelist.at(2).toFloat()),
+						QVector3D(linelist.at(3).toFloat(), linelist.at(4).toFloat(), linelist.at(5).toFloat()),
+						QVector3D(linelist.at(6).toFloat(), linelist.at(7).toFloat(), linelist.at(8).toFloat()) });
+				}
+				else if (currentline.contains("*"))
+				{
+					geoFaceData->appendGeoFaceData(_globalFaceId, faceVertexs);
+					geoPartData->appendGeoFaceID(_globalFaceId);				
+					faceVertexs.clear();
+					break;
+				}
+				currentline = file.readLine().simplified();
+			}
+		}
+		else if (currentline.contains("*vector"))
+		{
+			QVector<QVector3D> vertexs;
+			QVector<QVector3D> vectors;
+			currentline = file.readLine().simplified();
+			while (!file.atEnd())
+			{
+				linelist = currentline.split(",");
+				if (linelist.size() == 6)
+				{
+					vertexs.append(QVector3D(linelist.at(0).toFloat(), linelist.at(1).toFloat(), linelist.at(2).toFloat()));
+					vectors.append(QVector3D(linelist.at(3).toFloat(), linelist.at(4).toFloat(), linelist.at(5).toFloat()));
+				}
+				currentline = file.readLine().simplified();
+			}
+			fontRender->appendCommonArrow("1", vertexs, vectors);
+		}
+		else
+		{
+			currentline = file.readLine().simplified();
+		}
+	}
+
 	return true;
 }

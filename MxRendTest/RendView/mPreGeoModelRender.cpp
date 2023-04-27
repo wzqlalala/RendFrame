@@ -192,6 +192,10 @@ namespace MPreRend
 			{
 				updateModelOperate(QPair<MBasicFunction::ModelOperateEnum, std::set<QString>>(ColorOnePart, partnames));
 			}
+			else if (postModelOperate == DeleteAllPart)
+			{
+				updateModelOperate(QPair<MBasicFunction::ModelOperateEnum, std::set<QString>>(DeleteOnePart, partnames));
+			}
 		}
 		return false;
 	}

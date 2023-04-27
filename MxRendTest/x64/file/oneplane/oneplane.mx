@@ -1,0 +1,49 @@
+*implicit_analysis
+*subcase, name = "Case_1"
+*analysis, type = linearstatic, solver = DSV, inrel = 0
+*spc
+"BC_1"
+*load
+"Load_1", 1
+*output
+displacement
+stress
+
+
+
+*node
+      46,               0,               5,              -5
+      47,               0,              -5,              -5
+      48,               0,               5,               5
+      49,               0,              -5,               5
+      50,               0,               0,              -5
+      51,               0,               5,               0
+      52,               0,               0,               5
+      53,               0,              -5,               0
+      54,               0,               0,               0
+
+*element, type = QPH, part = "Square-1", section = "Property_1"
+              9,              46,              51,              54,              50, 
+             10,              51,              48,              52,              54, 
+             11,              50,              54,              53,              47, 
+             12,              54,              52,              49,              53, 
+*material, type = isolinearelastic, name = "Material_1"
+2100000, 0.3
+*section, type = structural, name = "Property_1", mat = "Material_1"
+*shellsection
+1
+*spc,set = "df_BC_Set_3", name = "BC_1"
+encastre
+*nodalload, set = "df_Load_Set_5", name = "Load_1"
+1000,0,0,,,,
+*set, type = node, name = "df_Load_Set_1"
+      48,      49,      52
+*set, type = node, name = "df_Load_Set_2"
+      48,      49,      52
+*set, type = node, name = "df_BC_Set_3"
+      46,      47,      50
+*set, type = node, name = "df_Load_Set_4"
+      48,      49,      52
+*set, type = node, name = "df_Load_Set_5"
+      48,      49,      52
+*end
